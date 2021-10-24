@@ -1,13 +1,20 @@
+#!/bin/bash
+
 set -e
+
+CONTRACT="battlemon.testnet"
+NFT_CONTRACT="nft.${CONTRACT}"
 
 cargo build --target wasm32-unknown-unknown --release
 
-near delete nft.battlemon.testnet battlemon.testnet \
-  && near create-account nft.battlemon.testnet --masterAccount battlemon.testnet \
-  || near create-account nft.battlemon.testnet --masterAccount battlemon.testnet
+near delete $NFT_CONTRACT $CONTRACT
+near create-account $NFT_CONTRACT --masterAccount $CONTRACT
+near deploy $NFT_CONTRACT ./target/wasm32-unknown-unknown/release/nft_token.wasm --masterAccount $CONTRACT --initDeposit 1
+near call $NFT_CONTRACT init '{"owner_id": "'$NFT_CONTRACT'"}' --accountId $CONTRACT
 
-near deploy nft.battlemon.testnet ./target/wasm32-unknown-unknown/release/nft_token.wasm --masterAccount battlemon.testnet --initDeposit 1
+IMAGE_URL="https://battlemon.com/fighters.png"
 
-near call nft.battlemon.testnet init '{"owner_id": "nft.battlemon.testnet"}'
-
-near call nft.battlemon.testnet mint '{"token_id": "1", "token_metadata": {"title": "title for 1", "description": "some description for batllemon nft token", "media": "some url"}}' --accountId nft.battlemon.testnet --amount 0.1
+for i in {1..10}
+do
+  near call $NFT_CONTRACT mint '{"token_id": "'$i'", "token_metadata": {"title": "Title for token '$i'", "description": "some description for batllemon nft token", "media": "'$IMAGE_URL'"}}' --accountId $NFT_CONTRACT --amount 0.1
+done
