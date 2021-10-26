@@ -68,3 +68,89 @@ impl Contract {
 }
 
 near_contract_standards::impl_non_fungible_token_enumeration!(Contract, tokens);
+
+#[cfg(all(test, not(target_arch = "wasm32")))]
+mod tests {
+    use near_sdk::test_utils::{accounts, VMContextBuilder};
+    use near_sdk::testing_env;
+    use std::collections::HashMap;
+
+    use super::*;
+
+    const MINT_STORAGE_COST: u128 = 5_770_000_000_000_000_000_000;
+
+    fn get_context(predecessor_account_id: AccountId) -> VMContextBuilder {
+        let mut builder = VMContextBuilder::new();
+        builder
+            .current_account_id(accounts(0))
+            .signer_account_id(predecessor_account_id.clone())
+            .predecessor_account_id(predecessor_account_id);
+        builder
+    }
+
+    fn sample_token_metadata() -> TokenMetadata {
+        TokenMetadata {
+            title: Some("foo title".into()),
+            description: Some("this is description for foo title's token".into()),
+            media: None,
+            media_hash: None,
+            copies: Some(1),
+            issued_at: None,
+            expires_at: None,
+            starts_at: None,
+            updated_at: None,
+            extra: None,
+            reference: None,
+            reference_hash: None,
+        }
+    }
+
+    #[test]
+    fn test_init() {
+        let mut context = get_context(accounts(1));
+        testing_env!(context.build());
+        let contract = Contract::init(accounts(1));
+        testing_env!(context.is_view(true).build());
+        assert_eq!(contract.nft_total_supply().0, 0);
+    }
+
+    #[test]
+    #[should_panic(expected = "The contract is not initialized")]
+    fn test_default() {
+        let context = get_context(accounts(1));
+        testing_env!(context.build());
+        Contract::default();
+    }
+
+    #[test]
+    fn test_mint() {
+        let mut context = get_context(accounts(0));
+        testing_env!(context.build());
+        let mut contract = Contract::init(accounts(0));
+        testing_env!(context
+            .storage_usage(env::storage_usage())
+            .attached_deposit(MINT_STORAGE_COST)
+            .build());
+        let token_id = "0".to_string();
+        let token = contract.mint(token_id.clone(), sample_token_metadata());
+
+        assert_eq!(token.token_id, token_id);
+        assert_eq!(token.owner_id, accounts(0));
+        assert_eq!(token.metadata.unwrap(), sample_token_metadata());
+        assert_eq!(token.approved_account_ids.unwrap(), HashMap::new());
+    }
+
+    #[test]
+    #[should_panic(expected = "The contract caller must be owner")]
+    fn test_mint_not_owner_id() {
+        let mut context = get_context(accounts(1));
+        testing_env!(context.build());
+        let mut contract = Contract::init(accounts(0));
+        testing_env!(context
+            .storage_usage(env::storage_usage())
+            .attached_deposit(MINT_STORAGE_COST)
+            .build());
+
+        contract.mint("0".to_string(), sample_token_metadata());
+    }
+}
