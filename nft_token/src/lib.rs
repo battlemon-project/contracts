@@ -65,6 +65,10 @@ impl Contract {
         self.tokens
             .internal_mint(token_id, self.tokens.owner_id.clone(), Some(token_metadata))
     }
+
+    pub fn get_owner_by_token_id(&self, token_id: TokenId) -> Option<AccountId> {
+        self.tokens.owner_by_id.get(&token_id)
+    }
 }
 
 near_contract_standards::impl_non_fungible_token_enumeration!(Contract, tokens);
@@ -152,5 +156,37 @@ mod tests {
             .build());
 
         contract.mint("0".to_string(), sample_token_metadata());
+    }
+
+    #[test]
+    fn test_get_owner_by_id_valid() {
+        let mut context = get_context(accounts(0));
+        testing_env!(context.build());
+        let mut contract = Contract::init(accounts(0));
+        testing_env!(context
+            .storage_usage(env::storage_usage())
+            .attached_deposit(MINT_STORAGE_COST)
+            .build());
+        let token_id = "0".to_string();
+        let token = contract.mint(token_id, sample_token_metadata());
+        let owner_id = contract.get_owner_by_token_id(token.token_id).unwrap();
+
+        assert_eq!(owner_id, accounts(0));
+    }
+
+    #[test]
+    fn test_get_owner_by_id_invalid() {
+        let mut context = get_context(accounts(0));
+        testing_env!(context.build());
+        let mut contract = Contract::init(accounts(0));
+        testing_env!(context
+            .storage_usage(env::storage_usage())
+            .attached_deposit(MINT_STORAGE_COST)
+            .build());
+        let token_id = "0".to_string();
+        let invalid_token_id = "1".to_string();
+        contract.mint(token_id, sample_token_metadata());
+
+        assert!(contract.get_owner_by_token_id(invalid_token_id).is_none());
     }
 }
