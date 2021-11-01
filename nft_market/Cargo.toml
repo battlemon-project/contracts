@@ -12,3 +12,7 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 near-sdk = "4.0.0-pre.4"
 near-contract-standards = "4.0.0-pre.4"
+
+[dev-dependencies]
+near-sdk-sim = "4.0.0-pre.4"
+nft_token = { path = "../nft_token" }
