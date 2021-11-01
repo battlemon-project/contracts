@@ -125,7 +125,7 @@ impl Contract {
             sale,
             env::current_account_id(),
             0,
-            Gas(100_000_000_000_000),
+            Gas(10_000_000_000_000),
         ))
     }
 
