@@ -12,6 +12,3 @@ near delete $MARKET_CONTRACT $MAIN_CONTRACT
 near create-account $MARKET_CONTRACT --masterAccount $MAIN_CONTRACT
 near deploy $MARKET_CONTRACT ./target/wasm32-unknown-unknown/release/nft_market.wasm --masterAccount $MAIN_CONTRACT --initDeposit 50
 near call $MARKET_CONTRACT init '{"nft_id": "'$NFT_CONTRACT'"}' --accountId $MAIN_CONTRACT
-
-near call nft.battlemon.testnet nft_approve '{"token_id": "2", "account_id": "market.battlemon.testnet", "msg": "{\"price\":\"2\"}"}' --accountId nft.battlemon.testnet --deposit 1
-near call market.battlemon.testnet buy '{"token_id": "2"}' --deposit 3 --accountId fomotosh1.testnet
