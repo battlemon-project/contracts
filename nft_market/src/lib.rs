@@ -26,10 +26,10 @@ pub struct Contract {
 #[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct SaleCondition {
-    owner_id: AccountId,
-    token_id: TokenId,
+    pub owner_id: AccountId,
+    pub token_id: TokenId,
     approval_id: u64,
-    price: U128,
+    pub price: U128,
 }
 
 impl SaleCondition {

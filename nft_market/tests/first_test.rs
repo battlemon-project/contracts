@@ -1,4 +1,5 @@
 use near_contract_standards::non_fungible_token::metadata::TokenMetadata;
+use near_sdk::json_types::U128;
 use near_sdk::serde_json::json;
 use near_sdk::Gas;
 use near_sdk_sim::{call, to_yocto, view, DEFAULT_GAS};
@@ -40,14 +41,18 @@ fn list_asks() {
         "price": "1",
     })
     .to_string();
-    // simulate sell call from frontend
+    // simulate frontend's call for selling nft token.
     call!(
         root,
-        nft.nft_approve(token_id, market.account_id(), Some(price)),
+        nft.nft_approve(token_id.clone(), market.account_id(), Some(price)),
         deposit = 180000000000000000000
     )
     .assert_success();
 
-    let actual: Vec<SaleCondition> = view!(market.list_asks()).unwrap_json();
-    assert_eq!(actual.len(), 1);
+    let sale_conditions: Vec<SaleCondition> = view!(market.list_asks()).unwrap_json();
+    assert_eq!(sale_conditions.len(), 1);
+    let sale = sale_conditions.first().unwrap();
+    assert_eq!(sale.token_id, token_id);
+    assert_eq!(sale.owner_id, root.account_id());
+    assert_eq!(sale.price, U128(1));
 }
