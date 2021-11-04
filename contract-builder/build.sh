@@ -1,2 +1,2 @@
 #!/bin/sh
-docker build -t contract-builder .
+docker build --platform=linux/amd64 -t contract-builder .
