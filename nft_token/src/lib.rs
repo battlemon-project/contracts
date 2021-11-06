@@ -58,14 +58,25 @@ impl Contract {
     }
 
     #[payable]
-    pub fn mint(&mut self, token_id: TokenId, token_metadata: TokenMetadata) -> Token {
+    pub fn mint(
+        &mut self,
+        token_id: TokenId,
+        token_metadata: TokenMetadata,
+        owner_id: Option<AccountId>,
+    ) -> Token {
         require!(
-            self.tokens.owner_id == env::signer_account_id(),
+            self.tokens.owner_id == env::predecessor_account_id(),
             "The contract caller must be owner"
         );
 
+        let owner_id = if let Some(id) = owner_id {
+            id
+        } else {
+            self.tokens.owner_id.clone()
+        };
+
         self.tokens
-            .internal_mint(token_id, self.tokens.owner_id.clone(), Some(token_metadata))
+            .internal_mint(token_id, owner_id, Some(token_metadata))
     }
 
     pub fn get_owner_by_token_id(&self, token_id: TokenId) -> Option<AccountId> {
@@ -85,7 +96,7 @@ mod tests {
 
     use super::*;
 
-    const MINT_STORAGE_COST: u128 = 5_770_000_000_000_000_000_000;
+    const MINT_STORAGE_COST: u128 = 6_000_000_000_000_000_000_000;
 
     fn get_context(predecessor_account_id: AccountId) -> VMContextBuilder {
         let mut builder = VMContextBuilder::new();
@@ -114,7 +125,7 @@ mod tests {
     }
 
     #[test]
-    fn test_init() {
+    fn init() {
         let mut context = get_context(accounts(1));
         testing_env!(context.build());
         let contract = Contract::init(accounts(1));
@@ -124,14 +135,14 @@ mod tests {
 
     #[test]
     #[should_panic(expected = "The contract is not initialized")]
-    fn test_default() {
+    fn default() {
         let context = get_context(accounts(1));
         testing_env!(context.build());
         Contract::default();
     }
 
     #[test]
-    fn test_mint() {
+    fn mint_with_owner_contract() {
         let mut context = get_context(accounts(0));
         testing_env!(context.build());
         let mut contract = Contract::init(accounts(0));
@@ -140,7 +151,7 @@ mod tests {
             .attached_deposit(MINT_STORAGE_COST)
             .build());
         let token_id = "0".to_string();
-        let token = contract.mint(token_id.clone(), sample_token_metadata());
+        let token = contract.mint(token_id.clone(), sample_token_metadata(), None);
 
         assert_eq!(token.token_id, token_id);
         assert_eq!(token.owner_id, accounts(0));
@@ -149,8 +160,26 @@ mod tests {
     }
 
     #[test]
+    fn mint_with_owner_id_is_not_contract_id() {
+        let mut context = get_context(accounts(0));
+        testing_env!(context.build());
+        let mut contract = Contract::init(accounts(0));
+        testing_env!(context
+            .storage_usage(env::storage_usage())
+            .attached_deposit(MINT_STORAGE_COST)
+            .build());
+
+        let token_id = "0".to_string();
+        let token = contract.mint(token_id.clone(), sample_token_metadata(), Some(accounts(1)));
+        assert_eq!(token.token_id, token_id);
+        assert_eq!(token.owner_id, accounts(1));
+        assert_eq!(token.metadata.unwrap(), sample_token_metadata());
+        assert_eq!(token.approved_account_ids.unwrap(), HashMap::new());
+    }
+
+    #[test]
     #[should_panic(expected = "The contract caller must be owner")]
-    fn test_mint_not_owner_id() {
+    fn mint_can_be_called_only_by_contract_owner() {
         let mut context = get_context(accounts(1));
         testing_env!(context.build());
         let mut contract = Contract::init(accounts(0));
@@ -159,11 +188,11 @@ mod tests {
             .attached_deposit(MINT_STORAGE_COST)
             .build());
 
-        contract.mint("0".to_string(), sample_token_metadata());
+        contract.mint("0".to_string(), sample_token_metadata(), Some(accounts(2)));
     }
 
     #[test]
-    fn test_get_owner_by_id_valid() {
+    fn get_owner_by_id_valid_and_it_is_contract_owner() {
         let mut context = get_context(accounts(0));
         testing_env!(context.build());
         let mut contract = Contract::init(accounts(0));
@@ -172,13 +201,28 @@ mod tests {
             .attached_deposit(MINT_STORAGE_COST)
             .build());
         let token_id = "0".to_string();
-        let token = contract.mint(token_id, sample_token_metadata());
+        let token = contract.mint(token_id, sample_token_metadata(), None);
         let owner_id = contract.get_owner_by_token_id(token.token_id).unwrap();
         assert_eq!(owner_id, accounts(0));
     }
 
     #[test]
-    fn test_get_owner_by_id_invalid() {
+    fn get_owner_by_id_valid_and_it_is_not_contract_owner() {
+        let mut context = get_context(accounts(0));
+        testing_env!(context.build());
+        let mut contract = Contract::init(accounts(0));
+        testing_env!(context
+            .storage_usage(env::storage_usage())
+            .attached_deposit(MINT_STORAGE_COST)
+            .build());
+        let token_id = "0".to_string();
+        let token = contract.mint(token_id, sample_token_metadata(), Some(accounts(2)));
+        let owner_id = contract.get_owner_by_token_id(token.token_id).unwrap();
+        assert_eq!(owner_id, accounts(2));
+    }
+
+    #[test]
+    fn get_owner_by_id_invalid() {
         let mut context = get_context(accounts(0));
         testing_env!(context.build());
         let mut contract = Contract::init(accounts(0));
@@ -188,7 +232,7 @@ mod tests {
             .build());
         let token_id = "0".to_string();
         let invalid_token_id = "1".to_string();
-        contract.mint(token_id, sample_token_metadata());
+        contract.mint(token_id, sample_token_metadata(), None);
 
         assert!(contract.get_owner_by_token_id(invalid_token_id).is_none());
     }
