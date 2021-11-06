@@ -30,7 +30,7 @@ fn list_asks() {
     // mint 1 nft token
     call!(
         root,
-        nft.mint(token_id.clone(), token_metadata),
+        nft.mint(token_id.clone(), token_metadata, None),
         deposit = STORAGE_AMOUNT
     )
     .assert_success();
@@ -74,28 +74,28 @@ fn buying() {
         reference: None,
         reference_hash: None,
     };
-    // mint 1 nft token
+    // mint 1 nft token to bob
+    let bob = root.create_user("bob".parse().unwrap(), to_yocto("100"));
     call!(
         root,
-        nft.mint(token_id.clone(), token_metadata),
+        nft.mint(token_id.clone(), token_metadata, Some(bob.account_id())),
         deposit = STORAGE_AMOUNT
     )
     .assert_success();
 
     // try to buy token
     let price = json!({
-        "price": "10",
+        "price": to_yocto("10").to_string(),
     })
     .to_string();
     // simulate frontend's call for selling nft token.
     call!(
-        root,
+        bob,
         nft.nft_approve(token_id.clone(), market.account_id(), Some(price)),
         deposit = STORAGE_AMOUNT
     )
     .assert_success();
 
-    // let market_balance_before =
     // simulate buying process from user
     let outcome = call!(
         alice,
@@ -109,7 +109,11 @@ fn buying() {
     // checking that asks is empty
     let sale_conditions: Vec<SaleCondition> = view!(market.list_asks()).unwrap_json();
     assert_eq!(sale_conditions.len(), 0);
-    //checking that new owner is Alice
+    // checking that new owner is Alice
     let owner_id: AccountId = view!(nft.get_owner_by_token_id(token_id.clone())).unwrap_json();
     assert_eq!(owner_id, alice.account_id());
+    // todo: checking that Bob's balance now changed right (he must receive 10 near)
+    let bob_view = bob.account().unwrap();
+    let bob_total_amount = bob_view.storage_usage as u128 + bob_view.amount;
+    // assert_eq!(bob_total_amount - to_yocto("1"), )
 }

@@ -96,7 +96,6 @@ impl Contract {
         let buyer_id = env::predecessor_account_id();
         let deposit = env::attached_deposit();
 
-        log!("attached deposit is {}", deposit);
         require!(
             deposit == sale.price.0,
             "attached deposit isn't equal to token's price."
