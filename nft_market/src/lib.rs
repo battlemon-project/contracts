@@ -3,17 +3,18 @@ use near_contract_standards::non_fungible_token::{
 };
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{UnorderedMap, Vector};
-use near_sdk::env::{log_str, panic_str};
+use near_sdk::env::panic_str;
 use near_sdk::json_types::U128;
 use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::serde_json;
 use near_sdk::{
-    env, near_bindgen, require, AccountId, Balance, BorshStorageKey, Gas, PanicOnDefault, Promise,
-    PromiseOrValue, PromiseResult,
+    env, log, near_bindgen, require, AccountId, Balance, BorshStorageKey, Gas, PanicOnDefault,
+    Promise, PromiseError, PromiseOrValue, PromiseResult,
 };
 
-const NO_DEPOSIT: Balance = 0;
-const XCC_GAS: Gas = Gas(20_000_000_000_000);
+pub const NO_DEPOSIT: Balance = 0;
+pub const ONE_YOCTO: Balance = 1;
+pub const XCC_GAS: Gas = Gas(20_000_000_000_000);
 
 #[near_bindgen]
 #[derive(BorshSerialize, BorshDeserialize, PanicOnDefault)]
@@ -88,18 +89,18 @@ impl Contract {
 
     #[payable]
     pub fn buy(&mut self, token_id: TokenId) {
-        log_str("enter the buy call");
         let sale = self.asks.get(&token_id).unwrap_or_else(|| {
             panic_str(format!("token with id {} doesn't sell", token_id).as_str())
         });
 
         let buyer_id = env::predecessor_account_id();
         let deposit = env::attached_deposit();
-        require!(deposit > 0, "attached deposit must be more than 0");
-        // require!(
-        //     deposit == sale.price.0,
-        //     "attached deposit isn't equal to token's price."
-        // );
+
+        log!("attached deposit is {}", deposit);
+        require!(
+            deposit == sale.price.0,
+            "attached deposit isn't equal to token's price."
+        );
 
         self.process_purchase(token_id, sale.price, buyer_id);
     }
@@ -111,8 +112,9 @@ impl Contract {
         price: U128,
         buyer_id: AccountId,
     ) -> Promise {
-        log_str("enter the process_purchase call");
         let sale = self.asks.get(&token_id).unwrap();
+        // let gas_for_next_callback =
+        //     env::prepaid_gas() - env::used_gas() - DEPOSIT_CALL_GAS - RESERVE_TGAS;
 
         ext_nft::nft_transfer(
             buyer_id,
@@ -120,33 +122,26 @@ impl Contract {
             Some(sale.approval_id),
             None,
             self.nft_id.clone(),
-            1,
+            ONE_YOCTO,
             XCC_GAS * 2,
         )
         .then(ext_self::after_nft_transfer(
             sale,
             env::current_account_id(),
-            0,
+            NO_DEPOSIT,
             XCC_GAS,
         ))
     }
 
     #[private]
     pub fn after_nft_transfer(&mut self, sale: SaleCondition) -> Promise {
-        log_str("enter the after_nft_transfer call");
-        require!(
-            env::promise_results_count() > 0,
-            "doesn't have result of cross-contract call"
-        );
-
         match env::promise_result(0) {
-            PromiseResult::NotReady => unreachable!(),
             PromiseResult::Successful(_) => {
                 self.asks.remove(&sale.token_id);
-                log_str("make promise to transfer nears");
                 Promise::new(env::current_account_id()).transfer(sale.price.0)
             }
-            PromiseResult::Failed => panic_str("nft_transfer was failed"),
+            PromiseResult::Failed => panic_str("Execution `nft_transfer` method was failed."),
+            PromiseResult::NotReady => unreachable!(),
         }
     }
 }
