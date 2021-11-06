@@ -3,7 +3,7 @@ use near_contract_standards::non_fungible_token::{
 };
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{UnorderedMap, Vector};
-use near_sdk::env::panic_str;
+use near_sdk::env::{log_str, panic_str};
 use near_sdk::json_types::U128;
 use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::serde_json;
@@ -13,7 +13,7 @@ use near_sdk::{
 };
 
 const NO_DEPOSIT: Balance = 0;
-const XCC_GAS: Gas = Gas(200_000_000_000_000);
+const XCC_GAS: Gas = Gas(20_000_000_000_000);
 
 #[near_bindgen]
 #[derive(BorshSerialize, BorshDeserialize, PanicOnDefault)]
@@ -68,7 +68,7 @@ trait ExtNft {
 
 #[near_sdk::ext_contract(ext_self)]
 trait ExtSelf {
-    fn after_nft_transfer(&mut self, sale: SaleCondition);
+    fn after_nft_transfer(&mut self, sale: SaleCondition) -> Promise;
 }
 
 #[near_bindgen]
@@ -88,6 +88,7 @@ impl Contract {
 
     #[payable]
     pub fn buy(&mut self, token_id: TokenId) {
+        log_str("enter the buy call");
         let sale = self.asks.get(&token_id).unwrap_or_else(|| {
             panic_str(format!("token with id {} doesn't sell", token_id).as_str())
         });
@@ -110,6 +111,7 @@ impl Contract {
         price: U128,
         buyer_id: AccountId,
     ) -> Promise {
+        log_str("enter the process_purchase call");
         let sale = self.asks.get(&token_id).unwrap();
 
         ext_nft::nft_transfer(
@@ -119,18 +121,19 @@ impl Contract {
             None,
             self.nft_id.clone(),
             1,
-            XCC_GAS,
+            XCC_GAS * 2,
         )
         .then(ext_self::after_nft_transfer(
             sale,
             env::current_account_id(),
             0,
-            Gas(10_000_000_000_000),
+            XCC_GAS,
         ))
     }
 
     #[private]
-    pub fn after_nft_transfer(&mut self, sale: SaleCondition) {
+    pub fn after_nft_transfer(&mut self, sale: SaleCondition) -> Promise {
+        log_str("enter the after_nft_transfer call");
         require!(
             env::promise_results_count() > 0,
             "doesn't have result of cross-contract call"
@@ -140,7 +143,8 @@ impl Contract {
             PromiseResult::NotReady => unreachable!(),
             PromiseResult::Successful(_) => {
                 self.asks.remove(&sale.token_id);
-                Promise::new(env::current_account_id()).transfer(sale.price.0);
+                log_str("make promise to transfer nears");
+                Promise::new(env::current_account_id()).transfer(sale.price.0)
             }
             PromiseResult::Failed => panic_str("nft_transfer was failed"),
         }

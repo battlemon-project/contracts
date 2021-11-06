@@ -99,21 +99,26 @@ fn buying() {
     .assert_success();
 
     // simulate buying process from user
-    let outcome = call!(alice, market.buy(token_id.clone()), deposit = 1);
+    let outcome = call!(
+        alice,
+        market.buy(token_id.clone()),
+        to_yocto("1"),
+        DEFAULT_GAS
+    );
     println!(
-        "profile_data: {:#?} \ngas burnt: {:?}\ntokens_burnt: {}",
-        outcome.profile_data(),
+        " \ngas burnt: {:?}\ntokens_burnt: {}\n outcome:{:#?}",
+    //     outcome.profile_data(),
         outcome.gas_burnt(),
         outcome.tokens_burnt(),
+        outcome.outcome(),
     );
-
-    let expected_gas_ceiling = 5 * u64::pow(10, 12); // 5 TeraGas
+    let expected_gas_ceiling = 3 * u64::pow(10, 14);
     assert!(outcome.gas_burnt() < Gas(expected_gas_ceiling));
 
     // checking that asks is empty
     let sale_conditions: Vec<SaleCondition> = view!(market.list_asks()).unwrap_json();
     assert_eq!(sale_conditions.len(), 0);
-    //checking that new onwer is Alice
+    //checking that new owner is Alice
     let owner_id: AccountId = view!(nft.get_owner_by_token_id(token_id.clone())).unwrap_json();
     assert_eq!(owner_id, alice.account_id());
 }
