@@ -100,11 +100,14 @@ fn buying() {
     let outcome = call!(
         alice,
         market.buy(token_id.clone()),
-        deposit = to_yocto("10")
+        to_yocto("10"),
+        DEFAULT_GAS
     );
 
     outcome.assert_success();
 
+    assert_eq!(outcome.promise_errors().len(), 0);
+    println!("outcome status: {:?}", outcome.outcome().status);
     let expected_gas_ceiling = 300 * u64::pow(10, 12);
     assert!(outcome.gas_burnt() < Gas(expected_gas_ceiling));
 
