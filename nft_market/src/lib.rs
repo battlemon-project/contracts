@@ -137,7 +137,8 @@ impl Contract {
         match env::promise_result(0) {
             PromiseResult::Successful(_) => {
                 self.asks.remove(&sale.token_id);
-                Promise::new(env::current_account_id()).transfer(sale.price.0)
+                panic_str("hahha");
+                // Promise::new(env::current_account_id()).transfer(sale.price.0)
             }
             PromiseResult::Failed => panic_str("Execution `nft_transfer` method was failed."),
             PromiseResult::NotReady => unreachable!(),
