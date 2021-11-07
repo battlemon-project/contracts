@@ -104,13 +104,7 @@ impl Contract {
         self.process_purchase(token_id, sale.price, buyer_id);
     }
 
-    #[private]
-    pub fn process_purchase(
-        &mut self,
-        token_id: TokenId,
-        price: U128,
-        buyer_id: AccountId,
-    ) -> Promise {
+    fn process_purchase(&mut self, token_id: TokenId, price: U128, buyer_id: AccountId) -> Promise {
         let sale = self.asks.get(&token_id).unwrap();
         // let gas_for_next_callback =
         //     env::prepaid_gas() - env::used_gas() - DEPOSIT_CALL_GAS - RESERVE_TGAS;
