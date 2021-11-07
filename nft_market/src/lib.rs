@@ -6,7 +6,7 @@ use near_sdk::collections::{UnorderedMap, Vector};
 use near_sdk::env::panic_str;
 use near_sdk::json_types::U128;
 use near_sdk::serde::{Deserialize, Serialize};
-use near_sdk::serde_json;
+use near_sdk::serde_json::{self, json};
 use near_sdk::{
     env, log, near_bindgen, require, AccountId, Balance, BorshStorageKey, Gas, PanicOnDefault,
     Promise, PromiseError, PromiseOrValue, PromiseResult,
@@ -14,7 +14,9 @@ use near_sdk::{
 
 pub const NO_DEPOSIT: Balance = 0;
 pub const ONE_YOCTO: Balance = 1;
-pub const XCC_GAS: Gas = Gas(20_000_000_000_000);
+pub const BUY_METHOD_TOTAL_GAS: Gas = Gas(40_000_000_000_000);
+pub const NFT_TRANSFER_GAS: Gas = Gas(10_000_000_000_000);
+pub const AFTER_NFT_TRANSFER_GAS: Gas = Gas(5_000_000_000_000);
 
 #[near_bindgen]
 #[derive(BorshSerialize, BorshDeserialize, PanicOnDefault)]
@@ -69,7 +71,7 @@ trait ExtNft {
 
 #[near_sdk::ext_contract(ext_self)]
 trait ExtSelf {
-    fn after_nft_transfer(&mut self, sale: SaleCondition) -> Promise;
+    fn after_nft_transfer(&mut self, sale: SaleCondition);
 }
 
 #[near_bindgen]
@@ -93,21 +95,24 @@ impl Contract {
             panic_str(format!("token with id {} doesn't sell", token_id).as_str())
         });
 
-        let buyer_id = env::predecessor_account_id();
         let deposit = env::attached_deposit();
-
         require!(
             deposit == sale.price.0,
             "attached deposit isn't equal to token's price."
         );
 
+        let prepaid_gas = env::prepaid_gas();
+        require!(
+            prepaid_gas >= BUY_METHOD_TOTAL_GAS,
+            format!("attached gas less than: {:?}", BUY_METHOD_TOTAL_GAS)
+        );
+
+        let buyer_id = env::predecessor_account_id();
         self.process_purchase(token_id, sale.price, buyer_id);
     }
 
     fn process_purchase(&mut self, token_id: TokenId, price: U128, buyer_id: AccountId) -> Promise {
         let sale = self.asks.get(&token_id).unwrap();
-        // let gas_for_next_callback =
-        //     env::prepaid_gas() - env::used_gas() - DEPOSIT_CALL_GAS - RESERVE_TGAS;
 
         ext_nft::nft_transfer(
             buyer_id,
@@ -116,22 +121,22 @@ impl Contract {
             None,
             self.nft_id.clone(),
             ONE_YOCTO,
-            XCC_GAS * 2,
+            NFT_TRANSFER_GAS,
         )
         .then(ext_self::after_nft_transfer(
             sale,
             env::current_account_id(),
             NO_DEPOSIT,
-            XCC_GAS,
+            AFTER_NFT_TRANSFER_GAS,
         ))
     }
 
     #[private]
-    pub fn after_nft_transfer(&mut self, sale: SaleCondition) -> Promise {
+    pub fn after_nft_transfer(&mut self, sale: SaleCondition) {
         match env::promise_result(0) {
             PromiseResult::Successful(_) => {
                 self.asks.remove(&sale.token_id);
-                Promise::new(env::current_account_id()).transfer(sale.price.0)
+                Promise::new(env::current_account_id()).transfer(sale.price.0);
             }
             PromiseResult::Failed => panic_str("Execution `nft_transfer` method was failed."),
             PromiseResult::NotReady => unreachable!(),
@@ -152,10 +157,10 @@ impl NonFungibleTokenApprovalReceiver for Contract {
         let SaleArgs { price } = serde_json::from_str(&msg).expect("couldn't parse json");
         let sale_conditions = SaleCondition::new(owner_id, token_id.clone(), approval_id, price);
         self.asks.insert(&token_id, &sale_conditions);
-
-        PromiseOrValue::Value(format!(
-            "token {} with price {} was added to market",
-            token_id, price.0
-        ))
+        let ret = json!({
+            "status": true,
+            "message": format!("token {} with price {} was added to market", token_id, price.0)
+        });
+        PromiseOrValue::Value(ret.to_string())
     }
 }
