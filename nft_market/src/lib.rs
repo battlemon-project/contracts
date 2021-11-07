@@ -154,8 +154,7 @@ impl NonFungibleTokenApprovalReceiver for Contract {
         approval_id: u64,
         msg: String,
     ) -> PromiseOrValue<String> {
-        // TODO: security assertions
-        // require!(env::predecessor_account_id() == self.nft_id);
+        require!(env::predecessor_account_id() == self.nft_id);
         let SaleArgs { price } = serde_json::from_str(&msg).expect("couldn't parse json");
         let sale_conditions = SaleCondition::new(owner_id, token_id.clone(), approval_id, price);
         self.asks.insert(&token_id, &sale_conditions);

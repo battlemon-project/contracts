@@ -26,7 +26,7 @@ pub fn init() -> (
         contract_id: NFT_ACCOUNT_ID,
         bytes: &NFT_WASM,
         signer_account: root,
-        init_method: init(root.account_id()),
+        init_method: init(NFT_ACCOUNT_ID.parse().unwrap()),
     );
 
     let market_contract = deploy!(

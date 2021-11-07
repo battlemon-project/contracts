@@ -29,9 +29,9 @@ fn list_asks() {
 
     // mint 1 nft token
     call!(
-        root,
+        nft.user_account,
         nft.mint(token_id.clone(), token_metadata, None),
-        deposit = STORAGE_AMOUNT
+        deposit = (STORAGE_AMOUNT / 2)
     )
     .assert_success();
 
@@ -42,9 +42,9 @@ fn list_asks() {
     .to_string();
     // simulate frontend's call for selling nft token.
     call!(
-        root,
+        nft.user_account,
         nft.nft_approve(token_id.clone(), market.account_id(), Some(price)),
-        deposit = STORAGE_AMOUNT
+        deposit = (STORAGE_AMOUNT / 2)
     )
     .assert_success();
 
@@ -52,7 +52,7 @@ fn list_asks() {
     assert_eq!(sale_conditions.len(), 1);
     let sale = sale_conditions.first().unwrap();
     assert_eq!(sale.token_id, token_id);
-    assert_eq!(sale.owner_id, root.account_id());
+    assert_eq!(sale.owner_id, nft.account_id());
     assert_eq!(sale.price, U128(1));
 }
 
@@ -77,9 +77,9 @@ fn buying() {
     // mint 1 nft token to bob
     let bob = root.create_user("bob".parse().unwrap(), to_yocto("100"));
     call!(
-        root,
+        nft.user_account,
         nft.mint(token_id.clone(), token_metadata, Some(bob.account_id())),
-        deposit = STORAGE_AMOUNT
+        deposit = (STORAGE_AMOUNT / 2)
     )
     .assert_success();
 
@@ -103,6 +103,8 @@ fn buying() {
         deposit = to_yocto("10")
     );
 
+    outcome.assert_success();
+
     let expected_gas_ceiling = 300 * u64::pow(10, 12);
     assert!(outcome.gas_burnt() < Gas(expected_gas_ceiling));
 
@@ -112,8 +114,4 @@ fn buying() {
     // checking that new owner is Alice
     let owner_id: AccountId = view!(nft.get_owner_by_token_id(token_id.clone())).unwrap_json();
     assert_eq!(owner_id, alice.account_id());
-    // todo: checking that Bob's balance now changed right (he must receive 10 near)
-    let bob_view = bob.account().unwrap();
-    let bob_total_amount = bob_view.storage_usage as u128 + bob_view.amount;
-    // assert_eq!(bob_total_amount - to_yocto("1"), )
 }
