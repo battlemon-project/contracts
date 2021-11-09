@@ -105,7 +105,7 @@ near_contract_standards::impl_non_fungible_token_approval!(Contract, tokens);
 mod tests {
     use crate::token_metadata_ext::*;
     use near_sdk::test_utils::{accounts, VMContextBuilder};
-    use near_sdk::testing_env;
+    use near_sdk::{serde_json, testing_env};
     use std::collections::HashMap;
 
     use super::*;
@@ -153,6 +153,12 @@ mod tests {
             reference_hash: None,
             properties,
         }
+    }
+
+    #[test]
+    fn token_metadata_deserialize() {
+        let json = r#"{"title": "Title for token 1", "description": "some description for batllemon nft token", "media": "blabla", "properties": {"option": "on_sale", "century": "our_time", "type": "light", "lemon_gen": "nakamoto", "background": "red", "top": "headdress", "cyber_suit": "metallic", "expression": "brooding", "eyes": "open", "hair": "bob_marley", "accessory": "cigar", "winrate": 14, "rarity": 12}}"#;
+        let _token_metadata: TokenMetadataExt = serde_json::from_str(json).unwrap();
     }
 
     #[test]
