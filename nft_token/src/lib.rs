@@ -82,8 +82,7 @@ impl Contract {
         );
 
         let owner_id = owner_id.unwrap_or_else(|| self.tokens.owner_id.clone());
-        let metadata = token_metadata.get_token_metadata();
-        let properties = token_metadata.get_token_properties();
+        let (metadata, properties) = token_metadata.split();
         self.token_properties_by_id.insert(&token_id, &properties);
         let token = self
             .tokens
@@ -190,16 +189,12 @@ mod tests {
         let token_id = "0".to_string();
         let token = contract.mint(token_id.clone(), sample_token_metadata(), None);
 
+        let (metadata, properties) = sample_token_metadata().split();
+
         assert_eq!(token.token_id, token_id);
         assert_eq!(token.owner_id, accounts(0));
-        assert_eq!(
-            token.metadata.unwrap(),
-            sample_token_metadata().get_token_metadata()
-        );
-        assert_eq!(
-            token.properties,
-            sample_token_metadata().get_token_properties()
-        );
+        assert_eq!(token.metadata.unwrap(), metadata);
+        assert_eq!(token.properties, properties,);
         assert_eq!(token.approved_account_ids.unwrap(), HashMap::new());
     }
 
@@ -215,16 +210,12 @@ mod tests {
 
         let token_id = "0".to_string();
         let token = contract.mint(token_id.clone(), sample_token_metadata(), Some(accounts(1)));
+        let (metadata, properties) = sample_token_metadata().split();
+
         assert_eq!(token.token_id, token_id);
         assert_eq!(token.owner_id, accounts(1));
-        assert_eq!(
-            token.metadata.unwrap(),
-            sample_token_metadata().get_token_metadata()
-        );
-        assert_eq!(
-            token.properties,
-            sample_token_metadata().get_token_properties()
-        );
+        assert_eq!(token.metadata.unwrap(), metadata);
+        assert_eq!(token.properties, properties,);
         assert_eq!(token.approved_account_ids.unwrap(), HashMap::new());
     }
 
