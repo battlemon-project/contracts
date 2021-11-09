@@ -3,12 +3,15 @@
 ## NFT Token Methods
 
 ### `mint`
-> Mint Battlemon's nft token whether for contract owner or arbitrary account. Can be invoked only by contract owner.
+> It's a payable method that mints Battlemon's NFT token whether for contract owner or arbitrary account.
+> The method can be invoked only by the contract owner.
+> Attached deposit must cover costs to store token's data on-chain.
+> Any extra attached deposit didn't use for storage will be returned.  
 
 #### Arguments:
-- `token_id`: An unique token id. Note that token IDs for NFTs are strings on NEAR. It's still fine to use autoincrementing numbers as unique IDs if desired, but they should be stringified.
+- `token_id`: An unique token id. Note that token IDs for NFTs are strings on NEAR. It's still fine to use auto-incrementing numbers as unique IDs if desired, but they should be stringified.
 - `token_metadata`: The fields format must be according to [NEP-177](https://nomicon.io/Standards/NonFungibleToken/Metadata.html) standard. Additionally, it must contain mandatory data with token properties.  
-- `owner_id` (Optional): An owner of minted NFT token must be valid NEAR account. If the argument is omitted, the owner of token will be contract owner.
+- `owner_id` (Optional): An owner of a minted NFT token must be a valid NEAR account. If the argument is omitted, the owner of the token will be the contract owner.
 
 #### Battlemon NFT Token Properties:
 - `"option"`: `["on_sale", "auction", "for_rent", "lemon_gen"]`
