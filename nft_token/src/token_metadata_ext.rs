@@ -167,25 +167,23 @@ pub struct TokenMetadataExt {
 }
 
 impl TokenMetadataExt {
-    pub fn get_token_metadata(&self) -> TokenMetadata {
-        TokenMetadata {
-            title: self.title.clone(),
-            description: self.description.clone(),
-            media: self.media.clone(),
-            media_hash: self.media_hash.clone(),
+    pub fn split(self) -> (TokenMetadata, TokenProperties) {
+        let metadata = TokenMetadata {
+            title: self.title,
+            description: self.description,
+            media: self.media,
+            media_hash: self.media_hash,
             copies: self.copies,
-            issued_at: self.issued_at.clone(),
-            expires_at: self.expires_at.clone(),
-            starts_at: self.starts_at.clone(),
-            updated_at: self.updated_at.clone(),
-            extra: self.extra.clone(),
-            reference: self.reference.clone(),
-            reference_hash: self.reference_hash.clone(),
-        }
-    }
+            issued_at: self.issued_at,
+            expires_at: self.expires_at,
+            starts_at: self.starts_at,
+            updated_at: self.updated_at,
+            extra: self.extra,
+            reference: self.reference,
+            reference_hash: self.reference_hash,
+        };
 
-    pub fn get_token_properties(&self) -> TokenProperties {
-        self.properties.clone()
+        (metadata, self.properties)
     }
 }
 
