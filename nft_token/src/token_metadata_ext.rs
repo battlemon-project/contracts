@@ -7,7 +7,7 @@ use near_sdk::AccountId;
 use std::collections::HashMap;
 
 #[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug)]
-#[serde(crate = "near_sdk::serde")]
+#[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
 pub enum Option_ {
     OnSale,
     Auction,
@@ -16,7 +16,7 @@ pub enum Option_ {
 }
 
 #[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug)]
-#[serde(crate = "near_sdk::serde")]
+#[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
 pub enum Century {
     Ancient,
     OurTime,
@@ -25,7 +25,7 @@ pub enum Century {
 }
 
 #[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug)]
-#[serde(crate = "near_sdk::serde")]
+#[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
 pub enum Type {
     Light,
     Medium,
@@ -33,7 +33,7 @@ pub enum Type {
 }
 
 #[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug)]
-#[serde(crate = "near_sdk::serde")]
+#[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
 pub enum LemonGen {
     Nakamoto,
     Buterin,
@@ -42,7 +42,7 @@ pub enum LemonGen {
 }
 
 #[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug)]
-#[serde(crate = "near_sdk::serde")]
+#[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
 pub enum Background {
     Red,
     Purple,
@@ -52,7 +52,7 @@ pub enum Background {
 }
 
 #[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug)]
-#[serde(crate = "near_sdk::serde")]
+#[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
 pub enum Top {
     Headdress,
     Hairstyle,
@@ -60,7 +60,7 @@ pub enum Top {
 }
 
 #[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug)]
-#[serde(crate = "near_sdk::serde")]
+#[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
 pub enum CyberSuit {
     Black,
     Metallic,
@@ -69,7 +69,7 @@ pub enum CyberSuit {
 }
 
 #[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug)]
-#[serde(crate = "near_sdk::serde")]
+#[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
 pub enum Expression {
     Brooding,
     Merry,
@@ -80,7 +80,7 @@ pub enum Expression {
 }
 
 #[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug)]
-#[serde(crate = "near_sdk::serde")]
+#[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
 pub enum Eyes {
     Open,
     Close,
@@ -88,7 +88,7 @@ pub enum Eyes {
 }
 
 #[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug)]
-#[serde(crate = "near_sdk::serde")]
+#[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
 pub enum Hair {
     Elvis,
     BobMarley,
@@ -97,7 +97,7 @@ pub enum Hair {
 }
 
 #[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug)]
-#[serde(crate = "near_sdk::serde")]
+#[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
 pub enum Accessory {
     Cigar,
     Toothpick,
@@ -110,6 +110,7 @@ pub enum Accessory {
 pub struct TokenProperties {
     pub option: Option_,
     pub century: Century,
+    #[serde(rename = "type")]
     pub type_: Type,
     pub lemon_gen: LemonGen,
     pub background: Background,
