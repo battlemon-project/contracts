@@ -90,6 +90,7 @@ near_contract_standards::impl_non_fungible_token_approval!(Contract, tokens);
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {
+    use crate::token_metadata_ext::*;
     use near_sdk::test_utils::{accounts, VMContextBuilder};
     use near_sdk::testing_env;
     use std::collections::HashMap;
@@ -107,8 +108,24 @@ mod tests {
         builder
     }
 
-    fn sample_token_metadata() -> TokenMetadata {
-        TokenMetadata {
+    fn sample_token_metadata() -> TokenMetadataExt {
+        let properties = TokenProperties {
+            option: Option_::OnSale,
+            century: Century::Ancient,
+            type_: Type::Light,
+            lemon_gen: LemonGen::Nakamoto,
+            background: Background::Red,
+            top: Top::Headdress,
+            cyber_suit: CyberSuit::Black,
+            expression: Expression::Brooding,
+            eyes: Eyes::Open,
+            hair: Hair::Elvis,
+            accessory: Accessory::Cigar,
+            winrate: None,
+            rarity: 0,
+        };
+
+        TokenMetadataExt {
             title: Some("foo title".into()),
             description: Some("this is description for foo title's token".into()),
             media: None,
@@ -121,6 +138,7 @@ mod tests {
             extra: None,
             reference: None,
             reference_hash: None,
+            properties,
         }
     }
 
@@ -155,7 +173,14 @@ mod tests {
 
         assert_eq!(token.token_id, token_id);
         assert_eq!(token.owner_id, accounts(0));
-        assert_eq!(token.metadata.unwrap(), sample_token_metadata());
+        assert_eq!(
+            token.metadata.unwrap(),
+            sample_token_metadata().get_token_metadata()
+        );
+        assert_eq!(
+            token.properties,
+            sample_token_metadata().get_token_properties()
+        );
         assert_eq!(token.approved_account_ids.unwrap(), HashMap::new());
     }
 
@@ -173,7 +198,14 @@ mod tests {
         let token = contract.mint(token_id.clone(), sample_token_metadata(), Some(accounts(1)));
         assert_eq!(token.token_id, token_id);
         assert_eq!(token.owner_id, accounts(1));
-        assert_eq!(token.metadata.unwrap(), sample_token_metadata());
+        assert_eq!(
+            token.metadata.unwrap(),
+            sample_token_metadata().get_token_metadata()
+        );
+        assert_eq!(
+            token.properties,
+            sample_token_metadata().get_token_properties()
+        );
         assert_eq!(token.approved_account_ids.unwrap(), HashMap::new());
     }
 
