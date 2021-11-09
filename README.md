@@ -78,3 +78,41 @@ near call $CONTRACT_NAME  mint '{"token_id": "1", "token_metadata": {"title": "T
 </details>
 
 ---
+
+### `nft_approve`
+> According to [NEP-178](https://nomicon.io/Standards/NonFungibleToken/ApprovalManagement.html) 
+> It's a payable method that gives for particular account id approvals to manage the token.
+> In our cases we must provide `account_id` of our market's contract, with proper `msg`.
+> Attached deposit must be at least 1 yoctoNEAR and cover costs to store request's data on-chain.
+> Gas must be at least than 30000000000000 yoctoNEAR.
+> Any extra attached deposit and gas didn't use for storage will be returned.
+
+#### Arguments:
+- `token_id`: the token id for which to add an approval
+- `account_id`: the account that will be approved for managing the NFT token.
+- `msg` (Optional): the message that will be deserialized by callback call and processed in the proper way that depends on provided data.
+
+#### `msg` format:
+`"msg": "{\"price\":\"2\"}` - stringified json, price must be measured in yoctoNEAR.
+
+**Example:**
+
+```bash
+ near call $NFT_CONTRACT_NAME nft_approve '{"token_id": "1", "account_id": "'$MARKET_CONTRACT_NAME'", "msg": "{\"price\":\"2\"}"}' --accountId $OWNER_NAME --depositYocto 440000000000000000000 --gas 30000000000000
+```
+- `$NFT_CONTRACT_NAME` - the account id of Battlemon NFT contract.
+- `$MARKET_CONTRACT_NAME` - the account id of Battlemon Marketplace contract.
+- `$OWNER_NAME` - the account id of NFT token's owner. 
+<details>
+<summary> <strong>Example Response</strong> </summary>
+<p>
+
+```json
+{"status":true,"message":"token 1 with price 2 was added to market"}
+```
+</p>
+</details>
+
+---
+
+## Marketplace Methods
