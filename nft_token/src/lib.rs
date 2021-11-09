@@ -73,7 +73,7 @@ impl Contract {
     pub fn mint(
         &mut self,
         token_id: TokenId,
-        token_metadata_ext: TokenMetadataExt,
+        token_metadata: TokenMetadataExt,
         owner_id: Option<AccountId>,
     ) -> TokenExt {
         require!(
@@ -82,15 +82,14 @@ impl Contract {
         );
 
         let owner_id = owner_id.unwrap_or_else(|| self.tokens.owner_id.clone());
-        let token_metadata = token_metadata_ext.get_token_metadata();
-        let token_properties = token_metadata_ext.get_token_properties();
-        self.token_properties_by_id
-            .insert(&token_id, &token_properties);
+        let metadata = token_metadata.get_token_metadata();
+        let properties = token_metadata.get_token_properties();
+        self.token_properties_by_id.insert(&token_id, &properties);
         let token = self
             .tokens
-            .internal_mint(token_id, owner_id, Some(token_metadata));
+            .internal_mint(token_id, owner_id, Some(metadata));
 
-        TokenExt::from_parts(token, token_properties)
+        TokenExt::from_parts(token, properties)
     }
 
     pub fn get_owner_by_token_id(&self, token_id: TokenId) -> Option<AccountId> {
