@@ -6,7 +6,9 @@ use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::AccountId;
 use std::collections::HashMap;
 
-#[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug)]
+#[derive(
+    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
+)]
 #[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
 pub enum Option_ {
     OnSale,
@@ -15,7 +17,9 @@ pub enum Option_ {
     LemonGen,
 }
 
-#[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug)]
+#[derive(
+    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
+)]
 #[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
 pub enum Century {
     Ancient,
@@ -24,7 +28,9 @@ pub enum Century {
     Otherworldly,
 }
 
-#[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug)]
+#[derive(
+    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
+)]
 #[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
 pub enum Type {
     Light,
@@ -32,7 +38,9 @@ pub enum Type {
     Heavy,
 }
 
-#[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug)]
+#[derive(
+    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
+)]
 #[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
 pub enum LemonGen {
     Nakamoto,
@@ -41,7 +49,9 @@ pub enum LemonGen {
     Jobs,
 }
 
-#[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug)]
+#[derive(
+    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
+)]
 #[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
 pub enum Background {
     Red,
@@ -51,7 +61,9 @@ pub enum Background {
     Green,
 }
 
-#[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug)]
+#[derive(
+    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
+)]
 #[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
 pub enum Top {
     Headdress,
@@ -59,7 +71,9 @@ pub enum Top {
     Classical,
 }
 
-#[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug)]
+#[derive(
+    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
+)]
 #[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
 pub enum CyberSuit {
     Black,
@@ -68,7 +82,9 @@ pub enum CyberSuit {
     Gold,
 }
 
-#[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug)]
+#[derive(
+    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
+)]
 #[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
 pub enum Expression {
     Brooding,
@@ -79,7 +95,9 @@ pub enum Expression {
     Mask,
 }
 
-#[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug)]
+#[derive(
+    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
+)]
 #[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
 pub enum Eyes {
     Open,
@@ -87,7 +105,9 @@ pub enum Eyes {
     Medium,
 }
 
-#[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug)]
+#[derive(
+    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
+)]
 #[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
 pub enum Hair {
     Elvis,
@@ -96,7 +116,9 @@ pub enum Hair {
     Disco,
 }
 
-#[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug)]
+#[derive(
+    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
+)]
 #[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
 pub enum Accessory {
     Cigar,
@@ -105,7 +127,9 @@ pub enum Accessory {
     Scar,
 }
 
-#[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug)]
+#[derive(
+    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Copy, Clone, PartialEq, Debug,
+)]
 #[serde(crate = "near_sdk::serde")]
 pub struct TokenProperties {
     pub option: Option_,
@@ -184,5 +208,53 @@ impl TokenExt {
             approved_account_ids: token.approved_account_ids,
             properties,
         }
+    }
+}
+
+#[cfg(all(test, not(target_arch = "wasm32")))]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn token_ext_from_parts() {
+        let token = Token {
+            token_id: "123".to_string(),
+            owner_id: "owner".parse().unwrap(),
+            metadata: None,
+            approved_account_ids: None,
+        };
+
+        let properties = TokenProperties {
+            option: Option_::OnSale,
+            century: Century::Ancient,
+            type_: Type::Light,
+            lemon_gen: LemonGen::Nakamoto,
+            background: Background::Red,
+            top: Top::Headdress,
+            cyber_suit: CyberSuit::Black,
+            expression: Expression::Brooding,
+            eyes: Eyes::Open,
+            hair: Hair::Elvis,
+            accessory: Accessory::Cigar,
+            winrate: None,
+            rarity: 0,
+        };
+
+        let token_ext = TokenExt::from_parts(token.clone(), properties);
+        assert_eq!(token.token_id, token_ext.token_id);
+        assert_eq!(token.metadata, token_ext.metadata);
+        assert_eq!(token.owner_id, token_ext.owner_id);
+        assert_eq!(token.approved_account_ids, token_ext.approved_account_ids);
+        assert_eq!(properties.century, token_ext.properties.century);
+        assert_eq!(properties.accessory, token_ext.properties.accessory);
+        assert_eq!(properties.top, token_ext.properties.top);
+        assert_eq!(properties.expression, token_ext.properties.expression);
+        assert_eq!(properties.eyes, token_ext.properties.eyes);
+        assert_eq!(properties.hair, token_ext.properties.hair);
+        assert_eq!(properties.lemon_gen, token_ext.properties.lemon_gen);
+        assert_eq!(properties.option, token_ext.properties.option);
+        assert_eq!(properties.type_, token_ext.properties.type_);
+        assert_eq!(properties.rarity, token_ext.properties.rarity);
+        assert_eq!(properties.winrate, token_ext.properties.winrate);
     }
 }
