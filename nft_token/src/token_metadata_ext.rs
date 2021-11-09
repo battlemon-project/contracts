@@ -148,7 +148,7 @@ pub struct TokenProperties {
     pub rarity: u8,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 #[serde(crate = "near_sdk::serde")]
 pub struct TokenMetadataExt {
     pub title: Option<String>, // ex. "Arch Nemesis: Mail Carrier" or "Parcel #5055"
@@ -212,6 +212,58 @@ impl TokenExt {
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {
     use super::*;
+
+    #[test]
+    fn token_metadata_ext_split() {
+        let expected_properties = TokenProperties {
+            option: Option_::OnSale,
+            century: Century::Ancient,
+            type_: Type::Light,
+            lemon_gen: LemonGen::Nakamoto,
+            background: Background::Red,
+            top: Top::Headdress,
+            cyber_suit: CyberSuit::Black,
+            expression: Expression::Brooding,
+            eyes: Eyes::Open,
+            hair: Hair::Elvis,
+            accessory: Accessory::Cigar,
+            winrate: None,
+            rarity: 0,
+        };
+
+        let token_metadata_ext = TokenMetadataExt {
+            title: None,
+            description: None,
+            media: None,
+            media_hash: None,
+            copies: None,
+            issued_at: None,
+            expires_at: None,
+            starts_at: None,
+            updated_at: None,
+            extra: None,
+            reference: None,
+            reference_hash: None,
+            properties: expected_properties,
+        };
+
+        let (actual_metadata, actual_properties) = token_metadata_ext.clone().split();
+
+        assert_eq!(actual_properties, expected_properties);
+        assert_eq!(token_metadata_ext.title, actual_metadata.title);
+        assert_eq!(token_metadata_ext.description, actual_metadata.description);
+        assert_eq!(token_metadata_ext.media, actual_metadata.media);
+        assert_eq!(token_metadata_ext.media_hash, actual_metadata.media_hash);
+        assert_eq!(token_metadata_ext.copies, actual_metadata.copies);
+        assert_eq!(token_metadata_ext.issued_at, actual_metadata.issued_at);
+        assert_eq!(token_metadata_ext.expires_at, actual_metadata.expires_at);
+        assert_eq!(token_metadata_ext.extra, actual_metadata.extra);
+        assert_eq!(token_metadata_ext.reference, actual_metadata.reference);
+        assert_eq!(
+            token_metadata_ext.reference_hash,
+            actual_metadata.reference_hash
+        );
+    }
 
     #[test]
     fn token_ext_from_parts() {
