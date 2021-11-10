@@ -167,7 +167,7 @@ near view $CONTRACT_NAME nft_tokens ''
 <summary> <strong>Example Response</strong> </summary>
 <p>
 
-```json lines
+```
 [
   {
     token_id: '1',
@@ -304,7 +304,7 @@ near view $CONTRACT_NAME nft_tokens ''
       rarity: 12
     },
     approved_account_ids: {}
-  },
+  }
 ]
 ```
 
