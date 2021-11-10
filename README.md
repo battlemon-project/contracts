@@ -179,8 +179,8 @@ near call $CONTRACT_NAME  mint '{"token_id": "1", "token_metadata": {"title": "T
 
 **Arguments:**
 
-- `from_index` (Optional): a string representing an unsigned 128-bit integer, representing the starting index of tokens to return. If it's omitted it will return
-  collection with starting index equals zero.
+- `from_index` (Optional): a string representing an unsigned 128-bit integer, representing the starting index of tokens
+  to return. If it's omitted it will return collection with starting index equals zero.
 - `limit` (Optional): the maximum number of tokens to return. If it's omitted it will return unlimited collection.
 
 **Example:**
@@ -188,16 +188,18 @@ near call $CONTRACT_NAME  mint '{"token_id": "1", "token_metadata": {"title": "T
 ```bash
 near view $CONTRACT_NAME nft_tokens ''
 ```
+
 ```bash
 near view $CONTRACT_NAME nft_tokens '{"from_index": "1"}'
 ```
+
 ```bash
 near view $CONTRACT_NAME nft_tokens '{"from_index": "2", limit: 3}'
 ```
+
 ```bash
 near view $CONTRACT_NAME nft_tokens '{"limit": 5}'
 ```
-
 
 <details>
 <summary> <strong>Example Response</strong> </summary>
@@ -377,6 +379,7 @@ near view $CONTRACT_NAME nft_total_supply ''
 > It's a view method. Returns the number of non-fungible tokens owned by given `account_id`.
 
 #### Arguments
+
 - `account_id` - a valid NEAR account
 
 **Example:**
@@ -403,15 +406,28 @@ near view $CONTRACT_NAME nft_supply_for_owner '{"account_id": "'$OWNER_NAME'"}'
 > It's a view method. Returns the collection of non-fungible tokens owned by given `account_id`.
 
 #### Arguments
+
 - `account_id` - a valid NEAR account
-- `from_index` (Optional): a string representing an unsigned 128-bit integer, representing the starting index of tokens to return. If it's omitted it will return
-  collection with starting index equals zero.
+- `from_index` (Optional): a string representing an unsigned 128-bit integer, representing the starting index of tokens
+  to return. If it's omitted it will return collection with starting index equals zero.
 - `limit` (Optional): the maximum number of tokens to return. If it's omitted it will return unlimited collection.
 
 **Example:**
 
 ```bash
-near view $CONTRACT_NAME nft_supply_for_owner '{"account_id": "'$OWNER_NAME'"}'
+near view $CONTRACT_NAME nft_tokens_for_owner '{"account_id": "'$OWNER_NAME'"}'
+```
+
+```bash
+near view $CONTRACT_NAME nft_tokens_for_owner '{"account_id": "'$OWNER_NAME'", "from_index": "2"}'
+```
+
+```bash
+near view $CONTRACT_NAME nft_tokens_for_owner '{"account_id": "'$OWNER_NAME'", "limit": 5}'
+```
+
+```bash
+near view $CONTRACT_NAME nft_tokens_for_owner '{"account_id": "'$OWNER_NAME'", "from_index": "2", "limit": 5}'
 ```
 
 <details>
@@ -419,7 +435,76 @@ near view $CONTRACT_NAME nft_supply_for_owner '{"account_id": "'$OWNER_NAME'"}'
 <p>
 
 ```
-'7'
+[
+  {
+    token_id: '3',
+    owner_id: 'dev-1636550205831-72164784084299',
+    metadata: {
+      title: 'Title for token 3',
+      description: 'some description for battlemon nft token',
+      media: 'blabla',
+      media_hash: null,
+      copies: null,
+      issued_at: null,
+      expires_at: null,
+      starts_at: null,
+      updated_at: null,
+      extra: null,
+      reference: null,
+      reference_hash: null
+    },
+    properties: {
+      option: 'on_sale',
+      century: 'our_time',
+      type: 'light',
+      lemon_gen: 'nakamoto',
+      background: 'red',
+      top: 'headdress',
+      cyber_suit: 'metallic',
+      expression: 'brooding',
+      eyes: 'open',
+      hair: 'bob_marley',
+      accessory: 'cigar',
+      winrate: 14,
+      rarity: 12
+    },
+    approved_account_ids: {}
+  },
+  {
+    token_id: '4',
+    owner_id: 'dev-1636550205831-72164784084299',
+    metadata: {
+      title: 'Title for token 4',
+      description: 'some description for battlemon nft token',
+      media: 'blabla',
+      media_hash: null,
+      copies: null,
+      issued_at: null,
+      expires_at: null,
+      starts_at: null,
+      updated_at: null,
+      extra: null,
+      reference: null,
+      reference_hash: null
+    },
+    properties: {
+      option: 'on_sale',
+      century: 'our_time',
+      type: 'light',
+      lemon_gen: 'nakamoto',
+      background: 'red',
+      top: 'headdress',
+      cyber_suit: 'metallic',
+      expression: 'brooding',
+      eyes: 'open',
+      hair: 'bob_marley',
+      accessory: 'cigar',
+      winrate: 14,
+      rarity: 12
+    },
+    approved_account_ids: {}
+  }
+]
 ```
 
 </p>
