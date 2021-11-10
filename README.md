@@ -201,3 +201,22 @@ near view list_asks $CONTRACT_NAME '{}'
 
 </p>
 </details>
+
+### `buy`
+
+> It's a payable method that uses for buying particular token.
+
+#### Arguments:
+
+- `token_id` - id of NFT token.
+
+**Example**
+
+```bash
+near call $CONTRACT_NAME buy '{"token_id": "2"}' --depositYocto 10 --gas 40000000000000 --accountId $NEW_OWNER_ID
+```
+
+- `depositYocto` - price of the token with `token_id`.
+- `gas` - attached gas for method execution. The current amount can be changed in the future.
+
+---
