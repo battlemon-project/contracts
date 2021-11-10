@@ -304,7 +304,7 @@ near view $CONTRACT_NAME nft_tokens ''
       rarity: 12
     },
     approved_account_ids: {}
-  }
+  },
 ]
 ```
 
