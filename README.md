@@ -18,6 +18,8 @@ _Click on a method for more information and examples._
 
 [`nft_supply_for_owner`](#nft_supply_for_owner)
 
+[`nft_tokens_for_owner`](#nft_tokens_for_owner)
+
 **Marketplace Methods:**
 
 [`init`](#marketplace_init)
