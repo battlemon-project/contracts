@@ -32,11 +32,11 @@ _Click on a method for more information and examples._
 
 > Method for initialization smart-contract.
 
-#### Arguments:
+**Arguments:**
 
 - `owner_id` - NEAR account.
 
-**Example**
+**Example:**
 
 ```bash
 near call $CONTRACT_NAME init '{"owner_id": "'$CONTRACT_NAME'"}' --accountId $CONTRACT_NAME
@@ -51,7 +51,7 @@ near call $CONTRACT_NAME init '{"owner_id": "'$CONTRACT_NAME'"}' --accountId $CO
 > Attached deposit must cover costs to store token's data on-chain.
 > Any extra attached deposit didn't use for storage will be returned.
 
-#### Arguments:
+**Arguments:**
 
 - `token_id`: An unique token id. Note that token IDs for NFTs are strings on NEAR. It's still fine to use
   auto-incrementing numbers as unique IDs if desired, but they should be stringified.
@@ -138,7 +138,7 @@ near call $CONTRACT_NAME  mint '{"token_id": "1", "token_metadata": {"title": "T
 > Gas must be at least than 30000000000000 yoctoNEAR.
 > Any extra attached deposit and gas didn't use for storage will be returned.
 
-#### Arguments:
+**Arguments:**
 
 - `token_id`: the token id for which to add an approval
 - `account_id`: the account that will be approved for managing the NFT token.
@@ -177,13 +177,13 @@ near call $CONTRACT_NAME  mint '{"token_id": "1", "token_metadata": {"title": "T
 
 > It's a view method that return collection of minted tokens and an empty collection if there are no tokens.
 
-#### Arguments:
+**Arguments:**
 
 - `from_index` (Optional): representing the starting index of tokens to return. If it's omitted it will return
   collection with starting index equals zero.
 - `limit` (Optional): the maximum number of tokens to return. If it's omitted it will return unlimited collection.
 
-**Example**
+**Example:**
 
 ```bash
 near view $CONTRACT_NAME nft_tokens ''
@@ -343,7 +343,7 @@ near view $CONTRACT_NAME nft_tokens ''
 
 > It's a view method. Returns the total supply of non-fungible tokens and "0" if there are no tokens.
 
-**Example**
+**Example:**
 
 ```bash
 near view $CONTRACT_NAME nft_total_supply ''
@@ -369,7 +369,33 @@ near view $CONTRACT_NAME nft_total_supply ''
 #### Arguments
 - `account_id` - a valid NEAR account
 
-**Example**
+**Example:**
+
+```bash
+near view $CONTRACT_NAME nft_supply_for_owner '{"account_id": "'$OWNER_NAME'"}'
+```
+
+<details>
+<summary> <strong>Example Response</strong> </summary>
+<p>
+
+```
+'7'
+```
+
+</p>
+</details>
+
+---
+
+### `nft_tokens_for_owner`
+
+> It's a view method. Returns the number of non-fungible tokens owned by given `account_id`.
+
+#### Arguments
+- `account_id` - a valid NEAR account
+
+**Example:**
 
 ```bash
 near view $CONTRACT_NAME nft_supply_for_owner '{"account_id": "'$OWNER_NAME'"}'
@@ -394,11 +420,11 @@ near view $CONTRACT_NAME nft_supply_for_owner '{"account_id": "'$OWNER_NAME'"}'
 
 > Method for initialization smart-contract.
 
-#### Arguments:
+**Arguments:**
 
 - `nft_id` - NEAR account of the NFT token.
 
-**Example**
+**Example:**
 
 ```bash
 near call $CONTRACT_NAME init '{"nft_id": "'$NFT_CONTRACT_NAME'"}' --accountId $CONTRACT_NAME
@@ -410,7 +436,7 @@ near call $CONTRACT_NAME init '{"nft_id": "'$NFT_CONTRACT_NAME'"}' --accountId $
 
 > View method to list all _asks_.
 
-**Example**
+**Example:**
 
 ```bash
 near view list_asks $CONTRACT_NAME '{}'
@@ -445,11 +471,11 @@ near view list_asks $CONTRACT_NAME '{}'
 
 > It's a payable method that uses for buying particular token.
 
-#### Arguments:
+**Arguments:**
 
 - `token_id` - id of NFT token.
 
-**Example**
+**Example:**
 
 ```bash
 near call $CONTRACT_NAME buy '{"token_id": "2"}' --depositYocto 10 --gas 40000000000000 --accountId $NEW_OWNER_ID
