@@ -1,11 +1,13 @@
 mod token_metadata_ext;
 
+use near_contract_standards::non_fungible_token::enumeration::NonFungibleTokenEnumeration;
 use near_contract_standards::non_fungible_token::metadata::{
     NFTContractMetadata, NFT_METADATA_SPEC,
 };
 use near_contract_standards::non_fungible_token::{NonFungibleToken, Token, TokenId};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{LazyOption, LookupMap};
+use near_sdk::json_types::U128;
 use near_sdk::{
     env, near_bindgen, require, AccountId, BorshStorageKey, PanicOnDefault, Promise, PromiseOrValue,
 };
@@ -94,10 +96,45 @@ impl Contract {
     pub fn get_owner_by_token_id(&self, token_id: TokenId) -> Option<AccountId> {
         self.tokens.owner_by_id.get(&token_id)
     }
+
+    pub fn nft_tokens(&self, from_index: Option<U128>, limit: Option<u64>) -> Vec<TokenExt> {
+        let tokens = self.tokens.nft_tokens(from_index, limit);
+        self.collect_to_ext_tokens(tokens)
+    }
+
+    pub fn nft_total_supply(&self) -> U128 {
+        self.tokens.nft_total_supply()
+    }
+
+    pub fn nft_supply_for_owner(&self, account_id: AccountId) -> U128 {
+        self.tokens.nft_supply_for_owner(account_id)
+    }
+
+    pub fn nft_tokens_for_owner(
+        &self,
+        account_id: AccountId,
+        from_index: Option<U128>,
+        limit: Option<u64>,
+    ) -> Vec<TokenExt> {
+        let tokens = self
+            .tokens
+            .nft_tokens_for_owner(account_id, from_index, limit);
+
+        self.collect_to_ext_tokens(tokens)
+    }
+
+    fn collect_to_ext_tokens(&self, tokens: Vec<Token>) -> Vec<TokenExt> {
+        tokens
+            .into_iter()
+            .map(|token| {
+                let properties = self.token_properties_by_id.get(&token.token_id).unwrap();
+                TokenExt::from_parts(token, properties)
+            })
+            .collect()
+    }
 }
 
 near_contract_standards::impl_non_fungible_token_core!(Contract, tokens);
-near_contract_standards::impl_non_fungible_token_enumeration!(Contract, tokens);
 near_contract_standards::impl_non_fungible_token_approval!(Contract, tokens);
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
