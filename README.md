@@ -1,8 +1,30 @@
 # Battlemon NFT token and marketplace
 
+## Overview
+
+_Click on a method for more information and examples._
+
+**NFT Token Methods:**
+
+[`init`](#nft_init)
+
+[`mint`](#mint)
+
+[`nft_approve`](#nft_approve)
+
+[`nft_tokens`](#nft_tokens)
+
+**Marketplace Methods:**
+
+[`init`](#marketplace_init)
+
+[`list_asks`](#list_asks)
+
+[`buy`](#buy)
+
 ## NFT Token Methods
 
-### `init`
+### <a name="nft_init"></a>`init`
 
 > Method for initialization smart-contract.
 
@@ -315,7 +337,7 @@ near view $CONTRACT_NAME nft_tokens ''
 
 ## Marketplace Methods
 
-### `init`
+### <a name="marketplace_init"></a> `init`
 
 > Method for initialization smart-contract.
 
