@@ -14,6 +14,8 @@ _Click on a method for more information and examples._
 
 [`nft_tokens`](#nft_tokens)
 
+[`nft_total_supply`](#nft_total_supply)
+
 **Marketplace Methods:**
 
 [`init`](#marketplace_init)
@@ -76,7 +78,7 @@ near call $CONTRACT_NAME init '{"owner_id": "'$CONTRACT_NAME'"}' --accountId $CO
 **Example:**
 
 ```bash
-near call $CONTRACT_NAME  mint '{"token_id": "1", "token_metadata": {"title": "Title for token 1", "description": "some description for batllemon nft token", "media": "blabla", "properties": {"option": "on_sale", "century": "our_time", "type": "light", "lemon_gen": "nakamoto", "background": "red", "top": "headdress", "cyber_suit": "metallic", "expression": "brooding", "eyes": "open", "hair": "bob_marley", "accessory": "cigar", "winrate": 14, "rarity": 12}}}' --accountId $CONTRACT_NAME --amount 0.1
+near call $CONTRACT_NAME  mint '{"token_id": "1", "token_metadata": {"title": "Title for token 1", "description": "some description for battlemon nft token", "media": "blabla", "properties": {"option": "on_sale", "century": "our_time", "type": "light", "lemon_gen": "nakamoto", "background": "red", "top": "headdress", "cyber_suit": "metallic", "expression": "brooding", "eyes": "open", "hair": "bob_marley", "accessory": "cigar", "winrate": 14, "rarity": 12}}}' --accountId $CONTRACT_NAME --amount 0.1
 ```
 
 <details>
@@ -328,6 +330,29 @@ near view $CONTRACT_NAME nft_tokens ''
     approved_account_ids: {}
   }
 ]
+```
+
+</p>
+</details>
+
+---
+
+### `nft_total_supply`
+
+> Returns the total supply of non-fungible tokens and "0" if there are no tokens.
+
+**Example**
+
+```bash
+near view $CONTRACT_NAME nft_total_supply ''
+```
+
+<details>
+<summary> <strong>Example Response</strong> </summary>
+<p>
+
+```
+'10'
 ```
 
 </p>
