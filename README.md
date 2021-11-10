@@ -16,6 +16,8 @@ _Click on a method for more information and examples._
 
 [`nft_total_supply`](#nft_total_supply)
 
+[`nft_supply_for_owner`](#nft_supply_for_owner)
+
 **Marketplace Methods:**
 
 [`init`](#marketplace_init)
@@ -353,6 +355,32 @@ near view $CONTRACT_NAME nft_total_supply ''
 
 ```
 '10'
+```
+
+</p>
+</details>
+
+---
+
+### `nft_supply_for_owner`
+
+> Returns the number of non-fungible tokens owned by given `account_id`.
+
+#### Arguments
+- `account_id` - a valid NEAR account
+
+**Example**
+
+```bash
+near view $CONTRACT_NAME nft_supply_for_owner '{"account_id": "'$OWNER_NAME'"}'
+```
+
+<details>
+<summary> <strong>Example Response</strong> </summary>
+<p>
+
+```
+'7'
 ```
 
 </p>
