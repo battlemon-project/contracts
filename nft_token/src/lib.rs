@@ -415,5 +415,16 @@ mod tests {
         let actual_tokens = contract.nft_tokens(None, None);
         assert_eq!(expected_tokens.len(), actual_tokens.len());
         assert!(expected_tokens.iter().all(|v| actual_tokens.contains(v)));
+
+        let vec_with_one_token = contract.nft_tokens(Some(U128(0)), Some(1));
+        assert_eq!(vec_with_one_token.len(), 1);
+        let vec_with_one_token = contract.nft_tokens(None, Some(1));
+        assert_eq!(vec_with_one_token.len(), 1);
+
+        let vec_with_three_tokens = contract.nft_tokens(Some(U128(1)), None);
+        assert_eq!(vec_with_three_tokens.len(), 3);
+
+        let vec_with_two_tokens = contract.nft_tokens(Some(U128(2)), Some(2));
+        assert_eq!(vec_with_two_tokens.len(), 2);
     }
 }
