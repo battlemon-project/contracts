@@ -11,10 +11,13 @@
 - `owner_id` - NEAR account.
 
 **Example**
+
 ```bash
 near call $CONTRACT_NAME init '{"owner_id": "'$CONTRACT_NAME'"}' --accountId $CONTRACT_NAME
 ```
+
 ---
+
 ### `mint`
 
 > It's a payable method that mints Battlemon's NFT token whether for contract owner or arbitrary account.
@@ -157,7 +160,44 @@ near call $CONTRACT_NAME  mint '{"token_id": "1", "token_metadata": {"title": "T
 - `nft_id` - NEAR account of the NFT token.
 
 **Example**
+
 ```bash
 near call $CONTRACT_NAME init '{"nft_id": "'$NFT_CONTRACT_NAME'"}' --accountId $CONTRACT_NAME
 ```
+
 ---
+
+### `list_asks`
+
+> View method to list all _asks_.
+
+**Example**
+
+```bash
+near view list_asks $CONTRACT_NAME '{}'
+```
+
+---
+<details>
+<summary> <strong>Example Response</strong> </summary>
+<p>
+
+```json lines
+[
+  {
+    owner_id: 'nft.dev-1636529128471-59911444209733',
+    token_id: '1',
+    approval_id: 3,
+    price: '2'
+  },
+  {
+    owner_id: 'nft.dev-1636529128471-59911444209733',
+    token_id: '2',
+    approval_id: 1,
+    price: '10'
+  }
+]
+```
+
+</p>
+</details>
