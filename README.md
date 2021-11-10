@@ -179,7 +179,7 @@ near call $CONTRACT_NAME  mint '{"token_id": "1", "token_metadata": {"title": "T
 
 **Arguments:**
 
-- `from_index` (Optional): representing the starting index of tokens to return. If it's omitted it will return
+- `from_index` (Optional): a string representing an unsigned 128-bit integer, representing the starting index of tokens to return. If it's omitted it will return
   collection with starting index equals zero.
 - `limit` (Optional): the maximum number of tokens to return. If it's omitted it will return unlimited collection.
 
@@ -341,7 +341,7 @@ near view $CONTRACT_NAME nft_tokens ''
 
 ### `nft_total_supply`
 
-> It's a view method. Returns the total supply of non-fungible tokens and "0" if there are no tokens.
+> It's a view method. Returns the total supply of non-fungible tokens and `0` if there are no tokens.
 
 **Example:**
 
@@ -390,10 +390,13 @@ near view $CONTRACT_NAME nft_supply_for_owner '{"account_id": "'$OWNER_NAME'"}'
 
 ### `nft_tokens_for_owner`
 
-> It's a view method. Returns the number of non-fungible tokens owned by given `account_id`.
+> It's a view method. Returns the collection of non-fungible tokens owned by given `account_id`.
 
 #### Arguments
 - `account_id` - a valid NEAR account
+- `from_index` (Optional): a string representing an unsigned 128-bit integer, representing the starting index of tokens to return. If it's omitted it will return
+  collection with starting index equals zero.
+- `limit` (Optional): the maximum number of tokens to return. If it's omitted it will return unlimited collection.
 
 **Example:**
 
