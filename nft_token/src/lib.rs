@@ -99,7 +99,7 @@ impl Contract {
 
     pub fn nft_tokens(&self, from_index: Option<U128>, limit: Option<u64>) -> Vec<TokenExt> {
         let tokens = self.tokens.nft_tokens(from_index, limit);
-        self.collect_to_ext_tokens(tokens)
+        self.collect_ext_tokens(tokens)
     }
 
     pub fn nft_total_supply(&self) -> U128 {
@@ -120,10 +120,10 @@ impl Contract {
             .tokens
             .nft_tokens_for_owner(account_id, from_index, limit);
 
-        self.collect_to_ext_tokens(tokens)
+        self.collect_ext_tokens(tokens)
     }
 
-    fn collect_to_ext_tokens(&self, tokens: Vec<Token>) -> Vec<TokenExt> {
+    fn collect_ext_tokens(&self, tokens: Vec<Token>) -> Vec<TokenExt> {
         tokens
             .into_iter()
             .map(|token| {
@@ -140,6 +140,7 @@ near_contract_standards::impl_non_fungible_token_approval!(Contract, tokens);
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {
     use crate::token_metadata_ext::*;
+    use near_sdk::serde_json::json;
     use near_sdk::test_utils::{accounts, VMContextBuilder};
     use near_sdk::{serde_json, testing_env};
     use std::collections::HashMap;
@@ -173,7 +174,6 @@ mod tests {
             winrate: None,
             rarity: 0,
         };
-
         TokenMetadataExt {
             title: Some("foo title".into()),
             description: Some("this is description for foo title's token".into()),
@@ -185,6 +185,86 @@ mod tests {
             starts_at: None,
             updated_at: None,
             extra: None,
+            reference: None,
+            reference_hash: None,
+            properties,
+        }
+    }
+
+    fn foo_token_metadata() -> TokenMetadataExt {
+        let properties = TokenProperties {
+            option: Option_::LemonGen,
+            century: Century::Future,
+            type_: Type::Medium,
+            lemon_gen: LemonGen::Buterin,
+            background: Background::Purple,
+            top: Top::Hairstyle,
+            cyber_suit: CyberSuit::Gold,
+            expression: Expression::Brooding,
+            eyes: Eyes::Open,
+            hair: Hair::BobMarley,
+            accessory: Accessory::Tattoo,
+            winrate: Some(100),
+            rarity: 10,
+        };
+
+        TokenMetadataExt {
+            title: Some("foo_token".into()),
+            description: Some("this is description for foo title's token".into()),
+            media: Some("link to media".into()),
+            media_hash: Some(vec![0, 1, 2, 3, 4].into()),
+            copies: Some(1),
+            issued_at: None,
+            expires_at: None,
+            starts_at: None,
+            updated_at: None,
+            extra: Some(
+                json!({
+                    "some": "json",
+                    "values": 9,
+                })
+                .to_string(),
+            ),
+            reference: None,
+            reference_hash: None,
+            properties,
+        }
+    }
+
+    fn baz_token_metadata() -> TokenMetadataExt {
+        let properties = TokenProperties {
+            option: Option_::Auction,
+            century: Century::Otherworldly,
+            type_: Type::Heavy,
+            lemon_gen: LemonGen::Nakamoto,
+            background: Background::Red,
+            top: Top::Classical,
+            cyber_suit: CyberSuit::Black,
+            expression: Expression::Angry,
+            eyes: Eyes::Close,
+            hair: Hair::Punkkez,
+            accessory: Accessory::Toothpick,
+            winrate: Some(33),
+            rarity: 88,
+        };
+
+        TokenMetadataExt {
+            title: Some("baz_token".into()),
+            description: Some("this is description for baz title's token".into()),
+            media: Some("link to media".into()),
+            media_hash: Some(vec![2, 3, 4, 3, 4].into()),
+            copies: Some(1),
+            issued_at: None,
+            expires_at: None,
+            starts_at: None,
+            updated_at: None,
+            extra: Some(
+                json!({
+                    "rust": "bless you!",
+                    "values": 2,
+                })
+                .to_string(),
+            ),
             reference: None,
             reference_hash: None,
             properties,
@@ -314,5 +394,26 @@ mod tests {
         contract.mint(token_id, sample_token_metadata(), None);
 
         assert!(contract.get_owner_by_token_id(invalid_token_id).is_none());
+    }
+
+    #[test]
+    fn nft_tokens() {
+        let mut context = get_context(accounts(0));
+        testing_env!(context.build());
+        let mut contract = Contract::init(accounts(0));
+        testing_env!(context
+            .storage_usage(env::storage_usage())
+            .attached_deposit(MINT_STORAGE_COST * 4)
+            .build());
+
+        let foo_token0 = contract.mint("1".to_string(), foo_token_metadata(), Some(accounts(1)));
+        let foo_token1 = contract.mint("2".to_string(), foo_token_metadata(), Some(accounts(2)));
+        let baz_token0 = contract.mint("3".to_string(), baz_token_metadata(), Some(accounts(3)));
+        let baz_token1 = contract.mint("4".to_string(), baz_token_metadata(), Some(accounts(4)));
+
+        let expected_tokens = vec![foo_token0, foo_token1, baz_token0, baz_token1];
+        let actual_tokens = contract.nft_tokens(None, None);
+        assert_eq!(expected_tokens.len(), actual_tokens.len());
+        assert!(expected_tokens.iter().all(|v| actual_tokens.contains(v)));
     }
 }
