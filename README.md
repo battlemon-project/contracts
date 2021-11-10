@@ -188,6 +188,16 @@ near call $CONTRACT_NAME  mint '{"token_id": "1", "token_metadata": {"title": "T
 ```bash
 near view $CONTRACT_NAME nft_tokens ''
 ```
+```bash
+near view $CONTRACT_NAME nft_tokens '{"from_index": "1"}'
+```
+```bash
+near view $CONTRACT_NAME nft_tokens '{"from_index": "2", limit: 3}'
+```
+```bash
+near view $CONTRACT_NAME nft_tokens '{"limit": 5}'
+```
+
 
 <details>
 <summary> <strong>Example Response</strong> </summary>
