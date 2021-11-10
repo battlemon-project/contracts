@@ -341,7 +341,7 @@ near view $CONTRACT_NAME nft_tokens ''
 
 ### `nft_total_supply`
 
-> Returns the total supply of non-fungible tokens and "0" if there are no tokens.
+> It's a view method. Returns the total supply of non-fungible tokens and "0" if there are no tokens.
 
 **Example**
 
@@ -364,7 +364,7 @@ near view $CONTRACT_NAME nft_total_supply ''
 
 ### `nft_supply_for_owner`
 
-> Returns the number of non-fungible tokens owned by given `account_id`.
+> It's a view method. Returns the number of non-fungible tokens owned by given `account_id`.
 
 #### Arguments
 - `account_id` - a valid NEAR account
