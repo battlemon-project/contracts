@@ -147,6 +147,170 @@ near call $CONTRACT_NAME  mint '{"token_id": "1", "token_metadata": {"title": "T
 </p>
 </details>
 
+### `nft_tokens`
+
+> It's a view method that return collection of minted tokens and an empty collection if there are no tokens.
+
+#### Arguments:
+
+- `from_index` (Optional): representing the starting index of tokens to return. If it's omitted it will return
+  collection with starting index equals zero.
+- `limit` (Optional): the maximum number of tokens to return. If it's omitted it will return unlimited collection.
+
+**Example**
+
+```bash
+near view $CONTRACT_NAME nft_tokens ''
+```
+
+<details>
+<summary> <strong>Example Response</strong> </summary>
+<p>
+
+```json lines
+[
+  {
+    token_id: '1',
+    owner_id: 'dev-1636550205831-72164784084299',
+    metadata: {
+      title: 'Title for token 1',
+      description: 'some description for battlemon nft token',
+      media: 'blabla',
+      media_hash: null,
+      copies: null,
+      issued_at: null,
+      expires_at: null,
+      starts_at: null,
+      updated_at: null,
+      extra: null,
+      reference: null,
+      reference_hash: null
+    },
+    properties: {
+      option: 'on_sale',
+      century: 'our_time',
+      type: 'light',
+      lemon_gen: 'nakamoto',
+      background: 'red',
+      top: 'headdress',
+      cyber_suit: 'metallic',
+      expression: 'brooding',
+      eyes: 'open',
+      hair: 'bob_marley',
+      accessory: 'cigar',
+      winrate: 14,
+      rarity: 12
+    },
+    approved_account_ids: {}
+  },
+  {
+    token_id: '10',
+    owner_id: 'dev-1636550205831-72164784084299',
+    metadata: {
+      title: 'Title for token 10',
+      description: 'some description for battlemon nft token',
+      media: 'blabla',
+      media_hash: null,
+      copies: null,
+      issued_at: null,
+      expires_at: null,
+      starts_at: null,
+      updated_at: null,
+      extra: null,
+      reference: null,
+      reference_hash: null
+    },
+    properties: {
+      option: 'on_sale',
+      century: 'our_time',
+      type: 'light',
+      lemon_gen: 'nakamoto',
+      background: 'red',
+      top: 'headdress',
+      cyber_suit: 'metallic',
+      expression: 'brooding',
+      eyes: 'open',
+      hair: 'bob_marley',
+      accessory: 'cigar',
+      winrate: 14,
+      rarity: 12
+    },
+    approved_account_ids: {}
+  },
+  {
+    token_id: '2',
+    owner_id: 'dev-1636550205831-72164784084299',
+    metadata: {
+      title: 'Title for token 2',
+      description: 'some description for battlemon nft token',
+      media: 'blabla',
+      media_hash: null,
+      copies: null,
+      issued_at: null,
+      expires_at: null,
+      starts_at: null,
+      updated_at: null,
+      extra: null,
+      reference: null,
+      reference_hash: null
+    },
+    properties: {
+      option: 'on_sale',
+      century: 'our_time',
+      type: 'light',
+      lemon_gen: 'nakamoto',
+      background: 'red',
+      top: 'headdress',
+      cyber_suit: 'metallic',
+      expression: 'brooding',
+      eyes: 'open',
+      hair: 'bob_marley',
+      accessory: 'cigar',
+      winrate: 14,
+      rarity: 12
+    },
+    approved_account_ids: {}
+  },
+  {
+    token_id: '3',
+    owner_id: 'dev-1636550205831-72164784084299',
+    metadata: {
+      title: 'Title for token 3',
+      description: 'some description for battlemon nft token',
+      media: 'blabla',
+      media_hash: null,
+      copies: null,
+      issued_at: null,
+      expires_at: null,
+      starts_at: null,
+      updated_at: null,
+      extra: null,
+      reference: null,
+      reference_hash: null
+    },
+    properties: {
+      option: 'on_sale',
+      century: 'our_time',
+      type: 'light',
+      lemon_gen: 'nakamoto',
+      background: 'red',
+      top: 'headdress',
+      cyber_suit: 'metallic',
+      expression: 'brooding',
+      eyes: 'open',
+      hair: 'bob_marley',
+      accessory: 'cigar',
+      winrate: 14,
+      rarity: 12
+    },
+    approved_account_ids: {}
+  }
+]
+```
+
+</p>
+</details>
+
 ---
 
 ## Marketplace Methods
