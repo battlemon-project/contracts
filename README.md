@@ -181,7 +181,7 @@ near call $CONTRACT_NAME  mint '{"token_id": "1", "token_metadata": {"title": "T
 
 ### `nft_token`
 
-> It's a view method that return the token with the given token_id or null if no such token.
+> It's a view method that return the token with the given `token_id` or `null` if no such token.
 
 **Arguments:**
 
