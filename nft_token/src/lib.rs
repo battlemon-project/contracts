@@ -224,7 +224,7 @@ mod tests {
         }
     }
 
-    fn foo_token_metadata() -> TokenMetadataExt {
+    fn foo_token_metadata_ext() -> TokenMetadataExt {
         let properties = TokenProperties {
             option: Option_::LemonGen,
             century: Century::Future,
@@ -264,7 +264,7 @@ mod tests {
         }
     }
 
-    fn baz_token_metadata() -> TokenMetadataExt {
+    fn baz_token_metadata_ext() -> TokenMetadataExt {
         let properties = TokenProperties {
             option: Option_::Auction,
             century: Century::Otherworldly,
@@ -439,10 +439,14 @@ mod tests {
             .attached_deposit(MINT_STORAGE_COST * 4)
             .build());
 
-        let foo_token0 = contract.mint("1".to_string(), foo_token_metadata(), Some(accounts(1)));
-        let foo_token1 = contract.mint("2".to_string(), foo_token_metadata(), Some(accounts(2)));
-        let baz_token0 = contract.mint("3".to_string(), baz_token_metadata(), Some(accounts(3)));
-        let baz_token1 = contract.mint("4".to_string(), baz_token_metadata(), Some(accounts(4)));
+        let foo_token0 =
+            contract.mint("1".to_string(), foo_token_metadata_ext(), Some(accounts(1)));
+        let foo_token1 =
+            contract.mint("2".to_string(), foo_token_metadata_ext(), Some(accounts(2)));
+        let baz_token0 =
+            contract.mint("3".to_string(), baz_token_metadata_ext(), Some(accounts(3)));
+        let baz_token1 =
+            contract.mint("4".to_string(), baz_token_metadata_ext(), Some(accounts(4)));
 
         let expected_tokens = vec![foo_token0, foo_token1, baz_token0, baz_token1];
         let actual_tokens = contract.nft_tokens(None, None);
@@ -471,16 +475,57 @@ mod tests {
             .attached_deposit(MINT_STORAGE_COST * 4)
             .build());
 
-        contract.mint("1".to_string(), foo_token_metadata(), Some(accounts(1)));
+        contract.mint("1".to_string(), foo_token_metadata_ext(), Some(accounts(1)));
         assert_eq!(U128(1), contract.nft_total_supply());
 
-        contract.mint("2".to_string(), foo_token_metadata(), Some(accounts(2)));
+        contract.mint("2".to_string(), foo_token_metadata_ext(), Some(accounts(2)));
         assert_eq!(U128(2), contract.nft_total_supply());
 
-        contract.mint("3".to_string(), baz_token_metadata(), Some(accounts(3)));
+        contract.mint("3".to_string(), baz_token_metadata_ext(), Some(accounts(3)));
         assert_eq!(U128(3), contract.nft_total_supply());
 
-        contract.mint("4".to_string(), baz_token_metadata(), Some(accounts(4)));
+        contract.mint("4".to_string(), baz_token_metadata_ext(), Some(accounts(4)));
         assert_eq!(U128(4), contract.nft_total_supply());
+    }
+
+    #[test]
+    fn nft_token() {
+        let mut context = get_context(accounts(0));
+        testing_env!(context.build());
+        let mut contract = Contract::init(accounts(0));
+        testing_env!(context
+            .storage_usage(env::storage_usage())
+            .attached_deposit(MINT_STORAGE_COST * 2)
+            .build());
+
+        let token_id_1 = "1".to_string();
+        let token_id_2 = "2".to_string();
+
+        contract.mint(
+            token_id_1.clone(),
+            foo_token_metadata_ext(),
+            Some(accounts(1)),
+        );
+        contract.mint(
+            token_id_2.clone(),
+            baz_token_metadata_ext(),
+            Some(accounts(2)),
+        );
+
+        let actual_token_1 = contract.nft_token(token_id_1.clone()).unwrap();
+        assert_eq!(actual_token_1.token_id, token_id_1);
+        assert_eq!(actual_token_1.owner_id, accounts(1));
+        assert_eq!(
+            actual_token_1.properties,
+            foo_token_metadata_ext().properties
+        );
+
+        let actual_token_2 = contract.nft_token(token_id_2.clone()).unwrap();
+        assert_eq!(actual_token_2.token_id, token_id_2);
+        assert_eq!(actual_token_2.owner_id, accounts(2));
+        assert_eq!(
+            actual_token_2.properties,
+            baz_token_metadata_ext().properties
+        );
     }
 }
