@@ -12,6 +12,8 @@ _Click on a method for more information and examples._
 
 [`nft_approve`](#nft_approve)
 
+[`nft_token`](#nft_token)
+
 [`nft_tokens`](#nft_tokens)
 
 [`nft_total_supply`](#nft_total_supply)
@@ -174,6 +176,69 @@ near call $CONTRACT_NAME  mint '{"token_id": "1", "token_metadata": {"title": "T
 
 </p>
 </details>
+
+---
+
+### `nft_token`
+
+> It's a view method that return the token with the given token_id or null if no such token.
+
+**Arguments:**
+
+- `token_id`: token's id in string representation.
+
+**Example:**
+
+```bash
+near view $CONTRACT_NAME nft_token '{"token_id": "2"}'
+```
+
+<details>
+<summary> <strong>Example Response</strong> </summary>
+<p>
+
+```
+{
+  token_id: '2',
+  owner_id: 'dev-1636641321126-54010839869553',
+  metadata: {
+    title: 'Title for token 2',
+    description: 'some description for battlemon nft token',
+    media: 'blabla',
+    media_hash: null,
+    copies: null,
+    issued_at: null,
+    expires_at: null,
+    starts_at: null,
+    updated_at: null,
+    extra: null,
+    reference: null,
+    reference_hash: null
+  },
+  properties: {
+    option: 'on_sale',
+    century: 'our_time',
+    type: 'light',
+    lemon_gen: 'nakamoto',
+    background: 'red',
+    top: 'headdress',
+    cyber_suit: 'metallic',
+    expression: 'brooding',
+    eyes: 'open',
+    hair: 'bob_marley',
+    accessory: 'cigar',
+    winrate: 14,
+    rarity: 12
+  },
+  approved_account_ids: {}
+}
+
+```
+
+</p>
+</details>
+
+---
 
 ### `nft_tokens`
 
