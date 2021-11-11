@@ -1,5 +1,6 @@
 mod token_metadata_ext;
 
+use near_contract_standards::non_fungible_token::core::NonFungibleTokenCore;
 use near_contract_standards::non_fungible_token::enumeration::NonFungibleTokenEnumeration;
 use near_contract_standards::non_fungible_token::metadata::{
     NFTContractMetadata, NFT_METADATA_SPEC,
@@ -132,9 +133,41 @@ impl Contract {
             })
             .collect()
     }
+
+    #[payable]
+    pub fn nft_transfer(
+        &mut self,
+        receiver_id: AccountId,
+        token_id: TokenId,
+        approval_id: Option<u64>,
+        memo: Option<String>,
+    ) {
+        self.tokens
+            .nft_transfer(receiver_id, token_id, approval_id, memo)
+    }
+
+    #[payable]
+    pub fn nft_transfer_call(
+        &mut self,
+        receiver_id: AccountId,
+        token_id: TokenId,
+        approval_id: Option<u64>,
+        memo: Option<String>,
+        msg: String,
+    ) -> PromiseOrValue<bool> {
+        self.tokens
+            .nft_transfer_call(receiver_id, token_id, approval_id, memo, msg)
+    }
+
+    pub fn nft_token(&self, token_id: TokenId) -> Option<TokenExt> {
+        self.tokens.nft_token(token_id).and_then(|token| {
+            self.token_properties_by_id
+                .get(&token.token_id)
+                .map(|properties| TokenExt::from_parts(token, properties))
+        })
+    }
 }
 
-near_contract_standards::impl_non_fungible_token_core!(Contract, tokens);
 near_contract_standards::impl_non_fungible_token_approval!(Contract, tokens);
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
