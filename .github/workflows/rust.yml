@@ -19,7 +19,7 @@ jobs:
           override: true
 
       - name: Build
-        run: cargo build --all --release --target wasm32-unknown-unknown && mv ./target/wasm32-unknown-unknown/release/*.wasm ./out
+        run: cargo build --all --release --target wasm32-unknown-unknown && mv ./target/wasm32-unknown-unknown/release/*.wasm ./out/
 
 #        env:
 #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
