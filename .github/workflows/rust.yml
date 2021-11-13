@@ -24,11 +24,14 @@ jobs:
       - name: Build
         run: cargo build --all --release --target wasm32-unknown-unknown
 
-      - name: Deploy
-        run: near dev-deploy ./target/wasm32-unknown-unknown/release/nft_token.wasm
+      - name: Ls Target
+        run: ls ./target/wasm32-unknown-unknown/release/*
 
-      - name: Cat
-        run: cat ./neardev/dev-account.env
+#      - name: Deploy
+#        run: near dev-deploy ./target/wasm32-unknown-unknown/release/nft_token.wasm
+#
+#      - name: Cat
+#        run: cat ./neardev/dev-account.env
 
 
 #        env:
