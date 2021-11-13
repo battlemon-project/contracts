@@ -2,6 +2,7 @@
 
 set -e
 
+
 MAIN_CONTRACT="battlemon.testnet"
 MARKET_CONTRACT="market.${MAIN_CONTRACT}"
 NFT_CONTRACT="nft.${MAIN_CONTRACT}"
