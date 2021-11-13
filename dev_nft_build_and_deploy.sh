@@ -3,7 +3,8 @@
 set -e
 
 near dev-deploy ./target/wasm32-unknown-unknown/release/nft_token.wasm
-source ./neardev/dev-account.env
+ls -al
+#source ./neardev/dev-account.env
 
 near call $CONTRACT_NAME init '{"owner_id": "'$CONTRACT_NAME'"}' --accountId $CONTRACT_NAME
 
