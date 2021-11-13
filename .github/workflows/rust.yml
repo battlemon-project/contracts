@@ -18,8 +18,15 @@ jobs:
           default: true
           override: true
 
-      - name: Build
-        run: cargo build --all --release --target wasm32-unknown-unknown && mv ./target/wasm32-unknown-unknown/release/*.wasm ./out/
+      - name: Near-toolchain
+        run: npm install -g near-cli
+
+#
+#      - name: Build
+#        run: cargo build --all --release --target wasm32-unknown-unknown
+#
+#      - name: Deploy
+#        run:
 
 #        env:
 #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
