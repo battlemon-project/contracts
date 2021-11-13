@@ -25,7 +25,9 @@ jobs:
         run: cargo build --all --release --target wasm32-unknown-unknown
 
       - name: Deploy
-        run: near dev-deploy ./target/wasm32-unknown-unknown/release/nft_token.wasm && ls -al
+        run: near dev-deploy ./target/wasm32-unknown-unknown/release/nft_token.wasm
+      - name: LS
+        run: ls -al
 
 #        env:
 #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

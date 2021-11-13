@@ -2,7 +2,7 @@
 
 set -e
 
-near dev-deploy ./target/wasm32-unknown-unknown/release/nft_token.wasm
+near dev-deploy ./target/wasm32-unknown-unknown/release/nft_token.wasm -f
 ls -al
 #source ./neardev/dev-account.env
 
