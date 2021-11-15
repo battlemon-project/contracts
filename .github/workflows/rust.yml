@@ -25,8 +25,10 @@ jobs:
         run: cargo build --all --release --target wasm32-unknown-unknown
 
       - name: Near cli config
-        run: 'mkdir ~/.near-config && echo \{\"trackingEnabled\":true,\"trackingAccountID\":true,\"trackingSessionId\":\"f5fde3c7-162e-487a-a365-7df465ef94ff\"\} > ~/.near-config/settings.json'
+        run: 'mkdir ~/.near-config && echo \{\"trackingEnabled\":false,\"trackingAccountID\":false\} > ~/.near-config/settings.json'
 
+      - name: test
+        run: cat ~/.near-config/settings.json
 
       - name: Deploy
         run: sudo near dev-deploy ./target/wasm32-unknown-unknown/release/nft_token.wasm
@@ -36,4 +38,4 @@ jobs:
 
 
 #        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}ls
