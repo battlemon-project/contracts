@@ -25,4 +25,4 @@ jobs:
         run: cargo build --all --release --target wasm32-unknown-unknown
 
       - name: deploy NFT
-        run: echo n | near dev-deploy ./target/wasm32-unknown-unknown/release/nft_token.wasm
+        run: ./dev_nft_deploy.sh
