@@ -19,7 +19,7 @@ jobs:
           override: true
 
       - name: Near-toolchain
-        run: npm install -g near-cli
+        run: npm install near-cli
 
       - name: Build
         run: cargo build --all --release --target wasm32-unknown-unknown
