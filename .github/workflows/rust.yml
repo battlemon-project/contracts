@@ -26,3 +26,9 @@ jobs:
 
       - name: deploy NFT
         run: ./dev_nft_deploy.sh
+
+      - name: echo dev credentials
+        run: "source ./neardev/dev-account.env \
+        && export MARKET=market.$CONTRACT_NAME \
+        && echo nft contract: $CONTRACT_NAME \
+        && echo market contract: $MARKET"
