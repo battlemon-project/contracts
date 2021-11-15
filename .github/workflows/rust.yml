@@ -3,25 +3,28 @@ name: Near-build-and-deploy
 on: [ push ]
 
 jobs:
-#  vm:
-#    runs-on: ubuntu-latest
+  #  vm:
+  #    runs-on: ubuntu-latest
   container:
     runs-on: ubuntu-latest
-    container: rust:latest
+    container: node:latest
     steps:
       - name: Checkout
         uses: actions/checkout@v1
 
+      - name: Install rust
+        run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
       - name: Add target
         run: rustup target add wasm32-unknown-unknown
 
-#      - name: Install latest rust toolchain
-#        uses: actions-rs/toolchain@v1
-#        with:
-#          toolchain: stable
-#          target: "wasm32-unknown-unknown"
-#          default: true
-#          override: true
+      #      - name: Install latest rust toolchain
+      #        uses: actions-rs/toolchain@v1
+      #        with:
+      #          toolchain: stable
+      #          target: "wasm32-unknown-unknown"
+      #          default: true
+      #          override: true
 
       - name: Near-toolchain
         run: npm install -g near-cli
