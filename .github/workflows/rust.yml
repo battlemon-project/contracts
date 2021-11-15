@@ -3,8 +3,8 @@ name: Near-build-and-deploy
 on: [ push ]
 
 jobs:
-  vm:
-    runs-on: ubuntu-latest
+#  vm:
+#    runs-on: ubuntu-latest
   container:
     runs-on: ubuntu-latest
     container: rust:latest
