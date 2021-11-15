@@ -24,6 +24,9 @@ jobs:
       - name: Build
         run: cargo build --all --release --target wasm32-unknown-unknown
 
+      - name: Near cli config
+        run: mkdir ~/.near-config && touch ~/.near-config/settings.json
+
       - name: Deploy
         run: sudo near dev-deploy ./target/wasm32-unknown-unknown/release/nft_token.wasm
 
