@@ -36,8 +36,8 @@ jobs:
       - name: test
         run: cat ~/.near-config/settings.json
 
-#      - name: Deploy
-#        run: sudo near dev-deploy ./target/wasm32-unknown-unknown/release/nft_token.wasm
+      - name: Deploy
+        run: sudo near dev-deploy ./target/wasm32-unknown-unknown/release/nft_token.wasm
 #
 #      - name: Cat
 #        run: cat ./neardev/dev-account.env
