@@ -3,28 +3,20 @@ name: Near-build-and-deploy
 on: [ push ]
 
 jobs:
-  #  vm:
-  #    runs-on: ubuntu-latest
-  container:
+  build:
     runs-on: ubuntu-latest
-    container: node:latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v1
 
-      - name: Install rust
-        run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-
-      - name: Add target
-        run: rustup target add wasm32-unknown-unknown
-
-      #      - name: Install latest rust toolchain
-      #        uses: actions-rs/toolchain@v1
-      #        with:
-      #          toolchain: stable
-      #          target: "wasm32-unknown-unknown"
-      #          default: true
-      #          override: true
+      - name: Install latest rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: "wasm32-unknown-unknown"
+          default: true
+          override: true
 
       - name: Near-toolchain
         run: npm install -g near-cli
@@ -32,14 +24,14 @@ jobs:
       - name: Build
         run: cargo build --all --release --target wasm32-unknown-unknown
 
-      - name: Near cli config
-        run: 'mkdir ~/.near-config && echo \{\"trackingEnabled\":false,\"trackingAccountID\":false\} > ~/.near-config/settings.json'
+#      - name: Near cli config
+#        run: 'mkdir ~/.near-config && echo \{\"trackingEnabled\":false,\"trackingAccountID\":false\} > ~/.near-config/settings.json'
 
       - name: Deploy
-        run: near dev-deploy ./target/wasm32-unknown-unknown/release/nft_token.wasm
-#
-#      - name: Cat
-#        run: cat ./neardev/dev-account.env
+        run: echo y | near dev-deploy ./target/wasm32-unknown-unknown/release/nft_token.wasm
+
+      - name: Cat
+        run: cat ./neardev/dev-account.env
 
 
 #        env:
