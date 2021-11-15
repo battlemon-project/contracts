@@ -19,22 +19,13 @@ jobs:
           override: true
 
       - name: Near-toolchain
-        run: npm install near-cli
+        run: npm install -g near-cli
 
       - name: Build
         run: cargo build --all --release --target wasm32-unknown-unknown
 
-      - name: ls home
-        run: cd ~ && pwd
-
       - name: Near cli config
-        run: 'mkdir ~/.near-config && echo \{\"trackingEnabled\":false,\"trackingAccountID\":false\} > ~/.near-config/settings.json'
-
-      - name: ls
-        run: ls -al
-
-      - name: test
-        run: cat ~/.near-config/settings.json
+        run: 'mkdir /root/.near-config && echo \{\"trackingEnabled\":false,\"trackingAccountID\":false\} > /root/.near-config/settings.json'
 
       - name: Deploy
         run: near dev-deploy ./target/wasm32-unknown-unknown/release/nft_token.wasm
