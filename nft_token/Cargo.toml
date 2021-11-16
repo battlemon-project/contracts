@@ -2,7 +2,7 @@
 name = "nft_token"
 version = "0.1.0"
 authors = ["fomotoshi <fomotoshi@ya.ru>"]
-edition = "2018"
+ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -12,3 +12,5 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 near-sdk = "4.0.0-pre.4"
 near-contract-standards = "4.0.0-pre.4"
+token_metadata_ext = { path = "../token_metadata_ext" }
+test_utils = { path = "../test_utils" }
