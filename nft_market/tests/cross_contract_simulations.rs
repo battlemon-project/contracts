@@ -1,32 +1,17 @@
-use near_contract_standards::non_fungible_token::metadata::TokenMetadata;
 use near_sdk::json_types::U128;
 use near_sdk::serde_json::json;
 use near_sdk::{AccountId, Gas};
 use near_sdk_sim::{call, to_yocto, view, DEFAULT_GAS, STORAGE_AMOUNT};
 use nft_market::{SaleCondition, NO_DEPOSIT};
-use utils::ONE_YOCTO;
+use test_utils::*;
 
 mod utils;
 
 #[test]
 fn list_asks() {
     let (root, nft, market, _alice) = utils::init();
-    let token_id = "some title".to_string();
-    let token_metadata = TokenMetadata {
-        title: Some(token_id.clone()),
-        description: Some("Here some description".to_string()),
-        media: None,
-        media_hash: None,
-        copies: None,
-        issued_at: None,
-        expires_at: None,
-        starts_at: None,
-        updated_at: None,
-        extra: Some("Here can be extra json".to_string()),
-        reference: None,
-        reference_hash: None,
-    };
-
+    let token_metadata = baz_token_metadata_ext();
+    let token_id = "1".to_string();
     // mint 1 nft token
     call!(
         nft.user_account,
@@ -60,20 +45,7 @@ fn list_asks() {
 fn buying() {
     let (root, nft, market, alice) = utils::init();
     let token_id = "some title".to_string();
-    let token_metadata = TokenMetadata {
-        title: Some(token_id.clone()),
-        description: Some("Here some description".to_string()),
-        media: None,
-        media_hash: None,
-        copies: None,
-        issued_at: None,
-        expires_at: None,
-        starts_at: None,
-        updated_at: None,
-        extra: Some("Here can be extra json".to_string()),
-        reference: None,
-        reference_hash: None,
-    };
+    let token_metadata = baz_token_metadata_ext();
     // mint 1 nft token to bob
     let bob = root.create_user("bob".parse().unwrap(), to_yocto("100"));
     call!(

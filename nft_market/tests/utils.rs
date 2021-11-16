@@ -1,4 +1,3 @@
-use near_sdk::AccountId;
 use near_sdk_sim::lazy_static_include::lazy_static_include_bytes;
 use near_sdk_sim::{deploy, init_simulator, to_yocto, ContractAccount, UserAccount};
 use nft_market::ContractContract as MarketContract;

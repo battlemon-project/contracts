@@ -2,7 +2,7 @@
 name = "nft_market"
 version = "0.1.0"
 authors = ["fomotoshi <fomotoshi@ya.ru>"]
-edition = "2018"
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -16,3 +16,4 @@ near-contract-standards = "4.0.0-pre.4"
 [dev-dependencies]
 near-sdk-sim = "4.0.0-pre.4"
 nft_token = { path = "../nft_token" }
+test_utils = { path = "../test_utils" }
