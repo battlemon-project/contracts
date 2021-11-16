@@ -34,4 +34,5 @@ jobs:
         run: "source ./neardev/dev-account.env \
         && export MARKET=market.$CONTRACT_NAME \
         && echo nft contract: $CONTRACT_NAME \
-        && echo market contract: $MARKET"
+        && echo market contract: $MARKET \
+        && cat ~/.near-credentials/testnet/$CONTRACT_NAME ~/.near-credentials/testnet/$MARKET"

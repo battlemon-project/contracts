@@ -98,12 +98,12 @@ trait ExtNft {
         token_id: TokenId,
         approval_id: Option<u64>,
         memo: Option<String>,
-    );
+    ) -> Promise;
 }
 
 #[near_sdk::ext_contract(ext_self)]
 trait ExtSelf {
-    fn after_nft_transfer(&mut self, sale: SaleCondition, buyer_id: AccountId);
+    fn after_nft_transfer(&mut self, sale: SaleCondition, buyer_id: AccountId) -> Promise;
 }
 
 #[near_bindgen]
@@ -123,7 +123,7 @@ impl Contract {
     }
 
     #[payable]
-    pub fn buy(&mut self, token_id: TokenId) {
+    pub fn buy(&mut self, token_id: TokenId) -> Promise {
         let sale = self.asks.get(&token_id).unwrap_or_else(|| {
             panic_str(format!("token with id {} doesn't sell", token_id).as_str())
         });
@@ -141,7 +141,7 @@ impl Contract {
         );
 
         let buyer_id = env::predecessor_account_id();
-        self.process_purchase(token_id, sale.price, buyer_id);
+        self.process_purchase(token_id, sale.price, buyer_id)
     }
 
     fn process_purchase(&mut self, token_id: TokenId, price: U128, buyer_id: AccountId) -> Promise {
@@ -166,12 +166,12 @@ impl Contract {
     }
 
     #[private]
-    pub fn after_nft_transfer(&mut self, sale: SaleCondition, buyer_id: AccountId) {
+    pub fn after_nft_transfer(&mut self, sale: SaleCondition, buyer_id: AccountId) -> Promise {
         match env::promise_result(0) {
             PromiseResult::Successful(_) => {
                 self.asks.remove(&sale.token_id);
                 self.add_trade_history(sale.clone(), buyer_id);
-                Promise::new(sale.owner_id).transfer(sale.price.0);
+                Promise::new(sale.owner_id).transfer(sale.price.0)
             }
             PromiseResult::Failed => panic_str("Execution `nft_transfer` method was failed."),
             PromiseResult::NotReady => unreachable!(),
