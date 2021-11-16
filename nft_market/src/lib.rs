@@ -11,13 +11,12 @@ use near_sdk::{
     env, log, near_bindgen, require, AccountId, Balance, BorshStorageKey, Gas, PanicOnDefault,
     Promise, PromiseError, PromiseOrValue, PromiseResult, Timestamp,
 };
-use std::borrow::BorrowMut;
 
 pub const NO_DEPOSIT: Balance = 0;
 pub const ONE_YOCTO: Balance = 1;
-pub const BUY_METHOD_TOTAL_GAS: Gas = Gas(40_000_000_000_000);
+pub const BUY_METHOD_TOTAL_GAS: Gas = Gas(50_000_000_000_000);
 pub const NFT_TRANSFER_GAS: Gas = Gas(10_000_000_000_000);
-pub const AFTER_NFT_TRANSFER_GAS: Gas = Gas(5_000_000_000_000);
+pub const AFTER_NFT_TRANSFER_GAS: Gas = Gas(10_000_000_000_000);
 
 #[near_bindgen]
 #[derive(BorshSerialize, BorshDeserialize, PanicOnDefault)]
