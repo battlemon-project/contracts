@@ -24,6 +24,9 @@ jobs:
       - name: build
         run: cargo build --all --release --target wasm32-unknown-unknown
 
+      - name: tests
+        run: cargo test
+
       - name: deploy NFT
         run: ./dev_nft_deploy.sh
 
