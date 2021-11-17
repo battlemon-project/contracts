@@ -652,7 +652,7 @@ near view $CONTRACT_NAME list_trade_history_by_token_id '{"token_id": "1"}'
 <summary> <strong>Example Response</strong> </summary>
 <p>
 
-```json lines
+```
 [
   {
     prev_owner: 'dev-1637162308296-49398331322990',
