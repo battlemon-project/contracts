@@ -14,9 +14,9 @@ use near_sdk::{
 
 pub const NO_DEPOSIT: Balance = 0;
 pub const ONE_YOCTO: Balance = 1;
-pub const BUY_METHOD_TOTAL_GAS: Gas = Gas(50_000_000_000_000);
-pub const NFT_TRANSFER_GAS: Gas = Gas(10_000_000_000_000);
-pub const AFTER_NFT_TRANSFER_GAS: Gas = Gas(10_000_000_000_000);
+pub const BUY_METHOD_TOTAL_GAS: Gas = Gas(80_000_000_000_000);
+pub const NFT_TRANSFER_GAS: Gas = Gas(44_000_000_000_000);
+pub const AFTER_NFT_TRANSFER_GAS: Gas = Gas(20_000_000_000_000);
 
 #[near_bindgen]
 #[derive(BorshSerialize, BorshDeserialize, PanicOnDefault)]
@@ -28,7 +28,7 @@ pub struct Contract {
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Serialize)]
-#[serde(crate = "near_sdk::serde")]
+#[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
 pub enum TradeType {
     Sell,
     Buy,
@@ -41,6 +41,7 @@ pub struct Trade {
     pub curr_owner: AccountId,
     pub price: U128,
     pub date: Timestamp,
+    #[serde(rename = "type")]
     pub type_: TradeType,
 }
 

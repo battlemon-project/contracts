@@ -28,6 +28,8 @@ _Click on a method for more information and examples._
 
 [`list_asks`](#list_asks)
 
+[`list_trade_history_by_token_id`](#list_trade_history_by_token_id)
+
 [`buy`](#buy)
 
 ## NFT Token Methods
@@ -607,7 +609,6 @@ near call $CONTRACT_NAME init '{"nft_id": "'$NFT_CONTRACT_NAME'"}' --accountId $
 near view list_asks $CONTRACT_NAME '{}'
 ```
 
----
 <details>
 <summary> <strong>Example Response</strong> </summary>
 <p>
@@ -631,6 +632,42 @@ near view list_asks $CONTRACT_NAME '{}'
 
 </p>
 </details>
+
+---
+
+### `list_trade_history_by_token_id`
+
+> It's a view method that list trade history for particular token.
+
+**Arguments:**
+
+- `token_id` - id of NFT token
+
+**Example:**
+
+```bash
+near view $CONTRACT_NAME list_trade_history_by_token_id '{"token_id": "1"}'
+```
+<details>
+<summary> <strong>Example Response</strong> </summary>
+<p>
+
+```json lines
+[
+  {
+    prev_owner: 'dev-1637162308296-49398331322990',
+    curr_owner: 'alice.dev-1636529128471-59911444209733',
+    price: '10',
+    date: 1637162365804594000,
+    type: 'sell'
+  }
+]
+```
+
+</p>
+</details>
+
+---
 
 ### `buy`
 
