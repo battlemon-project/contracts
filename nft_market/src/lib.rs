@@ -177,7 +177,8 @@ impl Contract {
                 self.add_trade_history(sale.clone(), buyer_id);
                 Promise::new(sale.owner_id).transfer(sale.price.0)
             }
-            PromiseResult::Failed => panic_str("Execution `nft_transfer` method was failed."),
+            PromiseResult::Failed => {
+                panic_str("Execution `nft_transfer` method was failed.") },
             PromiseResult::NotReady => unreachable!(),
         }
     }
