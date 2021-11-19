@@ -132,7 +132,10 @@ impl Contract {
         let deposit = env::attached_deposit();
         require!(
             deposit == sale.price.0,
-            "attached deposit isn't equal to token's price."
+            format!(
+                "attached deposit isn't equal to token's price.\n attached deposit is {}, token's price is {}",
+                deposit, sale.price.0
+            )
         );
 
         let prepaid_gas = env::prepaid_gas();
