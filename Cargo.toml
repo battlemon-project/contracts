@@ -1,6 +1,6 @@
 [workspace]
 
-members = ["nft_token", "test_utils", "token_metadata_ext", "nft_market", "play2earn", "juice"]
+members = ["nft_token", "test_utils", "token_metadata_ext", "nft_market", "play2earn", "juice", "spoiled_nft_token"]
 
 [profile.release]
 opt-level = "z"
