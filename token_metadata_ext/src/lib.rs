@@ -187,7 +187,7 @@ impl TokenMetadataExt {
     }
 }
 
-#[derive(Serialize, Deserialize, PartialEq)]
+#[derive(Serialize, Deserialize, PartialEq, Debug)]
 #[serde(crate = "near_sdk::serde")]
 pub struct TokenExt {
     pub token_id: TokenId,
