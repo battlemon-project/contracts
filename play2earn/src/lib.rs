@@ -7,8 +7,8 @@ use near_sdk::env::panic_str;
 use near_sdk::json_types::U128;
 use near_sdk::serde::{self, Deserialize, Serialize};
 use near_sdk::{
-    env, ext_contract, near_bindgen, require, AccountId, Balance, BorshStorageKey, Gas,
-    PanicOnDefault, Promise, PromiseResult,
+    env, ext_contract, near_bindgen, require, AccountId, Balance, Gas, PanicOnDefault, Promise,
+    PromiseResult,
 };
 
 const PROCESS_PROGRESS_GAS: Gas = Gas(50_000_000_000_000 + FT_TRANSFER_GAS.0);
@@ -35,11 +35,6 @@ trait ExtJuice {
 #[ext_contract(ext_self)]
 trait ExtSelf {
     fn after_storage_deposit(&mut self, player_id: AccountId, royalty_amount: U128) -> Promise;
-}
-
-#[derive(BorshSerialize, BorshStorageKey)]
-enum StorageKey {
-    Progress,
 }
 
 /// Player progress
