@@ -1,8 +1,8 @@
 use crate::utils::State;
 use near_sdk::serde_json::json;
 use near_sdk::{AccountId, Gas};
-use near_sdk_sim::{call, to_yocto, view, DEFAULT_GAS, STORAGE_AMOUNT};
 use near_sdk_sim::transaction::ExecutionStatus;
+use near_sdk_sim::{call, to_yocto, view, DEFAULT_GAS, STORAGE_AMOUNT};
 use nft_market::{OfferCondition, SaleCondition};
 use test_utils::*;
 
@@ -128,7 +128,7 @@ fn bid_failure_nft_token_must_refund_attached_deposit() {
     // the gas fee for execution tx smaller than 1, so the balance the same before and after
     assert!(diff < to_yocto("1"));
 
-    // promise results must contain errors
+    // promise results must contain particular error
     let promise_results = result.promise_results();
     let panic_msg = "this is spoiled `nft_token` method.";
     let failures = promise_results
