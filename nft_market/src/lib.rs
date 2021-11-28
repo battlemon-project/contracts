@@ -4,6 +4,7 @@ use near_contract_standards::non_fungible_token::{
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{UnorderedMap, Vector};
 use near_sdk::env::panic_str;
+use near_sdk::json_types::U128;
 use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::serde_json::{self, json};
 use near_sdk::{
@@ -78,23 +79,28 @@ impl SaleCondition {
     }
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize, Clone)]
+#[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize, Clone, Debug)]
 #[serde(crate = "near_sdk::serde")]
 pub struct OfferCondition {
+    pub token_id: TokenId,
     pub bidder_id: AccountId,
     pub price: u128,
 }
 
 impl OfferCondition {
-    pub fn new(bidder_id: AccountId, price: u128) -> Self {
-        Self { bidder_id, price }
+    pub fn new(token_id: TokenId, bidder_id: AccountId, price: u128) -> Self {
+        Self {
+            token_id,
+            bidder_id,
+            price,
+        }
     }
 }
 
 #[derive(Deserialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct SaleArgs {
-    price: u128,
+    price: U128,
 }
 
 #[derive(BorshSerialize, BorshStorageKey)]
@@ -115,20 +121,23 @@ trait ExtNft {
         memo: Option<String>,
     ) -> Promise;
 
-    fn nft_token(&self, token_id: TokenId) -> Option<TokenExt>;
+    // fn nft_token(&self, token_id: TokenId) -> Option<TokenExt>;
+    fn nft_token(&self, token_id: TokenId) -> Promise;
 }
 
-#[near_sdk::ext_contract(ext_self)]
+#[near_sdk::ext_contract]
 trait ExtSelf {
     fn after_nft_transfer(&mut self, sale: SaleCondition, buyer_id: AccountId) -> Promise;
+
     fn after_nft_token(
         &mut self,
         bidder_id: AccountId,
         token_id: TokenId,
+        bid_price: Balance,
         #[rustfmt::skip]
         #[callback_result]
         result: Result<Option<TokenExt>, PromiseError>,
-    ) -> Promise;
+    ) -> PromiseOrValue<()>;
 }
 
 #[near_bindgen]
@@ -181,21 +190,20 @@ impl Contract {
             token_id.clone(),
             self.nft_id.clone(),
             NO_DEPOSIT,
-            Gas(5_000_000_000_000),
+            Gas(20_000_000_000_000),
         )
         .then(ext_self::after_nft_token(
             bidder_id,
             token_id,
-            self.nft_id.clone(),
             bid_price,
-            Gas(5_000_000_000_000),
-        ));
-        // todo:
-        // 1. check existence of token
-        // 2. check attached deposit more than top value in bid history
-        // 3. check if token already in asks, insta buy
+            env::current_account_id(),
+            NO_DEPOSIT,
+            Gas(20_000_000_000_000),
+        ))
+    }
 
-        todo!()
+    pub fn list_bids(&self) -> Vec<OfferCondition> {
+        self.bids.values().collect()
     }
 
     fn process_purchase(&mut self, token_id: TokenId, buyer_id: AccountId) -> Promise {
@@ -237,12 +245,11 @@ impl Contract {
         &mut self,
         bidder_id: AccountId,
         token_id: TokenId,
+        bid_price: Balance,
         #[rustfmt::skip]
         #[callback_result]
         result: Result<Option<TokenExt>, PromiseError>,
     ) -> PromiseOrValue<()> {
-        let bid_price = env::attached_deposit();
-
         match result {
             Ok(Some(_)) => {
                 let ask_less_bid = self
@@ -267,15 +274,20 @@ impl Contract {
                         PromiseOrValue::Promise(promise)
                     }
                     _ => {
-                        self.bids
-                            .insert(&token_id, &OfferCondition::new(bidder_id, bid_price));
+                        self.bids.insert(
+                            &token_id,
+                            &OfferCondition::new(token_id.clone(), bidder_id, bid_price),
+                        );
                         PromiseOrValue::Value(())
                     }
                 }
             }
 
             Ok(None) => {
-                log!("token with id: {} doesn't exist", token_id);
+                log!(
+                    "token with id: {} doesn't exist, attached deposit was returned",
+                    token_id
+                );
                 let promise = Promise::new(bidder_id).transfer(bid_price);
                 PromiseOrValue::Promise(promise)
             }
@@ -315,11 +327,11 @@ impl NonFungibleTokenApprovalReceiver for Contract {
     ) -> PromiseOrValue<String> {
         require!(env::predecessor_account_id() == self.nft_id);
         let SaleArgs { price } = serde_json::from_str(&msg).expect("couldn't parse json");
-        let sale_conditions = SaleCondition::new(owner_id, token_id.clone(), approval_id, price);
+        let sale_conditions = SaleCondition::new(owner_id, token_id.clone(), approval_id, price.0);
         self.asks.insert(&token_id, &sale_conditions);
         let ret = json!({
             "status": true,
-            "message": format!("token {} with price {} was added to market", token_id, price)
+            "message": format!("token {} with price {} was added to market", token_id, price.0)
         });
         PromiseOrValue::Value(ret.to_string())
     }
