@@ -25,7 +25,7 @@ pub const AFTER_NFT_TRANSFER_GAS: Gas = Gas(20_000_000_000_000);
 pub struct Contract {
     nft_id: AccountId,
     asks: UnorderedMap<TokenId, SaleCondition>,
-    bids: UnorderedMap<TokenId, OfferCondition>,
+    bids: UnorderedMap<TokenId, Vec<OfferCondition>>,
     trade_history: UnorderedMap<TokenId, Vector<Trade>>,
 }
 
@@ -52,7 +52,7 @@ impl Trade {
         Self {
             prev_owner: sale.owner_id,
             curr_owner,
-            price: sale.price,
+            price: sale.price.0,
             date: env::block_timestamp(),
             type_,
         }
@@ -65,7 +65,7 @@ pub struct SaleCondition {
     pub owner_id: AccountId,
     pub token_id: TokenId,
     approval_id: u64,
-    pub price: u128,
+    pub price: U128,
 }
 
 impl SaleCondition {
@@ -74,7 +74,7 @@ impl SaleCondition {
             owner_id,
             token_id,
             approval_id,
-            price,
+            price: U128(price),
         }
     }
 }
@@ -84,7 +84,7 @@ impl SaleCondition {
 pub struct OfferCondition {
     pub token_id: TokenId,
     pub bidder_id: AccountId,
-    pub price: u128,
+    pub price: U128,
 }
 
 impl OfferCondition {
@@ -92,7 +92,7 @@ impl OfferCondition {
         Self {
             token_id,
             bidder_id,
-            price,
+            price: U128(price),
         }
     }
 }
