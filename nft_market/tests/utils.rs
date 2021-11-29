@@ -68,11 +68,7 @@ pub fn init() -> (
     (root, nft_contract, market_contract, alice)
 }
 
-pub fn init_spoiled() -> (
-    UserAccount,
-    ContractAccount<SpoiledNFTContract>,
-    ContractAccount<MarketContract>,
-) {
+pub fn init_spoiled() -> SpoiledInitAccounts {
     let root = init_simulator(None);
 
     let spoiled_nft_contract = deploy!(
@@ -80,7 +76,6 @@ pub fn init_spoiled() -> (
         contract_id: SPOILED_NFT_ACCOUNT_ID,
         bytes: &SPOILED_NFT_WASM,
         signer_account: root,
-        // init_method: init(NFT_ACCOUNT_ID.parse().unwrap()),
     );
 
     let market_contract = deploy!(
