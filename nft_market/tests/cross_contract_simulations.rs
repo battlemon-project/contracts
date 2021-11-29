@@ -168,9 +168,6 @@ fn bid_successful_and_more_than_ask_with_same_token_id_must_refund_diff() {
 
     let bids: Vec<(TokenId, Vec<OfferCondition>)> = view!(market.list_bids()).unwrap_json();
     assert_eq!(bids.len(), 0);
-    let (token_id, offers) = bids.last().unwrap();
-    assert_eq!(token_id, VALID_TOKEN_ID);
-    assert_eq!(offers.len(), 0);
 }
 
 // #[test]
