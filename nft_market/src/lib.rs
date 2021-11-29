@@ -133,7 +133,6 @@ trait ExtSelf {
         &mut self,
         bidder_id: AccountId,
         token_id: TokenId,
-        bid_price: Balance,
         #[rustfmt::skip]
         #[callback_result]
         result: Result<Option<TokenExt>, PromiseError>,
