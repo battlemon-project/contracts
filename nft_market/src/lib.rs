@@ -164,10 +164,10 @@ impl Contract {
 
         let deposit = env::attached_deposit();
         require!(
-            deposit == sale.price,
+            deposit == sale.price.0,
             format!(
                 "attached deposit isn't equal to token's price.\n attached deposit is {}, token's price is {}",
-                deposit, sale.price
+                deposit, sale.price.0
             )
         );
 
@@ -178,12 +178,12 @@ impl Contract {
         );
 
         let buyer_id = env::predecessor_account_id();
-        self.process_purchase(token_id, buyer_id)
+        self.process_purchase(token_id, buyer_id, deposit)
     }
 
     #[payable]
     pub fn bid(&mut self, token_id: TokenId) -> Promise {
-        let bid_price = env::attached_deposit();
+        let deposit = env::attached_deposit();
         let bidder_id = env::predecessor_account_id();
 
         ext_nft::nft_token(
@@ -195,18 +195,22 @@ impl Contract {
         .then(ext_self::after_nft_token(
             bidder_id,
             token_id,
-            bid_price,
             env::current_account_id(),
-            NO_DEPOSIT,
-            Gas(20_000_000_000_000),
+            deposit,
+            Gas(90_000_000_000_000),
         ))
     }
 
-    pub fn list_bids(&self) -> Vec<OfferCondition> {
-        self.bids.values().collect()
+    pub fn list_bids(&self) -> Vec<(TokenId, Vec<OfferCondition>)> {
+        self.bids.to_vec()
     }
 
-    fn process_purchase(&mut self, token_id: TokenId, buyer_id: AccountId) -> Promise {
+    fn process_purchase(
+        &mut self,
+        token_id: TokenId,
+        buyer_id: AccountId,
+        deposit: Balance,
+    ) -> Promise {
         let sale = self.asks.get(&token_id).unwrap();
 
         ext_nft::nft_transfer(
@@ -222,67 +226,75 @@ impl Contract {
             sale,
             buyer_id,
             env::current_account_id(),
-            NO_DEPOSIT,
+            deposit,
             AFTER_NFT_TRANSFER_GAS,
         ))
     }
 
     #[private]
+    #[payable]
     pub fn after_nft_transfer(&mut self, sale: SaleCondition, buyer_id: AccountId) -> Promise {
+        let deposit = env::attached_deposit();
         match env::promise_result(0) {
             PromiseResult::Successful(_) => {
                 self.asks.remove(&sale.token_id);
-                self.add_trade_history(sale.clone(), buyer_id);
-                Promise::new(sale.owner_id).transfer(sale.price)
+                self.add_trade_history(sale.clone(), buyer_id.clone());
+
+                let trade = Promise::new(sale.owner_id).transfer(sale.price.0);
+                let change = Promise::new(buyer_id).transfer(deposit - sale.price.0);
+
+                if deposit > sale.price.0 {
+                    log!("bid more than sale price, refund change and paying for sale token");
+                    trade.then(change)
+                } else {
+                    log!("bid more equals to sale price, just paying for sale token");
+                    trade
+                }
             }
-            PromiseResult::Failed => panic_str("Execution `nft_transfer` method was failed."),
+            PromiseResult::Failed => {
+                log!("Execution `nft_transfer` method was failed. Attached deposit was refund.");
+                Promise::new(buyer_id).transfer(deposit)
+            }
             PromiseResult::NotReady => unreachable!(),
         }
     }
 
     #[private]
+    #[payable]
     pub fn after_nft_token(
         &mut self,
         bidder_id: AccountId,
         token_id: TokenId,
-        bid_price: Balance,
         #[rustfmt::skip]
         #[callback_result]
         result: Result<Option<TokenExt>, PromiseError>,
     ) -> PromiseOrValue<()> {
+        let bid_price = env::attached_deposit();
+        let ask_less_bid = self
+            .asks
+            .get(&token_id)
+            .map_or(false, |ask| ask.price.0 <= bid_price);
+
         match result {
-            Ok(Some(_)) => {
-                let ask_less_bid = self
-                    .asks
-                    .get(&token_id)
-                    .map_or(false, |ask| ask.price <= bid_price);
-
-                if ask_less_bid {
-                    todo!("nft token transfer");
-                    todo!("return attached deposit - ask.price");
-                    // return PromiseOrValue::Promise(_);
-                }
-
-                match self.bids.get(&token_id) {
-                    Some(offer_condition) if bid_price <= offer_condition.price => {
-                        log!(
-                            "your bid is {} and it's less than last bid {}",
-                            bid_price,
-                            offer_condition.price
-                        );
-                        let promise = Promise::new(bidder_id).transfer(bid_price);
-                        PromiseOrValue::Promise(promise)
-                    }
-                    _ => {
-                        self.bids.insert(
-                            &token_id,
-                            &OfferCondition::new(token_id.clone(), bidder_id, bid_price),
-                        );
-                        PromiseOrValue::Value(())
-                    }
-                }
+            Ok(Some(_)) if ask_less_bid => {
+                log!("ask for current token id less than provided bid, so process purchase");
+                self.process_purchase(token_id, bidder_id, bid_price);
+                PromiseOrValue::Value(())
             }
+            Ok(Some(_)) => {
+                let new_offer_condition =
+                    OfferCondition::new(token_id.clone(), bidder_id, bid_price);
 
+                match self.bids.get(&token_id).as_mut() {
+                    Some(offer_conditions) => {
+                        offer_conditions.push(new_offer_condition);
+                        self.bids.insert(&token_id, offer_conditions)
+                    }
+                    _ => self.bids.insert(&token_id, &vec![new_offer_condition]),
+                };
+
+                PromiseOrValue::Value(())
+            }
             Ok(None) => {
                 log!(
                     "token with id: {} doesn't exist, attached deposit was returned",
