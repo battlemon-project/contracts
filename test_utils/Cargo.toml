@@ -9,3 +9,5 @@ edition = "2021"
 token_metadata_ext = { path = "../token_metadata_ext" }
 near-sdk = "4.0.0-pre.4"
 near-contract-standards = "4.0.0-pre.4"
+once_cell = "1.8.0"
+near-sdk-sim = "4.0.0-pre.4"

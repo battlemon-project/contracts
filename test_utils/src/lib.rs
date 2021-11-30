@@ -1,7 +1,18 @@
-use near_sdk::AccountId;
 use near_sdk::serde_json::json;
 use near_sdk::test_utils::{accounts, VMContextBuilder};
+use near_sdk::AccountId;
+use near_sdk_sim::to_yocto;
+use once_cell::unsync::Lazy;
 use token_metadata_ext::*;
+
+pub const MARKET_ACCOUNT_ID: &str = "market";
+pub const NFT_ACCOUNT_ID: &str = "nft";
+pub const SPOILED_NFT_ACCOUNT_ID: &str = "spoiled_nft";
+pub const VALID_TOKEN_ID: &str = "valid token id";
+pub const INVALID_TOKEN_ID: &str = "invalid token id";
+pub const VALID_TOKEN_PRICE: Lazy<u128> = Lazy::new(|| to_yocto("10"));
+pub const INVALID_TOKEN_PRICE: Lazy<u128> = Lazy::new(|| to_yocto("5"));
+pub const BASE_DEPOSIT: Lazy<u128> = Lazy::new(|| to_yocto("100"));
 
 pub fn sample_token_metadata() -> TokenMetadataExt {
     let properties = TokenProperties {
