@@ -127,7 +127,6 @@ trait ExtNft {
         memo: Option<String>,
     ) -> Promise;
 
-    // fn nft_token(&self, token_id: TokenId) -> Option<TokenExt>;
     fn nft_token(&self, token_id: TokenId) -> Promise;
 }
 
@@ -363,7 +362,6 @@ impl NonFungibleTokenApprovalReceiver for Contract {
 mod tests {
     use near_sdk::test_utils::{accounts, VMContextBuilder};
     use near_sdk::{serde_json, testing_env};
-    use std::collections::HashMap;
     use test_utils::*;
 
     use super::*;
