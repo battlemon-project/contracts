@@ -1,5 +1,7 @@
-use token_metadata_ext::*;
+use near_sdk::AccountId;
 use near_sdk::serde_json::json;
+use near_sdk::test_utils::{accounts, VMContextBuilder};
+use token_metadata_ext::*;
 
 pub fn sample_token_metadata() -> TokenMetadataExt {
     let properties = TokenProperties {
@@ -112,4 +114,13 @@ pub fn baz_token_metadata_ext() -> TokenMetadataExt {
         reference_hash: None,
         properties,
     }
+}
+
+pub fn get_context(predecessor_account_id: AccountId) -> VMContextBuilder {
+    let mut builder = VMContextBuilder::new();
+    builder
+        .current_account_id(accounts(0))
+        .signer_account_id(predecessor_account_id.clone())
+        .predecessor_account_id(predecessor_account_id);
+    builder
 }
