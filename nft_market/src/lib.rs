@@ -133,7 +133,8 @@ trait ExtNft {
 
 #[near_sdk::ext_contract]
 trait ExtSelf {
-    fn after_nft_transfer(&mut self, sale: SaleCondition, buyer_id: AccountId) -> Promise;
+    fn after_nft_transfer_for_ask(&mut self, sale: SaleCondition, buyer_id: AccountId) -> Promise;
+    fn after_nft_transfer_for_bid(&mut self, sale: OfferCondition, buyer_id: AccountId) -> Promise;
 
     fn after_nft_token(
         &mut self,
@@ -238,7 +239,11 @@ impl Contract {
 
     #[private]
     #[payable]
-    pub fn after_nft_transfer(&mut self, sale: SaleCondition, buyer_id: AccountId) -> Promise {
+    pub fn after_nft_transfer_for_ask(
+        &mut self,
+        sale: SaleCondition,
+        buyer_id: AccountId,
+    ) -> Promise {
         let deposit = env::attached_deposit();
         match env::promise_result(0) {
             PromiseResult::Successful(_) => {
