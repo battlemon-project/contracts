@@ -178,14 +178,7 @@ mod tests {
 
     const MINT_STORAGE_COST: u128 = 6_000_000_000_000_000_000_000;
 
-    fn get_context(predecessor_account_id: AccountId) -> VMContextBuilder {
-        let mut builder = VMContextBuilder::new();
-        builder
-            .current_account_id(accounts(0))
-            .signer_account_id(predecessor_account_id.clone())
-            .predecessor_account_id(predecessor_account_id);
-        builder
-    }
+
 
     #[test]
     fn token_metadata_deserialize() {
