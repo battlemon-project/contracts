@@ -1,10 +1,8 @@
 use near_sdk::{AccountId, Gas};
 use near_sdk_sim::{call, to_yocto, view, DEFAULT_GAS};
 use nft_market::SaleCondition;
-use utils::{
-    PromiseResultUtils, State, INVALID_TOKEN_ID, INVALID_TOKEN_PRICE, VALID_TOKEN_ID,
-    VALID_TOKEN_PRICE,
-};
+use test_utils::{INVALID_TOKEN_ID, INVALID_TOKEN_PRICE, VALID_TOKEN_ID, VALID_TOKEN_PRICE};
+use utils::{PromiseResultUtils, State};
 
 mod utils;
 

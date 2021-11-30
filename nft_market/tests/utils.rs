@@ -10,7 +10,11 @@ use once_cell::sync::Lazy;
 use nft_market::ContractContract as MarketContract;
 use nft_token::ContractContract as NFTContract;
 use spoiled_nft_token::ContractContract as SpoiledNFTContract;
-use test_utils::{baz_token_metadata_ext, foo_token_metadata_ext};
+use test_utils::{
+    baz_token_metadata_ext, foo_token_metadata_ext, BASE_DEPOSIT, INVALID_TOKEN_ID,
+    INVALID_TOKEN_PRICE, MARKET_ACCOUNT_ID, NFT_ACCOUNT_ID, SPOILED_NFT_ACCOUNT_ID, VALID_TOKEN_ID,
+    VALID_TOKEN_PRICE,
+};
 
 type InitAccounts = (
     UserAccount,
@@ -31,15 +35,6 @@ lazy_static_include_bytes! {
     NFT_WASM => "./../target/wasm32-unknown-unknown/release/nft_token.wasm",
     SPOILED_NFT_WASM => "./../target/wasm32-unknown-unknown/release/spoiled_nft_token.wasm",
 }
-
-const MARKET_ACCOUNT_ID: &str = "market";
-const NFT_ACCOUNT_ID: &str = "nft";
-const SPOILED_NFT_ACCOUNT_ID: &str = "spoiled_nft";
-pub const VALID_TOKEN_ID: &str = "valid token id";
-pub const INVALID_TOKEN_ID: &str = "invalid token id";
-pub const VALID_TOKEN_PRICE: Lazy<u128> = Lazy::new(|| to_yocto("10"));
-pub const INVALID_TOKEN_PRICE: Lazy<u128> = Lazy::new(|| to_yocto("5"));
-pub const BASE_DEPOSIT: Lazy<u128> = Lazy::new(|| to_yocto("100"));
 
 pub fn init() -> (
     UserAccount,
