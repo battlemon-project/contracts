@@ -606,7 +606,7 @@ near call $CONTRACT_NAME init '{"nft_id": "'$NFT_CONTRACT_NAME'"}' --accountId $
 **Example:**
 
 ```bash
-near view list_asks $CONTRACT_NAME '{}'
+near view $CONTRACT_NAME list_asks '{}'
 ```
 
 <details>
