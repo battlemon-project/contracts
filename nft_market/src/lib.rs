@@ -285,21 +285,21 @@ impl Contract {
         };
 
         ext_nft::nft_transfer(
-            buyer_id.clone(),
+            new_owner_id,
             token_id,
-            Some(sale.approval_id),
+            approval_id,
             None,
             self.nft_id.clone(),
             ONE_YOCTO,
             NFT_TRANSFER_GAS,
         )
-        .then(ext_self::after_nft_transfer(
-            sale,
-            buyer_id,
-            env::current_account_id(),
-            deposit,
-            AFTER_NFT_TRANSFER_GAS,
-        ))
+        .then(callback)
+    }
+
+    fn get_ask(&self, token_id: &TokenId) -> SaleCondition {
+        self.asks.get(token_id).unwrap_or_else(|| {
+            panic_str(format!("token with id {} doesn't sell", token_id).as_str())
+        })
     }
 
     #[private]
