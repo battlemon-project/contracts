@@ -186,6 +186,11 @@ impl Contract {
         ))
     }
 
+    #[payable]
+    pub fn accept_bid(&mut self, token_id: TokenId) -> Promise {
+        self.process_purchase(token_id, OrderType::Bid)
+    }
+
     pub fn list_bids(&self) -> Vec<(TokenId, Vec<OfferCondition>)> {
         self.bids.to_vec()
     }
