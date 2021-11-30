@@ -163,27 +163,7 @@ impl Contract {
 
     #[payable]
     pub fn buy(&mut self, token_id: TokenId) -> Promise {
-        let sale = self.asks.get(&token_id).unwrap_or_else(|| {
-            panic_str(format!("token with id {} doesn't sell", token_id).as_str())
-        });
-
-        let deposit = env::attached_deposit();
-        require!(
-            deposit == sale.price.0,
-            format!(
-                "attached deposit isn't equal to token's price.\n attached deposit is {}, token's price is {}",
-                deposit, sale.price.0
-            )
-        );
-
-        let prepaid_gas = env::prepaid_gas();
-        require!(
-            prepaid_gas >= BUY_METHOD_TOTAL_GAS,
-            format!("attached gas less than: {:?}", BUY_METHOD_TOTAL_GAS)
-        );
-
-        let buyer_id = env::predecessor_account_id();
-        self.process_purchase(token_id, buyer_id, deposit)
+        self.process_purchase(token_id, OrderType::Ask)
     }
 
     #[payable]
@@ -210,13 +190,99 @@ impl Contract {
         self.bids.to_vec()
     }
 
-    fn process_purchase(
-        &mut self,
-        token_id: TokenId,
-        buyer_id: AccountId,
-        deposit: Balance,
-    ) -> Promise {
-        let sale = self.asks.get(&token_id).unwrap();
+    fn process_purchase(&mut self, token_id: TokenId, order_type: OrderType) -> Promise {
+        let approval_id;
+        let callback;
+        let new_owner_id;
+
+        match order_type {
+            OrderType::Ask => {
+                new_owner_id = env::predecessor_account_id();
+
+                let sale = self.get_ask(&token_id);
+
+                // todo: to refactor from here ->
+                let deposit = env::attached_deposit();
+                let panic_msg = format!(
+                    "attached deposit less than token's price.\n\
+                     Attached deposit is {}, token's price is {}",
+                    deposit, sale.price.0
+                );
+                require!(deposit >= sale.price.0, panic_msg);
+
+                require!(
+                    env::prepaid_gas() >= BUY_METHOD_TOTAL_GAS,
+                    format!("attached gas less than: {:?}", BUY_METHOD_TOTAL_GAS)
+                );
+                // <- until here
+
+                approval_id = Some(sale.approval_id);
+
+                callback = ext_self::after_nft_transfer_for_ask(
+                    sale,
+                    new_owner_id.clone(),
+                    env::current_account_id(),
+                    deposit,
+                    AFTER_NFT_TRANSFER_GAS,
+                );
+            }
+            OrderType::AskLessBid(bidder_id) => {
+                let sale = self.get_ask(&token_id);
+
+                // todo: to refactor from here ->
+                let deposit = env::attached_deposit();
+                let panic_msg = format!(
+                    "attached deposit less than token's price.\n\
+                     Attached deposit is {}, token's price is {}",
+                    deposit, sale.price.0
+                );
+                require!(deposit >= sale.price.0, panic_msg);
+
+                require!(
+                    env::prepaid_gas() >= BUY_METHOD_TOTAL_GAS,
+                    format!("attached gas less than: {:?}", BUY_METHOD_TOTAL_GAS)
+                );
+                // <- until here
+                new_owner_id = bidder_id.clone();
+                approval_id = Some(sale.approval_id);
+
+                callback = ext_self::after_nft_transfer_for_ask(
+                    sale,
+                    bidder_id,
+                    env::current_account_id(),
+                    deposit,
+                    AFTER_NFT_TRANSFER_GAS,
+                );
+            }
+
+            OrderType::Bid => {
+                let deposit = env::attached_deposit();
+                let mut ordered_bids = self.bids.get(&token_id).unwrap_or_else(|| {
+                    panic_str(format!("bids for token is: {}, doesn't exists", token_id).as_str())
+                });
+
+                ordered_bids.sort_by_key(|v| v.price.0);
+
+                let last = ordered_bids
+                    .last()
+                    .unwrap_or_else(|| panic_str("bids is empty"));
+
+                require!(
+                    deposit == last.price.0,
+                    "attached deposit must be equal to bid price"
+                );
+
+                new_owner_id = last.bidder_id.clone();
+                approval_id = None;
+                callback = ext_self::after_nft_transfer_for_bid(
+                    last.clone(),
+                    env::predecessor_account_id(),
+                    env::current_account_id(),
+                    env::attached_deposit(),
+                    AFTER_NFT_TRANSFER_GAS,
+                )
+            }
+        };
 
         ext_nft::nft_transfer(
             buyer_id.clone(),
