@@ -372,4 +372,16 @@ mod tests {
         assert_eq!(contract.list_asks().len(), 0);
         assert_eq!(contract.list_bids().len(), 0);
     }
+
+    #[test]
+    #[should_panic(expected = "token with id valid token id doesn't sell")]
+    fn get_ask_empty_asks() {
+        let mut context = get_context(accounts(1));
+        testing_env!(context.build());
+        let contract = Contract::init(accounts(1));
+        testing_env!(context.is_view(true).build());
+        contract.get_ask(&VALID_TOKEN_ID.to_string());
+    }
+
+
 }
