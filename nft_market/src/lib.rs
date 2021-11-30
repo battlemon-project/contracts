@@ -391,7 +391,7 @@ impl Contract {
         match result {
             Ok(Some(_)) if ask_less_bid => {
                 log!("ask for current token id less than provided bid, so process purchase");
-                self.process_purchase(token_id, bidder_id, bid_price);
+                self.process_purchase(token_id, OrderType::AskLessBid(bidder_id));
                 PromiseOrValue::Value(())
             }
             Ok(Some(_)) => {
