@@ -341,6 +341,39 @@ impl Contract {
 
     #[private]
     #[payable]
+    pub fn after_nft_transfer_for_bid(
+        &mut self,
+        sale: SaleCondition,
+        buyer_id: AccountId,
+    ) -> Promise {
+        let deposit = env::attached_deposit();
+        match env::promise_result(0) {
+            PromiseResult::Successful(_) => {
+                // self.asks.remove(&sale.token_id);
+                // self.add_trade_history(sale.clone(), buyer_id.clone());
+                //
+                // let trade = Promise::new(sale.owner_id).transfer(sale.price.0);
+                // let change = Promise::new(buyer_id).transfer(deposit - sale.price.0);
+                //
+                // if deposit > sale.price.0 {
+                //     log!("bid more than sale price, refund change and paying for sale token");
+                //     trade.then(change)
+                // } else {
+                //     log!("bid more equals to sale price, just paying for sale token");
+                //     trade
+                // }
+                todo!()
+            }
+            PromiseResult::Failed => {
+                log!("Execution `nft_transfer` method was failed. Attached deposit was refund.");
+                Promise::new(buyer_id).transfer(deposit)
+            }
+            PromiseResult::NotReady => unreachable!(),
+        }
+    }
+
+    #[private]
+    #[payable]
     pub fn after_nft_token(
         &mut self,
         bidder_id: AccountId,
