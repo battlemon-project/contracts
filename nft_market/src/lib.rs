@@ -347,3 +347,23 @@ impl NonFungibleTokenApprovalReceiver for Contract {
         PromiseOrValue::Value(ret.to_string())
     }
 }
+
+#[cfg(all(test, not(target_arch = "wasm32")))]
+mod tests {
+    use near_sdk::test_utils::{accounts, VMContextBuilder};
+    use near_sdk::{serde_json, testing_env};
+    use std::collections::HashMap;
+    use test_utils::*;
+
+    use super::*;
+
+    #[test]
+    fn init() {
+        let mut context = get_context(accounts(1));
+        testing_env!(context.build());
+        let contract = Contract::init(accounts(1));
+        testing_env!(context.is_view(true).build());
+        assert_eq!(contract.list_asks().len(), 0);
+        assert_eq!(contract.list_bids().len(), 0);
+    }
+}
