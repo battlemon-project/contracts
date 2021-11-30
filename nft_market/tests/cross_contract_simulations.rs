@@ -1,4 +1,6 @@
-use crate::utils::{PromiseResultUtils, State, INVALID_TOKEN_ID, TOKEN_PRICE, VALID_TOKEN_ID};
+use crate::utils::{
+    PromiseResultUtils, State, INVALID_TOKEN_ID, VALID_TOKEN_ID, VALID_TOKEN_PRICE,
+};
 use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::{AccountId, Gas};
 use near_sdk_sim::{call, to_yocto, view, DEFAULT_GAS, STORAGE_AMOUNT};
@@ -18,35 +20,7 @@ fn list_asks() {
     let sale = sale_conditions.first().unwrap();
     assert_eq!(sale.token_id, VALID_TOKEN_ID.to_string());
     assert_eq!(sale.owner_id, nft.account_id());
-    assert_eq!(sale.price.0, *TOKEN_PRICE);
-}
-
-#[test]
-fn buying() {
-    // todo: add more test here
-    let (_root, nft, market, alice) = utils::init_mint_approve();
-
-    // simulate buying process from user
-    let exec_results = call!(
-        alice,
-        market.buy(VALID_TOKEN_ID.to_string()),
-        *TOKEN_PRICE,
-        DEFAULT_GAS
-    );
-
-    exec_results.assert_success();
-
-    assert_eq!(exec_results.promise_errors().len(), 0);
-    let expected_gas_ceiling = 300 * u64::pow(10, 12);
-    assert!(exec_results.gas_burnt() < Gas(expected_gas_ceiling));
-
-    // checking that asks is empty
-    let sale_conditions: Vec<SaleCondition> = view!(market.list_asks()).unwrap_json();
-    assert_eq!(sale_conditions.len(), 0);
-    // checking that new owner is Alice
-    let owner_id: AccountId =
-        view!(nft.get_owner_by_token_id(VALID_TOKEN_ID.to_string())).unwrap_json();
-    assert_eq!(owner_id, alice.account_id());
+    assert_eq!(sale.price.0, *VALID_TOKEN_PRICE);
 }
 
 #[test]
@@ -68,7 +42,7 @@ fn bid_adding_to_state_successful() {
     call!(
         alice,
         market.bid(VALID_TOKEN_ID.to_string()),
-        deposit = *TOKEN_PRICE
+        deposit = *VALID_TOKEN_PRICE
     )
     .assert_success();
 
@@ -79,7 +53,7 @@ fn bid_adding_to_state_successful() {
     let condition = conditions.last().unwrap();
     assert_eq!(condition.token_id, VALID_TOKEN_ID.to_string());
     assert_eq!(condition.bidder_id, alice.account_id());
-    assert_eq!(condition.price.0, *TOKEN_PRICE);
+    assert_eq!(condition.price.0, *VALID_TOKEN_PRICE);
 }
 
 #[test]
@@ -89,7 +63,7 @@ fn bid_failure_nft_token_method_panic_than_must_refund_attached_deposit() {
     let execution_result = call!(
         alice,
         market.bid(VALID_TOKEN_ID.to_string()),
-        deposit = *TOKEN_PRICE
+        deposit = *VALID_TOKEN_PRICE
     );
     let actual_amount = alice.get_amount();
     let diff = initial_amount - actual_amount;
@@ -138,7 +112,7 @@ fn bid_successful_and_more_than_ask_with_same_token_id_must_refund_diff() {
     let (_root, nft, market, alice) = utils::init_mint_approve();
     let nft_initial_amount = nft.user_account.get_amount();
     let alice_initial_amount = alice.get_amount();
-    let double_price = *TOKEN_PRICE * 2;
+    let double_price = *VALID_TOKEN_PRICE * 2;
     let execution_result = call!(
         alice,
         market.bid(VALID_TOKEN_ID.to_string()),
@@ -153,10 +127,10 @@ fn bid_successful_and_more_than_ask_with_same_token_id_must_refund_diff() {
     //actual now is less than initial
     let alice_diff = alice_initial_amount - alice_actual_amount;
     // the gas fee for execution tx smaller than 0.1 near, so the balance the same before and after
-    assert!(alice_diff - *TOKEN_PRICE < to_yocto("0.1"));
+    assert!(alice_diff - *VALID_TOKEN_PRICE < to_yocto("0.1"));
     // actual now more than initial
     let nft_diff = nft_actual_amount - nft_initial_amount;
-    assert!(nft_diff - *TOKEN_PRICE < to_yocto("0.1"));
+    assert!(nft_diff - *VALID_TOKEN_PRICE < to_yocto("0.1"));
 
     // alice must be new owner of token and back half of attached deposit
     let nft_token: Option<TokenExt> =
