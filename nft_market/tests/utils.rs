@@ -10,7 +10,7 @@ use once_cell::sync::Lazy;
 use nft_market::ContractContract as MarketContract;
 use nft_token::ContractContract as NFTContract;
 use spoiled_nft_token::ContractContract as SpoiledNFTContract;
-use test_utils::baz_token_metadata_ext;
+use test_utils::{baz_token_metadata_ext, foo_token_metadata_ext};
 
 type InitAccounts = (
     UserAccount,
@@ -37,7 +37,8 @@ const NFT_ACCOUNT_ID: &str = "nft";
 const SPOILED_NFT_ACCOUNT_ID: &str = "spoiled_nft";
 pub const VALID_TOKEN_ID: &str = "valid token id";
 pub const INVALID_TOKEN_ID: &str = "invalid token id";
-pub const TOKEN_PRICE: Lazy<u128> = Lazy::new(|| to_yocto("10"));
+pub const VALID_TOKEN_PRICE: Lazy<u128> = Lazy::new(|| to_yocto("10"));
+pub const INVALID_TOKEN_PRICE: Lazy<u128> = Lazy::new(|| to_yocto("5"));
 pub const BASE_DEPOSIT: Lazy<u128> = Lazy::new(|| to_yocto("100"));
 
 pub fn init() -> (
@@ -124,6 +125,51 @@ impl PromiseResultUtils for Vec<Option<ExecutionResult>> {
     }
 }
 
+pub fn init_mint_to_alice() -> (
+    UserAccount,
+    ContractAccount<NFTContract>,
+    ContractAccount<MarketContract>,
+    UserAccount,
+    UserAccount,
+) {
+    let (root, nft, market, alice) = init();
+    let bob = root.create_user("bob".parse().unwrap(), *BASE_DEPOSIT);
+    call!(
+        nft.user_account,
+        nft.mint(
+            VALID_TOKEN_ID.to_string(),
+            foo_token_metadata_ext(),
+            Some(alice.account_id())
+        ),
+        deposit = (STORAGE_AMOUNT / 2)
+    )
+    .assert_success();
+    (root, nft, market, alice, bob)
+}
+
+pub fn init_mint_to_alice_approve() -> (
+    UserAccount,
+    ContractAccount<NFTContract>,
+    ContractAccount<MarketContract>,
+    UserAccount,
+    UserAccount,
+) {
+    let (root, nft, market, alice, bob) = init_mint_to_alice();
+    let price = json!({
+        "price": *VALID_TOKEN_PRICE.to_string(),
+    })
+    .to_string();
+    // simulate frontend call for selling nft token.
+    call!(
+        alice,
+        nft.nft_approve(VALID_TOKEN_ID.to_string(), market.account_id(), Some(price)),
+        deposit = (STORAGE_AMOUNT / 2)
+    )
+    .assert_success();
+
+    (root, nft, market, alice, bob)
+}
+
 pub fn init_mint() -> InitAccounts {
     let (root, nft, market, alice) = init();
     let token_metadata = baz_token_metadata_ext();
@@ -141,7 +187,7 @@ pub fn init_mint_approve() -> InitAccounts {
     let (root, nft, market, alice) = init_mint();
     // try to buy token
     let price = json!({
-        "price": *TOKEN_PRICE.to_string(),
+        "price": *VALID_TOKEN_PRICE.to_string(),
     })
     .to_string();
     // simulate frontend call for selling nft token.
