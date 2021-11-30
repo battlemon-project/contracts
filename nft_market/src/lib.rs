@@ -327,7 +327,7 @@ impl Contract {
                     log!("bid more than sale price, refund change and paying for sale token");
                     trade.then(change)
                 } else {
-                    log!("bid more equals to sale price, just paying for sale token");
+                    log!("bid equals to sale price, just paying for sale token");
                     trade
                 }
             }
