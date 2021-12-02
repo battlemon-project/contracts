@@ -490,5 +490,15 @@ mod tests {
         contract.get_ask(&VALID_TOKEN_ID.to_string());
     }
 
-
+    #[test]
+    #[should_panic(expected = "token with id invalid token id doesn't sell")]
+    fn get_ask_from_not_empty_asks_but_invalid_token_id() {
+        let mut context = get_context(accounts(1));
+        testing_env!(context.build());
+        let mut contract = Contract::init(accounts(1));
+        let ask = SaleCondition::new(accounts(2), VALID_TOKEN_ID.to_string(), 0, 0);
+        contract.asks.insert(&VALID_TOKEN_ID.to_string(), &ask);
+        testing_env!(context.is_view(true).build());
+        contract.get_ask(&INVALID_TOKEN_ID.to_string());
+    }
 }
