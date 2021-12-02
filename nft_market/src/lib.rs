@@ -65,7 +65,7 @@ enum OrderType {
     Bid,
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize, Clone)]
+#[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize, Clone, PartialEq, Debug)]
 #[serde(crate = "near_sdk::serde")]
 pub struct SaleCondition {
     pub owner_id: AccountId,
@@ -500,5 +500,19 @@ mod tests {
         contract.asks.insert(&VALID_TOKEN_ID.to_string(), &ask);
         testing_env!(context.is_view(true).build());
         contract.get_ask(&INVALID_TOKEN_ID.to_string());
+    }
+
+    #[test]
+    fn get_ask_valid_token_id() {
+        let mut context = get_context(accounts(1));
+        testing_env!(context.build());
+        let mut contract = Contract::init(accounts(1));
+        let expected_ask = SaleCondition::new(accounts(2), VALID_TOKEN_ID.to_string(), 0, 0);
+        contract
+            .asks
+            .insert(&VALID_TOKEN_ID.to_string(), &expected_ask);
+        testing_env!(context.is_view(true).build());
+        let actual_ask = contract.get_ask(&VALID_TOKEN_ID.to_string());
+        assert_eq!(expected_ask, actual_ask);
     }
 }
