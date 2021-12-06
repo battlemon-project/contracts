@@ -185,6 +185,8 @@ impl Contract {
     #[payable]
     pub fn bid(&mut self, token_id: TokenId) -> Promise {
         let deposit = env::attached_deposit();
+        require!(deposit > 0, "attached deposit must be more than 0.");
+
         let bidder_id = env::predecessor_account_id();
 
         ext_nft::nft_token(
