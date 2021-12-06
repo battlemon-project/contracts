@@ -179,7 +179,7 @@ impl Contract {
 
     #[payable]
     pub fn buy(&mut self, token_id: TokenId) -> Promise {
-        self.process_purchase(token_id, OrderType::Ask)
+        self.process_purchase(token_id, OrderType::AcceptAsk)
     }
 
     #[payable]
