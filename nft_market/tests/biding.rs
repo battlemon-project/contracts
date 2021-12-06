@@ -144,7 +144,7 @@ fn bid_with_amount_bigger_than_ask_price_must_refund_diff() {
 
 #[test]
 fn bid_successful_and_equals_to_ask_with_same_token_id() {
-    let (root, nft, market, alice, bob) = utils::init_mint_to_alice_approve();
+    let (_root, nft, market, alice, bob) = utils::init_mint_to_alice_approve();
     let alice_initial_balance = alice.get_amount();
     let execution_result = call!(
         bob,
