@@ -150,14 +150,15 @@ pub fn init_mint_to_alice_approve() -> (
     UserAccount,
 ) {
     let (root, nft, market, alice, bob) = init_mint_to_alice();
-    let price = json!({
+    let msg = json!({
+        "sale_type": "selling",
         "price": *VALID_TOKEN_PRICE.to_string(),
     })
     .to_string();
     // simulate frontend call for selling nft token.
     call!(
         alice,
-        nft.nft_approve(VALID_TOKEN_ID.to_string(), market.account_id(), Some(price)),
+        nft.nft_approve(VALID_TOKEN_ID.to_string(), market.account_id(), Some(msg)),
         deposit = (STORAGE_AMOUNT / 2)
     )
     .assert_success();
