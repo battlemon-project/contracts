@@ -458,14 +458,33 @@ impl NonFungibleTokenApprovalReceiver for Contract {
         msg: String,
     ) -> PromiseOrValue<String> {
         require!(env::predecessor_account_id() == self.nft_id);
-        let SaleArgs { price } = serde_json::from_str(&msg).expect("couldn't parse json");
-        let sale_conditions = SaleCondition::new(owner_id, token_id.clone(), approval_id, price.0);
-        self.asks.insert(&token_id, &sale_conditions);
-        let ret = json!({
-            "status": true,
-            "message": format!("token {} with price {} was added to market", token_id, price.0)
-        });
-        PromiseOrValue::Value(ret.to_string())
+        let SaleArgs { sale_type, price } =
+            serde_json::from_str(&msg).expect("couldn't parse json");
+
+        match sale_type {
+            SaleType::AcceptBid => {
+                let promise = self.process_purchase(
+                    token_id,
+                    OrderType::AcceptBid {
+                        owner_id,
+                        approval_id,
+                    },
+                );
+
+                PromiseOrValue::Promise(promise)
+            }
+            SaleType::Selling => {
+                let sale_conditions =
+                    SaleCondition::new(owner_id, token_id.clone(), approval_id, price.0);
+                self.asks.insert(&token_id, &sale_conditions);
+                let ret = json!({
+                    "status": true,
+                    "message": format!("token {} with price {} was added to market", token_id, price.0)
+                });
+
+                PromiseOrValue::Value(ret.to_string())
+            }
+        }
     }
 }
 
