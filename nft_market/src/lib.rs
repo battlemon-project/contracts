@@ -219,7 +219,7 @@ impl Contract {
         let new_owner_id;
 
         match order_type {
-            OrderType::Ask => {
+            OrderType::AcceptAsk => {
                 new_owner_id = env::predecessor_account_id();
 
                 let sale = self.get_ask(&token_id);
@@ -239,7 +239,7 @@ impl Contract {
                 );
                 // <- until here
 
-                approval_id = Some(sale.approval_id);
+                approval_id = sale.approval_id;
 
                 callback = ext_self::after_nft_transfer_for_ask(
                     sale,
@@ -267,7 +267,7 @@ impl Contract {
                 );
                 // <- until here
                 new_owner_id = bidder_id.clone();
-                approval_id = Some(sale.approval_id);
+                approval_id = sale.approval_id;
 
                 callback = ext_self::after_nft_transfer_for_ask(
                     sale,
@@ -277,9 +277,12 @@ impl Contract {
                     AFTER_NFT_TRANSFER_GAS,
                 );
             }
+            OrderType::AcceptBid {
+                owner_id,
+                approval_id: _approval_id,
+            } => {
+                approval_id = _approval_id;
 
-            OrderType::Bid => {
-                let deposit = env::attached_deposit();
                 let mut ordered_bids = self.bids.get(&token_id).unwrap_or_else(|| {
                     panic_str(format!("bids for token is: {}, doesn't exists", token_id).as_str())
                 });
@@ -287,19 +290,15 @@ impl Contract {
                 ordered_bids.sort_by_key(|v| v.price.0);
 
                 let last = ordered_bids
-                    .last()
+                    .pop()
                     .unwrap_or_else(|| panic_str("bids is empty"));
 
-                require!(
-                    deposit == last.price.0,
-                    "attached deposit must be equal to bid price"
-                );
+                self.bids.insert(&token_id, &ordered_bids);
 
                 new_owner_id = last.bidder_id.clone();
-                approval_id = None;
                 callback = ext_self::after_nft_transfer_for_bid(
-                    last.clone(),
-                    env::predecessor_account_id(),
+                    last,
+                    owner_id,
                     env::current_account_id(),
                     env::attached_deposit(),
                     AFTER_NFT_TRANSFER_GAS,
@@ -310,7 +309,7 @@ impl Contract {
         ext_nft::nft_transfer(
             new_owner_id,
             token_id,
-            approval_id,
+            Some(approval_id),
             None,
             self.nft_id.clone(),
             ONE_YOCTO,
