@@ -183,6 +183,7 @@ pub fn init_mint_approve() -> InitAccounts {
     let (root, nft, market, alice) = init_mint();
     // try to buy token
     let price = json!({
+        "sale_type": "selling",
         "price": *VALID_TOKEN_PRICE.to_string(),
     })
     .to_string();
