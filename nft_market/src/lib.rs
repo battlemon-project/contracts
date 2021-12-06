@@ -60,9 +60,12 @@ impl Trade {
 }
 
 enum OrderType {
-    Ask,
+    AcceptAsk,
     AskLessBid(AccountId),
-    Bid,
+    AcceptBid {
+        owner_id: AccountId,
+        approval_id: u64,
+    },
 }
 
 #[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize, Clone, PartialEq, Debug)]
