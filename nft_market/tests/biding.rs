@@ -1,7 +1,8 @@
 use near_contract_standards::non_fungible_token::TokenId;
+use near_sdk::serde_json::json;
 use near_sdk::{AccountId, Gas};
 use near_sdk_sim::{call, to_yocto, view, DEFAULT_GAS, STORAGE_AMOUNT};
-use nft_market::{OfferCondition, SaleCondition};
+use nft_market::{OfferCondition, SaleCondition, SaleType};
 use once_cell::unsync::Lazy;
 use test_utils::baz_token_metadata_ext;
 use test_utils::{INVALID_TOKEN_ID, INVALID_TOKEN_PRICE, VALID_TOKEN_ID, VALID_TOKEN_PRICE};
@@ -179,7 +180,46 @@ fn bid_successful_and_equals_to_ask_with_same_token_id() {
 }
 
 #[test]
-#[ignore = "not yet implemented"]
-fn accept_bid_not_with_attached_deposit_less_than_needed() {
-    let (root, nft, market, alice, bob) = utils::init_mint_to_alice();
+fn accept_bid_successful() {
+    let (_root, nft, market, alice, bob) = utils::init_mint_to_alice();
+    call!(
+        bob,
+        market.bid(VALID_TOKEN_ID.to_string()),
+        deposit = *VALID_TOKEN_PRICE
+    )
+    .assert_success();
+
+    let msg = json!({
+        "sale_type": "accept_bid",
+        "price": "0"
+    })
+    .to_string();
+
+    let alice_initial_balance = alice.get_amount();
+    let execution_result = call!(
+        alice,
+        nft.nft_approve(VALID_TOKEN_ID.to_string(), market.account_id(), Some(msg)),
+        deposit = 180000000000000000000
+    );
+    assert_eq!(execution_result.promise_errors().len(), 0);
+    let alice_actual_balance = alice.get_amount();
+
+    let alice_diff = alice_actual_balance - alice_initial_balance;
+    // because we also pay for storing approval_id
+    let fee = *VALID_TOKEN_PRICE - alice_diff;
+    // the gas fee for execution tx smaller than 0.1 near, so the balance the same before and after
+    assert!(
+        fee < *IMAGINED_MAX_FEE,
+        "alice_diff - token_price: {} must be less than {}",
+        fee,
+        *IMAGINED_MAX_FEE
+    );
+
+    let nft_token: Option<TokenExt> =
+        view!(nft.nft_token(VALID_TOKEN_ID.to_string())).unwrap_json();
+    assert_eq!(nft_token.unwrap().owner_id, bob.account_id());
+
+    let bids: Vec<(TokenId, Vec<OfferCondition>)> = view!(market.list_bids()).unwrap_json();
+    assert_eq!(bids.len(), 1);
+    assert_eq!(bids[0].1.len(), 0);
 }
