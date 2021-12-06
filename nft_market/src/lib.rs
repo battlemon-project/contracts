@@ -355,30 +355,25 @@ impl Contract {
     #[payable]
     pub fn after_nft_transfer_for_bid(
         &mut self,
-        sale: SaleCondition,
-        buyer_id: AccountId,
-    ) -> Promise {
-        let deposit = env::attached_deposit();
+        sale: OfferCondition,
+        owner_id: AccountId,
+    ) -> PromiseOrValue<()> {
         match env::promise_result(0) {
             PromiseResult::Successful(_) => {
-                // self.asks.remove(&sale.token_id);
-                // self.add_trade_history(sale.clone(), buyer_id.clone());
-                //
-                // let trade = Promise::new(sale.owner_id).transfer(sale.price.0);
-                // let change = Promise::new(buyer_id).transfer(deposit - sale.price.0);
-                //
-                // if deposit > sale.price.0 {
-                //     log!("bid more than sale price, refund change and paying for sale token");
-                //     trade.then(change)
-                // } else {
-                //     log!("bid more equals to sale price, just paying for sale token");
-                //     trade
-                // }
-                todo!()
+                let promise = Promise::new(owner_id).transfer(sale.price.0);
+                PromiseOrValue::Promise(promise)
             }
             PromiseResult::Failed => {
-                log!("Execution `nft_transfer` method was failed. Attached deposit was refund.");
-                Promise::new(buyer_id).transfer(deposit)
+                log!("Execution `nft_transfer` method was failed. The bidder's token transfer was stopped.");
+                let mut bids = self.bids.get(&sale.token_id).unwrap_or_else(|| {
+                    panic_str(
+                        format!("bids for token is: {}, doesn't exists", sale.token_id).as_str(),
+                    )
+                });
+                bids.push(sale.clone());
+                self.bids.insert(&sale.token_id, &bids);
+
+                PromiseOrValue::Value(())
             }
             PromiseResult::NotReady => unreachable!(),
         }
