@@ -108,7 +108,16 @@ impl OfferCondition {
 
 #[derive(Deserialize)]
 #[serde(crate = "near_sdk::serde")]
+#[serde(rename_all = "snake_case")]
+pub enum SaleType {
+    AcceptBid,
+    Selling,
+}
+
+#[derive(Deserialize)]
+#[serde(crate = "near_sdk::serde")]
 pub struct SaleArgs {
+    sale_type: SaleType,
     price: U128,
 }
 
