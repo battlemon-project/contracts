@@ -118,7 +118,7 @@ pub enum SaleType {
 #[serde(crate = "near_sdk::serde")]
 pub struct SaleArgs {
     sale_type: SaleType,
-    price: U128,
+    price: Option<U128>,
 }
 
 #[derive(BorshSerialize, BorshStorageKey)]
@@ -458,6 +458,7 @@ impl NonFungibleTokenApprovalReceiver for Contract {
         msg: String,
     ) -> PromiseOrValue<String> {
         require!(env::predecessor_account_id() == self.nft_id);
+
         let SaleArgs { sale_type, price } =
             serde_json::from_str(&msg).expect("couldn't parse json");
 
@@ -474,12 +475,13 @@ impl NonFungibleTokenApprovalReceiver for Contract {
                 PromiseOrValue::Promise(promise)
             }
             SaleType::Selling => {
+                let price = price.expect("The price didn't provided for selling").0;
                 let sale_conditions =
-                    SaleCondition::new(owner_id, token_id.clone(), approval_id, price.0);
+                    SaleCondition::new(owner_id, token_id.clone(), approval_id, price);
                 self.asks.insert(&token_id, &sale_conditions);
                 let ret = json!({
                     "status": true,
-                    "message": format!("token {} with price {} was added to market", token_id, price.0)
+                    "message": format!("token {} with price {} was added to market", token_id, price)
                 });
 
                 PromiseOrValue::Value(ret.to_string())

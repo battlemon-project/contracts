@@ -191,7 +191,6 @@ fn accept_bid_successful() {
 
     let msg = json!({
         "sale_type": "accept_bid",
-        "price": "0"
     })
     .to_string();
 
