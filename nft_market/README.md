@@ -12,6 +12,8 @@
 
 [`bid`](#bid)
 
+[`list_bids`](#bid)
+
 ## Marketplace Methods
 
 ### `init`
@@ -140,6 +142,60 @@ near call $CONTRACT_NAME bid '{"token_id": "1"}' --depositYocto 10 --gas 2000000
 
 ```
 null
+```
+
+</p>
+</details>
+
+---
+
+### `list_bids`
+
+> It's a view method that list bids for tokens.
+
+**Arguments:**
+
+- `token_id` - id of NFT token
+
+**Example:**
+
+```bash
+near view $CONTRACT_NAME list_bids ''
+```
+
+<details>
+<summary> <strong>Example Response</strong> </summary>
+<p>
+
+```
+[
+  [
+    '1',
+    [
+      {
+        token_id: '1',
+        bidder_id: 'dev-1638882173121-36557120766090',
+        price: '510000000000000000000'
+      },
+      {
+        token_id: '1',
+        bidder_id: 'bob.dev-1638882173121-36557120766090',
+        price: '520000000000000000000'
+      }
+    ]
+  ],
+  [
+    '2',
+    [
+      {
+        token_id: '2',
+        bidder_id: 'bob.dev-1638882173121-36557120766090',
+        price: '10000000000000000000'
+      }
+    ]
+  ]
+]
+
 ```
 
 </p>
