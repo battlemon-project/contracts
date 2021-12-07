@@ -10,6 +10,8 @@
 
 [`buy`](#buy)
 
+[`bid`](#bid)
+
 ## Marketplace Methods
 
 ### `init`
@@ -42,7 +44,7 @@ near view $CONTRACT_NAME list_asks '{}'
 <summary> <strong>Example Response</strong> </summary>
 <p>
 
-```json lines
+```
 [
   {
     owner_id: 'nft.dev-1636529128471-59911444209733',
@@ -115,5 +117,32 @@ near call $CONTRACT_NAME buy '{"token_id": "2"}' --depositYocto 10 --gas 4000000
 
 - `depositYocto` - price of the token with `token_id`.
 - `gas` - attached gas for method execution. The current amount can be changed in the future.
+
+---
+
+### `bid`
+
+> It's a payable method that bids for existing token. An attached deposit will be used as the bid's price. If the token's owner already sells the token and the attached deposit equals or more than the token's price, it will be automatically processed. The difference between the attached deposit and the token's price will be refunded to the caller.
+
+**Arguments:**
+
+- `token_id` - id of NFT token
+
+**Example:**
+
+```bash
+near call $CONTRACT_NAME bid '{"token_id": "1"}' --depositYocto 10 --gas 200000000000000 --accountId $NEW_OWNER_ID
+```
+
+<details>
+<summary> <strong>Example Response</strong> </summary>
+<p>
+
+```
+null
+```
+
+</p>
+</details>
 
 ---
