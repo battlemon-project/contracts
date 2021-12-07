@@ -1,4 +1,4 @@
-# Battlemon NFT token
+# Battlemon NFT Token Contract
 
 ## Battlemon NFT Token Properties
 
