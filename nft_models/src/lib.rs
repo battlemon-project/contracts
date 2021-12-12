@@ -1,6 +1,13 @@
+mod lemon;
 mod slots;
 
+pub use lemon::Lemon;
 pub use slots::Slots;
+
+#[enum_dispatch(Slots)]
+pub enum ModelKind {
+    Lemon,
+}
 
 #[cfg(test)]
 mod tests {
