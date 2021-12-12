@@ -2,6 +2,7 @@ use near_sdk::serde_json::json;
 use near_sdk::test_utils::{accounts, VMContextBuilder};
 use near_sdk::AccountId;
 use near_sdk_sim::to_yocto;
+use nft_models::ModelKind;
 use once_cell::unsync::Lazy;
 use token_metadata_ext::*;
 
@@ -15,10 +16,12 @@ pub const INVALID_TOKEN_PRICE: Lazy<u128> = Lazy::new(|| to_yocto("5"));
 pub const BASE_DEPOSIT: Lazy<u128> = Lazy::new(|| to_yocto("100"));
 
 pub fn sample_token_metadata() -> TokenMetadataExt {
-    let properties = TokenProperties {
+    use nft_models::lemon::*;
+
+    let model: ModelKind = Lemon {
         option: Option_::OnSale,
         century: Century::Ancient,
-        type_: Type::Light,
+        r#type: Type::Light,
         lemon_gen: LemonGen::Nakamoto,
         background: Background::Red,
         top: Top::Headdress,
@@ -29,7 +32,12 @@ pub fn sample_token_metadata() -> TokenMetadataExt {
         accessory: Accessory::Cigar,
         winrate: None,
         rarity: 0,
-    };
+        body_slot: None,
+        left_weapon_slot: None,
+        right_weapon_slot: None,
+    }
+    .into();
+
     TokenMetadataExt {
         title: Some("foo title".into()),
         description: Some("this is description for foo title's token".into()),
@@ -43,26 +51,24 @@ pub fn sample_token_metadata() -> TokenMetadataExt {
         extra: None,
         reference: None,
         reference_hash: None,
-        properties,
+        model,
     }
 }
 
 pub fn foo_token_metadata_ext() -> TokenMetadataExt {
-    let properties = TokenProperties {
-        option: Option_::LemonGen,
-        century: Century::Future,
-        type_: Type::Medium,
-        lemon_gen: LemonGen::Buterin,
-        background: Background::Purple,
-        top: Top::Hairstyle,
-        cyber_suit: CyberSuit::Gold,
-        expression: Expression::Brooding,
-        eyes: Eyes::Open,
-        hair: Hair::BobMarley,
-        accessory: Accessory::Tattoo,
-        winrate: Some(100),
-        rarity: 10,
-    };
+    use nft_models::weapon::*;
+    let model: ModelKind = Weapon {
+        level: 0,
+        r#type: Type::Instant,
+        scope_slot: None,
+        perk_slot: None,
+        mag_slot: None,
+        barrel_slot: None,
+        muzzle_slot: None,
+        grip_slot: None,
+        stock_slot: None,
+    }
+    .into();
 
     TokenMetadataExt {
         title: Some("foo_token".into()),
@@ -83,15 +89,16 @@ pub fn foo_token_metadata_ext() -> TokenMetadataExt {
         ),
         reference: None,
         reference_hash: None,
-        properties,
+        model,
     }
 }
 
 pub fn baz_token_metadata_ext() -> TokenMetadataExt {
-    let properties = TokenProperties {
+    use nft_models::lemon::*;
+    let model: ModelKind = Lemon {
         option: Option_::Auction,
         century: Century::Otherworldly,
-        type_: Type::Heavy,
+        r#type: Type::Heavy,
         lemon_gen: LemonGen::Nakamoto,
         background: Background::Red,
         top: Top::Classical,
@@ -102,7 +109,11 @@ pub fn baz_token_metadata_ext() -> TokenMetadataExt {
         accessory: Accessory::Toothpick,
         winrate: Some(33),
         rarity: 88,
-    };
+        body_slot: None,
+        left_weapon_slot: None,
+        right_weapon_slot: None,
+    }
+    .into();
 
     TokenMetadataExt {
         title: Some("baz_token".into()),
@@ -123,7 +134,7 @@ pub fn baz_token_metadata_ext() -> TokenMetadataExt {
         ),
         reference: None,
         reference_hash: None,
-        properties,
+        model,
     }
 }
 
