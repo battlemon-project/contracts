@@ -31,3 +31,23 @@ pub enum Type {
     Projection,
     Collusion,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn weapon_model() {
+        let _weapon = Weapon {
+            level: 0,
+            r#type: Type::Instant,
+            scope_slot: None,
+            perk_slot: None,
+            mag_slot: None,
+            barrel_slot: None,
+            muzzle_slot: None,
+            grip_slot: None,
+            stock_slot: None,
+        };
+    }
+}

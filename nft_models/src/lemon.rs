@@ -151,10 +151,11 @@ pub enum Accessory {
 }
 
 mod tests {
+    #[warn(unused_imports)]
     use super::*;
 
     #[test]
-    fn lemon_struct_exist() {
+    fn lemon_model() {
         let _lemon = Lemon {
             option: Option_::OnSale,
             century: Century::Ancient,
