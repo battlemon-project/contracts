@@ -7,4 +7,5 @@ edition = "2021"
 
 [dependencies]
 near-contract-standards = "4.0.0-pre.4"
-enum_dispatch = "0.3.7"
+enum_dispatch = "0.3.7
+slots_derive_macro = { path = "../slots_derive_macro" }
