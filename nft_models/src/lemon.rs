@@ -13,8 +13,7 @@ use crate::slots::Slots;
 pub struct Lemon {
     pub option: Option_,
     pub century: Century,
-    #[serde(rename = "type")]
-    pub type_: Type,
+    pub r#type: Type,
     pub lemon_gen: LemonGen,
     pub background: Background,
     pub top: Top,
@@ -25,6 +24,7 @@ pub struct Lemon {
     pub accessory: Accessory,
     pub winrate: Option<u8>,
     pub rarity: u8,
+    pub body_slot: Option<TokenId>,
     pub left_weapon_slot: Option<TokenId>,
     pub right_weapon_slot: Option<TokenId>,
 }
@@ -158,7 +158,6 @@ mod tests {
         let _lemon = Lemon {
             option: Option_::OnSale,
             century: Century::Ancient,
-            type_: Type::Light,
             lemon_gen: LemonGen::Nakamoto,
             background: Background::Red,
             top: Top::Headdress,
@@ -169,8 +168,10 @@ mod tests {
             accessory: Accessory::Cigar,
             winrate: None,
             rarity: 0,
+            body_slot: None,
             left_weapon_slot: None,
             right_weapon_slot: None,
+            r#type: Type::Light,
         };
     }
 }
