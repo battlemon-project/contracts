@@ -73,7 +73,7 @@ mod tests {
     use nft_models::*;
 
     fn get_lemon_model() -> Lemon {
-        let expected_model = Lemon {
+        Lemon {
             option: Option_::OnSale,
             century: Century::Ancient,
             r#type: Type::Light,
@@ -90,8 +90,7 @@ mod tests {
             body_slot: None,
             left_weapon_slot: None,
             right_weapon_slot: None,
-        };
-        expected_model
+        }
     }
 
     #[test]
