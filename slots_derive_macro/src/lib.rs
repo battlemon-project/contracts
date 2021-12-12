@@ -2,6 +2,7 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, Data, DeriveInput, Fields, FieldsNamed};
 
+/// derive macro for `Slots` trait, collect fields with `slot` in the name into `Vec<&TokenId>` of ref on values.
 #[proc_macro_derive(Slots)]
 pub fn slots(input: TokenStream) -> TokenStream {
     let ast = parse_macro_input!(input as DeriveInput);
