@@ -1,3 +1,7 @@
+mod slots;
+
+pub use slots::Slots;
+
 #[cfg(test)]
 mod tests {
     #[test]
