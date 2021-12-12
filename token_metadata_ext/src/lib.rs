@@ -70,17 +70,17 @@ impl TokenExt {
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {
     use super::*;
-    use nft_models::*;
+    use nft_models::lemon::*;
 
     fn get_lemon_model() -> Lemon {
         Lemon {
-            option: Option_::OnSale,
+            option: Option_::ForRent,
             century: Century::Ancient,
             r#type: Type::Light,
-            lemon_gen: LemonGen::Nakamoto,
+            lemon_gen: LemonGen::Buterin,
             background: Background::Red,
             top: Top::Headdress,
-            cyber_suit: CyberSuit::Black,
+            cyber_suit: CyberSuit::Gold,
             expression: Expression::Brooding,
             eyes: Eyes::Open,
             hair: Hair::Elvis,
