@@ -1,3 +1,4 @@
+use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::serde_json::json;
 use near_sdk::test_utils::{accounts, VMContextBuilder};
 use near_sdk::AccountId;
@@ -16,8 +17,11 @@ pub const VALID_TOKEN_PRICE: Lazy<u128> = Lazy::new(|| to_yocto("10"));
 pub const INVALID_TOKEN_PRICE: Lazy<u128> = Lazy::new(|| to_yocto("5"));
 pub const BASE_DEPOSIT: Lazy<u128> = Lazy::new(|| to_yocto("100"));
 
-pub fn get_tokens_id(n: u8) -> Vec<AccountId> {
-    (0..n).map(|n| n.to_string()).collect()
+pub fn tokens(id: usize) -> TokenId {
+    (0..10)
+        .map(|v| v.to_string())
+        .nth(id)
+        .expect("id must be less than 10")
 }
 
 pub fn sample_token_metadata() -> TokenMetadataExt {
