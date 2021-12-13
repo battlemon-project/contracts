@@ -1,15 +1,15 @@
-use near_contract_standards::non_fungible_token::{NonFungibleToken, Token, TokenId};
 use near_contract_standards::non_fungible_token::core::NonFungibleTokenCore;
 use near_contract_standards::non_fungible_token::enumeration::NonFungibleTokenEnumeration;
 use near_contract_standards::non_fungible_token::metadata::{
-    NFT_METADATA_SPEC, NFTContractMetadata,
+    NFTContractMetadata, NFT_METADATA_SPEC,
 };
-use near_sdk::{
-    AccountId, BorshStorageKey, env, near_bindgen, PanicOnDefault, Promise, PromiseOrValue, require,
-};
+use near_contract_standards::non_fungible_token::{NonFungibleToken, Token, TokenId};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{LazyOption, LookupMap};
 use near_sdk::json_types::U128;
+use near_sdk::{
+    env, near_bindgen, require, AccountId, BorshStorageKey, PanicOnDefault, Promise, PromiseOrValue,
+};
 
 use nft_models::{ModelKind, Slots};
 use token_metadata_ext::{TokenExt, TokenMetadataExt};
@@ -189,8 +189,8 @@ near_contract_standards::impl_non_fungible_token_approval!(Contract, tokens);
 mod tests {
     use std::collections::HashMap;
 
-    use near_sdk::{serde_json, testing_env};
     use near_sdk::test_utils::{accounts, VMContextBuilder};
+    use near_sdk::{serde_json, testing_env};
 
     use nft_models::ModelKind;
     use test_utils::*;
@@ -421,14 +421,14 @@ mod tests {
 
     #[test]
     #[should_panic = "token with provided id doesn't exist."]
-    fn nested_token_id() {
+    fn nested_tokens_id() {
         let contract = Contract::init(accounts(0));
         let token_id = "foo".to_string();
         contract.nested_tokens_id(token_id, &mut vec![]);
     }
 
     #[test]
-    fn nested_token_must_return_one() {
+    fn nested_tokens_must_return_self() {
         let mut contract = Contract::init(accounts(0));
         let lemon = get_foo_lemon();
         let token_id = tokens(0);
