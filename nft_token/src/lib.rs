@@ -187,15 +187,12 @@ near_contract_standards::impl_non_fungible_token_approval!(Contract, tokens);
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {
-    use std::collections::HashMap;
-
+    use super::*;
     use near_sdk::test_utils::{accounts, VMContextBuilder};
     use near_sdk::{serde_json, testing_env};
-
-    use nft_models::ModelKind;
+    use nft_models::{lemon::Lemon, weapon::Weapon, ModelKind};
+    use std::collections::HashMap;
     use test_utils::*;
-
-    use super::*;
 
     const MINT_STORAGE_COST: u128 = 6_000_000_000_000_000_000_000;
 
@@ -438,5 +435,30 @@ mod tests {
         contract.nested_tokens_id(token_id.clone(), &mut buf);
         assert_eq!(buf.len(), 1);
         assert_eq!(buf[0], token_id);
+    }
+
+    #[test]
+    fn nested_tokens_must_return_self_and_weapon() {
+        let mut contract = Contract::init(accounts(0));
+        let weapon = get_foo_weapon();
+        let weapon_token_id = tokens(0);
+        contract
+            .model_by_id
+            .insert(&weapon_token_id, &weapon.into());
+
+        let lemon_token_id = tokens(1);
+        let lemon = Lemon {
+            left_weapon_slot: Some(weapon_token_id.clone()),
+            ..get_foo_lemon()
+        };
+        contract.model_by_id.insert(&lemon_token_id, &lemon.into());
+
+        let mut weapon_nested_buf = Vec::new();
+        contract.nested_tokens_id(weapon_token_id.clone(), &mut weapon_nested_buf);
+        assert_eq!(weapon_nested_buf, vec![weapon_token_id.clone()]);
+
+        let mut lemon_nested_buf = Vec::new();
+        contract.nested_tokens_id(lemon_token_id.clone(), &mut lemon_nested_buf);
+        assert_eq!(lemon_nested_buf, vec![lemon_token_id, weapon_token_id]);
     }
 }
