@@ -417,4 +417,12 @@ mod tests {
         assert_eq!(actual_token_2.owner_id, accounts(2));
         assert_eq!(actual_token_2.model, baz_token_metadata_ext().model);
     }
+
+    #[test]
+    #[should_panic = "token with provided id doesn't exist."]
+    fn nested_token_id() {
+        let contract = Contract::init(accounts(0));
+        let token_id = "foo".to_string();
+        contract.nested_tokens_id(token_id, vec![]);
+    }
 }
