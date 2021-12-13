@@ -7,9 +7,7 @@ use near_contract_standards::non_fungible_token::{NonFungibleToken, Token, Token
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{LazyOption, LookupMap};
 use near_sdk::json_types::U128;
-use near_sdk::{
-    env, near_bindgen, require, AccountId, BorshStorageKey, PanicOnDefault, Promise, PromiseOrValue,
-};
+
 use nft_models::{ModelKind, Slots};
 use token_metadata_ext::{TokenExt, TokenMetadataExt};
 
@@ -123,7 +121,7 @@ impl Contract {
 
     /// Get all nested token's id for `token_id`.
     /// `token_id` will be included to the returned collection.
-    fn nested_tokens_id(&self, token_id: TokenId, mut buf: Vec<TokenId>) -> Vec<TokenId> {
+    fn nested_tokens_id(&self, token_id: TokenId, buf: &mut Vec<TokenId>) {
         let model = self
             .model_by_id
             .get(&token_id)
@@ -134,10 +132,8 @@ impl Contract {
         buf.push(token_id);
 
         for child_id in children {
-            buf = self.nested_tokens_id(child_id, buf);
+            self.nested_tokens_id(child_id, buf);
         }
-
-        buf
     }
 
     fn collect_ext_tokens(&self, tokens: Vec<Token>) -> Vec<TokenExt> {
