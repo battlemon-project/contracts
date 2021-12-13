@@ -497,8 +497,6 @@ mod tests {
         contract.nested_tokens_id(right_weapon_token_id.clone(), &mut right_weapon_nested_buf);
         assert_eq!(right_weapon_nested_buf, vec![right_weapon_token_id.clone()]);
 
-
-
         let mut lemon_nested_buf = Vec::new();
         contract.nested_tokens_id(lemon_token_id.clone(), &mut lemon_nested_buf);
         assert_eq!(
