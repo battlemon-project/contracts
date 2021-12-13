@@ -190,7 +190,7 @@ mod tests {
     use super::*;
     use near_sdk::test_utils::{accounts, VMContextBuilder};
     use near_sdk::{serde_json, testing_env};
-    use nft_models::{lemon::Lemon, weapon::Weapon, ModelKind};
+    use nft_models::{lemon::Lemon, weapon::Weapon};
     use std::collections::HashMap;
     use test_utils::*;
 
@@ -460,5 +460,50 @@ mod tests {
         let mut lemon_nested_buf = Vec::new();
         contract.nested_tokens_id(lemon_token_id.clone(), &mut lemon_nested_buf);
         assert_eq!(lemon_nested_buf, vec![lemon_token_id, weapon_token_id]);
+    }
+
+    #[test]
+    fn nested_tokens_must_return_self_and_two_weapons() {
+        let mut contract = Contract::init(accounts(0));
+        use nft_models::weapon::Type;
+
+        let left_weapon = get_foo_weapon();
+        let right_weapon = Weapon {
+            level: 1,
+            r#type: Type::Collusion,
+            ..left_weapon.clone()
+        };
+
+        let left_weapon_token_id = tokens(0);
+        let right_weapon_token_id = tokens(1);
+        let lemon_token_id = tokens(2);
+        let lemon = Lemon {
+            left_weapon_slot: Some(left_weapon_token_id.clone()),
+            right_weapon_slot: Some(right_weapon_token_id.clone()),
+            ..get_foo_lemon()
+        };
+
+        contract.model_by_id.extend([
+            (left_weapon_token_id.clone(), left_weapon.into()),
+            (right_weapon_token_id.clone(), right_weapon.into()),
+            (lemon_token_id.clone(), lemon.into()),
+        ]);
+
+        let mut left_weapon_nested_buf = Vec::new();
+        contract.nested_tokens_id(left_weapon_token_id.clone(), &mut left_weapon_nested_buf);
+        assert_eq!(left_weapon_nested_buf, vec![left_weapon_token_id.clone()]);
+
+        let mut right_weapon_nested_buf = Vec::new();
+        contract.nested_tokens_id(right_weapon_token_id.clone(), &mut right_weapon_nested_buf);
+        assert_eq!(right_weapon_nested_buf, vec![right_weapon_token_id.clone()]);
+
+
+
+        let mut lemon_nested_buf = Vec::new();
+        contract.nested_tokens_id(lemon_token_id.clone(), &mut lemon_nested_buf);
+        assert_eq!(
+            lemon_nested_buf,
+            vec![lemon_token_id, left_weapon_token_id, right_weapon_token_id]
+        );
     }
 }
