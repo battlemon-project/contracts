@@ -123,21 +123,18 @@ impl Contract {
 
     /// Get all nested token's id for `token_id`.
     /// `token_id` will be included to the returned collection.
-    fn nested_tokens_id<'a>(
-        &'a self,
-        token_id: &'a TokenId,
-        mut buf: Vec<&'a TokenId>,
-    ) -> Vec<&'a TokenId> {
-        let children = self
+    fn nested_tokens_id(&self, token_id: TokenId, mut buf: Vec<TokenId>) -> Vec<TokenId> {
+        let model = self
             .model_by_id
-            .get(token_id)
-            .expect("token with provided id doesn't exist.")
-            .slots_id();
+            .get(&token_id)
+            .expect("token with provided id doesn't exist.");
+
+        let children = model.slots_id();
 
         buf.push(token_id);
 
         for child_id in children {
-            buf = self.nested_tokens(child_id, buf);
+            buf = self.nested_tokens_id(child_id, buf);
         }
 
         buf

@@ -26,9 +26,9 @@ fn impl_slots(ast: &DeriveInput) -> TokenStream {
 
     let gen = quote! {
         impl Slots for #name {
-            fn slots_id(&self) -> Vec<&TokenId> {
+            fn slots_id(self) -> Vec<TokenId> {
                 std::iter::empty()
-                    #(.chain(&self.#slots))*
+                    #(.chain(self.#slots))*
                     .collect()
             }
         }
