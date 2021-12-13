@@ -428,7 +428,7 @@ mod tests {
     }
 
     #[test]
-    fn nested_token_must_return_zero() {
+    fn nested_token_must_return_one() {
         let mut contract = Contract::init(accounts(0));
         let lemon = get_foo_lemon();
         let token_id = tokens(0);
