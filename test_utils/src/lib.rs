@@ -6,6 +6,7 @@ use near_sdk_sim::to_yocto;
 use nft_models::lemon::Lemon;
 use nft_models::ModelKind;
 use once_cell::unsync::Lazy;
+use nft_models::weapon::Weapon;
 use token_metadata_ext::*;
 
 pub const MARKET_ACCOUNT_ID: &str = "market";
@@ -65,6 +66,23 @@ pub fn get_foo_lemon() -> Lemon {
         body_slot: None,
         left_weapon_slot: None,
         right_weapon_slot: None,
+    }
+}
+
+pub fn get_foo_weapon() -> Weapon {
+    use nft_models::weapon::*;
+    
+    Weapon {
+        level: 0,
+        r#type: Type::Instant,
+        parent: None,
+        scope_slot: None,
+        perk_slot: None,
+        mag_slot: None,
+        barrel_slot: None,
+        muzzle_slot: None,
+        grip_slot: None,
+        stock_slot: None
     }
 }
 
