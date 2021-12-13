@@ -190,6 +190,7 @@ near_contract_standards::impl_non_fungible_token_approval!(Contract, tokens);
 mod tests {
     use near_sdk::test_utils::{accounts, VMContextBuilder};
     use near_sdk::{serde_json, testing_env};
+    use nft_models::{lemon::*, ModelKind};
     use std::collections::HashMap;
     use test_utils::*;
 
