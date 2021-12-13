@@ -2,6 +2,7 @@ use near_sdk::serde_json::json;
 use near_sdk::test_utils::{accounts, VMContextBuilder};
 use near_sdk::AccountId;
 use near_sdk_sim::to_yocto;
+use nft_models::lemon::Lemon;
 use nft_models::ModelKind;
 use once_cell::unsync::Lazy;
 use token_metadata_ext::*;
@@ -15,10 +16,34 @@ pub const VALID_TOKEN_PRICE: Lazy<u128> = Lazy::new(|| to_yocto("10"));
 pub const INVALID_TOKEN_PRICE: Lazy<u128> = Lazy::new(|| to_yocto("5"));
 pub const BASE_DEPOSIT: Lazy<u128> = Lazy::new(|| to_yocto("100"));
 
+pub fn get_tokens_id(n: u8) -> Vec<AccountId> {
+    (0..n).map(|n| n.to_string()).collect()
+}
+
 pub fn sample_token_metadata() -> TokenMetadataExt {
+    let model: ModelKind = get_foo_lemon().into();
+
+    TokenMetadataExt {
+        title: Some("foo title".into()),
+        description: Some("this is description for foo title's token".into()),
+        media: None,
+        media_hash: None,
+        copies: Some(1),
+        issued_at: None,
+        expires_at: None,
+        starts_at: None,
+        updated_at: None,
+        extra: None,
+        reference: None,
+        reference_hash: None,
+        model,
+    }
+}
+
+pub fn get_foo_lemon() -> Lemon {
     use nft_models::lemon::*;
 
-    let model: ModelKind = Lemon {
+    Lemon {
         option: Option_::OnSale,
         century: Century::Ancient,
         r#type: Type::Light,
@@ -36,23 +61,6 @@ pub fn sample_token_metadata() -> TokenMetadataExt {
         body_slot: None,
         left_weapon_slot: None,
         right_weapon_slot: None,
-    }
-    .into();
-
-    TokenMetadataExt {
-        title: Some("foo title".into()),
-        description: Some("this is description for foo title's token".into()),
-        media: None,
-        media_hash: None,
-        copies: Some(1),
-        issued_at: None,
-        expires_at: None,
-        starts_at: None,
-        updated_at: None,
-        extra: None,
-        reference: None,
-        reference_hash: None,
-        model,
     }
 }
 
