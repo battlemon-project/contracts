@@ -32,6 +32,7 @@ pub fn sample_token_metadata() -> TokenMetadataExt {
         accessory: Accessory::Cigar,
         winrate: None,
         rarity: 0,
+        parent: None,
         body_slot: None,
         left_weapon_slot: None,
         right_weapon_slot: None,
@@ -60,6 +61,7 @@ pub fn foo_token_metadata_ext() -> TokenMetadataExt {
     let model: ModelKind = Weapon {
         level: 0,
         r#type: Type::Instant,
+        parent: None,
         scope_slot: None,
         perk_slot: None,
         mag_slot: None,
@@ -109,6 +111,7 @@ pub fn baz_token_metadata_ext() -> TokenMetadataExt {
         accessory: Accessory::Toothpick,
         winrate: Some(33),
         rarity: 88,
+        parent: None,
         body_slot: None,
         left_weapon_slot: None,
         right_weapon_slot: None,

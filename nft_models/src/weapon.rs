@@ -13,6 +13,7 @@ use crate::slots::Slots;
 pub struct Weapon {
     pub level: u8,
     pub r#type: Type,
+    pub parent: Option<TokenId>,
     pub scope_slot: Option<TokenId>,
     pub perk_slot: Option<TokenId>,
     pub mag_slot: Option<TokenId>,
@@ -41,6 +42,7 @@ mod tests {
         let _weapon = Weapon {
             level: 0,
             r#type: Type::Instant,
+            parent: None,
             scope_slot: None,
             perk_slot: None,
             mag_slot: None,
