@@ -7,7 +7,7 @@ use slots_derive_macro::Slots;
 use crate::slots::Slots;
 
 #[derive(
-    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug, Slots,
+    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug, Slots, Parent,
 )]
 #[serde(crate = "near_sdk::serde")]
 pub struct Suppressor {}
