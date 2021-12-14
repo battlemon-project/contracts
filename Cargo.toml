@@ -1,6 +1,6 @@
 [workspace]
 
-members = ["nft_token", "test_utils", "token_metadata_ext", "nft_market", "play2earn", "juice", "spoiled_nft_token", "slots_derive_macro", "nft_models"]
+members = ["nft_token", "test_utils", "token_metadata_ext", "nft_market", "play2earn", "juice", "spoiled_nft_token", "slots_derive_macro", "nft_models", "parent_derive_macro"]
 default-members = ["nft_token", "nft_market", "play2earn", "juice", "spoiled_nft_token"]
 
 [profile.release]
