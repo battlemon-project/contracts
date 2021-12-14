@@ -158,7 +158,18 @@ impl Contract {
         memo: Option<String>,
     ) {
         self.tokens
-            .nft_transfer(receiver_id, token_id, approval_id, memo)
+            .nft_transfer(receiver_id, token_id.clone(), approval_id, memo);
+
+        // After transfer NFT, we must disassemble compound NFT.
+        // Put off token with `token_id` from tokens that contain it.
+        let mut model = self.model_by_id.get(&token_id).unwrap();
+        model.take_parent();
+        self.model_by_id.insert(&token_id, &model);
+        for id in model.slots_id() {
+            let mut child = self.model_by_id.get(&id).unwrap();
+            child.take_parent();
+            self.model_by_id.insert(&id, &child);
+        }
     }
 
     #[payable]
@@ -545,13 +556,21 @@ mod tests {
 
         let mut right_weapon_nested_buf = Vec::new();
         contract.nested_tokens_id(right_weapon_token_id.clone(), &mut right_weapon_nested_buf);
-        assert_eq!(right_weapon_nested_buf, vec![right_weapon_token_id.clone(), suppressor_token_id.clone()]);
+        assert_eq!(
+            right_weapon_nested_buf,
+            vec![right_weapon_token_id.clone(), suppressor_token_id.clone()]
+        );
 
         let mut lemon_nested_buf = Vec::new();
         contract.nested_tokens_id(lemon_token_id.clone(), &mut lemon_nested_buf);
         assert_eq!(
             lemon_nested_buf,
-            vec![lemon_token_id, left_weapon_token_id, right_weapon_token_id, suppressor_token_id]
+            vec![
+                lemon_token_id,
+                left_weapon_token_id,
+                right_weapon_token_id,
+                suppressor_token_id
+            ]
         );
     }
 }
