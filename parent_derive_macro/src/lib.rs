@@ -1,6 +1,6 @@
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, Data, DeriveInput, Fields, FieldsNamed};
+use syn::{parse_macro_input, DeriveInput};
 
 /// derive macro for `Parent` trait, take field `parent`.
 #[proc_macro_derive(Parent)]
