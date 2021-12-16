@@ -165,8 +165,10 @@ impl Contract {
         // Put off token with `token_id` from tokens that contain it.
         let mut model = self.model_by_id.get(&token_id).unwrap();
         model.take_parent();
+        let slots = model.take_slots();
         self.model_by_id.insert(&token_id, &model);
-        for id in model.slots_id() {
+
+        for id in slots.iter().flatten() {
             let mut child = self.model_by_id.get(&id).unwrap();
             child.take_parent();
             self.model_by_id.insert(&id, &child);
@@ -562,7 +564,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
     fn lemon_nft_transfer_change_owner_only_for_lemon_token_and_disassemble_it_from_weapon_nft() {
         let mut context = get_context(alice());
         testing_env!(context.build());
@@ -612,6 +613,61 @@ mod tests {
             } => {
                 assert_eq!(owner_id, danny());
                 assert_eq!(left_weapon_slot, None);
+            }
+            _ => unreachable!(),
+        }
+    }
+
+    #[test]
+    fn weapon_nft_transfer_change_owner_only_for_weapon_token_and_disassemble_it_from_lemon_nft() {
+        let mut context = get_context(alice());
+        testing_env!(context.build());
+        let mut contract = Contract::init(alice());
+        testing_env!(context
+            .storage_usage(env::storage_usage())
+            .attached_deposit(MINT_STORAGE_COST * 2)
+            .build());
+
+        let [lemon_id, weapon_id] = tokens::<2>();
+        let mut lemon = get_foo_lemon();
+        let mut weapon = get_foo_weapon();
+        lemon.right_weapon_slot = Some(weapon_id.clone());
+        weapon.parent = Some(lemon_id.clone());
+
+        contract.mint(lemon_id.clone(), fake_metadata_with(lemon), Some(bob()));
+        contract.mint(weapon_id.clone(), fake_metadata_with(weapon), Some(bob()));
+
+        testing_env!(context
+            .storage_usage(env::storage_usage())
+            .attached_deposit(1)
+            .predecessor_account_id(bob())
+            .build());
+
+        contract.nft_transfer(danny(), weapon_id.clone(), None, None);
+
+        match contract.nft_token(weapon_id).unwrap() {
+            TokenExt {
+                owner_id,
+                model: ModelKind::Weapon(Weapon { parent, .. }),
+                ..
+            } => {
+                assert_eq!(owner_id, danny());
+                assert_eq!(parent, None);
+            }
+            _ => unreachable!(),
+        }
+
+        match contract.nft_token(lemon_id).unwrap() {
+            TokenExt {
+                owner_id,
+                model:
+                    ModelKind::Lemon(Lemon {
+                        right_weapon_slot, ..
+                    }),
+                ..
+            } => {
+                assert_eq!(owner_id, bob());
+                assert_eq!(right_weapon_slot, None);
             }
             _ => unreachable!(),
         }
