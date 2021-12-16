@@ -6,7 +6,7 @@ trait Parent {
 }
 
 #[test]
-fn first() {
+fn take_parent() {
     #[derive(Parent)]
     struct Foo {
         parent: Option<TokenId>,
