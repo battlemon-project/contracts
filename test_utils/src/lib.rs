@@ -1,12 +1,12 @@
 use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::serde_json::json;
-use near_sdk::test_utils::{accounts, VMContextBuilder};
+use near_sdk::test_utils::VMContextBuilder;
 use near_sdk::AccountId;
 use near_sdk_sim::to_yocto;
 use nft_models::lemon::Lemon;
-use nft_models::ModelKind;
-use once_cell::unsync::Lazy;
 use nft_models::weapon::Weapon;
+use nft_models::{ModelKind, Parent, Slots};
+use once_cell::unsync::Lazy;
 use token_metadata_ext::*;
 
 pub const MARKET_ACCOUNT_ID: &str = "market";
@@ -18,11 +18,48 @@ pub const VALID_TOKEN_PRICE: Lazy<u128> = Lazy::new(|| to_yocto("10"));
 pub const INVALID_TOKEN_PRICE: Lazy<u128> = Lazy::new(|| to_yocto("5"));
 pub const BASE_DEPOSIT: Lazy<u128> = Lazy::new(|| to_yocto("100"));
 
-pub fn tokens(id: usize) -> TokenId {
-    (0..10)
-        .map(|v| v.to_string())
-        .nth(id)
-        .expect("id must be less than 10")
+pub fn alice() -> AccountId {
+    AccountId::new_unchecked("alice.near".to_string())
+}
+
+pub fn bob() -> AccountId {
+    AccountId::new_unchecked("bob.near".to_string())
+}
+pub fn danny() -> AccountId {
+    AccountId::new_unchecked("danny.near".to_string())
+}
+pub fn fargo() -> AccountId {
+    AccountId::new_unchecked("fargo.near".to_string())
+}
+
+pub fn carol() -> AccountId {
+    AccountId::new_unchecked("carol.near".to_string())
+}
+
+pub fn tokens<const N: usize>() -> [TokenId; N] {
+    let range: Vec<_> = (0..N).map(|v| v.to_string()).collect();
+    <[_; N]>::try_from(range).unwrap()
+}
+
+pub fn fake_metadata_with<T>(model: T) -> TokenMetadataExt
+where
+    T: Slots + Parent + Into<ModelKind>,
+{
+    TokenMetadataExt {
+        title: Some("fake title".into()),
+        description: Some("this is fake description".into()),
+        media: Some("https://fakelinktomedia.com".into()),
+        media_hash: Some(vec![0, 1, 2, 3, 4].into()),
+        copies: None,
+        issued_at: None,
+        expires_at: None,
+        starts_at: None,
+        updated_at: None,
+        extra: None,
+        reference: None,
+        reference_hash: None,
+        model: model.into(),
+    }
 }
 
 pub fn sample_token_metadata() -> TokenMetadataExt {
@@ -71,7 +108,7 @@ pub fn get_foo_lemon() -> Lemon {
 
 pub fn get_foo_weapon() -> Weapon {
     use nft_models::weapon::*;
-    
+
     Weapon {
         level: 0,
         r#type: Type::Instant,
@@ -82,7 +119,7 @@ pub fn get_foo_weapon() -> Weapon {
         barrel_slot: None,
         muzzle_slot: None,
         grip_slot: None,
-        stock_slot: None
+        stock_slot: None,
     }
 }
 
@@ -174,7 +211,7 @@ pub fn baz_token_metadata_ext() -> TokenMetadataExt {
 pub fn get_context(predecessor_account_id: AccountId) -> VMContextBuilder {
     let mut builder = VMContextBuilder::new();
     builder
-        .current_account_id(accounts(0))
+        .current_account_id(alice())
         .signer_account_id(predecessor_account_id.clone())
         .predecessor_account_id(predecessor_account_id);
     builder
