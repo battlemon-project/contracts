@@ -1,10 +1,10 @@
+use crate::parent::Parent;
+use crate::slots::Slots;
 use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::serde::{Deserialize, Serialize};
-
+use parent_derive_macro::Parent;
 use slots_derive_macro::Slots;
-
-use crate::slots::Slots;
 
 #[derive(
     Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug, Slots, Parent,
