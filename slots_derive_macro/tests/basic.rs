@@ -1,9 +1,11 @@
 use near_contract_standards::non_fungible_token::TokenId;
 use slots_derive_macro::Slots;
+use test_utils::tokens;
 
 /// Mocked version of original trait. It uses only for tests
 trait Slots {
-    fn slots_id(&self) -> Vec<&TokenId>;
+    fn slots_id(self) -> Vec<TokenId>;
+    fn take_slots(&mut self) -> Vec<Option<TokenId>>;
 }
 
 #[test]
@@ -16,7 +18,7 @@ fn zero_slots_to_vec() {
     let model = Model { _damage: 0 };
 
     let actual = model.slots_id();
-    assert_eq!(actual, Vec::<&TokenId>::new());
+    assert_eq!(actual, Vec::<TokenId>::new());
 }
 
 #[test]
@@ -35,7 +37,7 @@ fn one_slots_to_vec() {
     };
 
     let actual = model.slots_id();
-    assert_eq!(actual, vec![&weapon])
+    assert_eq!(actual, vec![weapon])
 }
 
 #[test]
@@ -57,5 +59,29 @@ fn two_slots_to_vec() {
     };
 
     let actual = model.slots_id();
-    assert_eq!(actual, vec![&weapon, &armor]);
+    assert_eq!(actual, vec![weapon, armor]);
+}
+
+#[test]
+fn take_slots() {
+    #[derive(Slots)]
+    struct Foo {
+        parent: Option<TokenId>,
+        a_slot: Option<TokenId>,
+        b_slot: Option<TokenId>,
+        c_slot: Option<TokenId>,
+    }
+
+    let [id1, id2, id3] = tokens::<3>();
+    let mut foo = Foo {
+        parent: None,
+        a_slot: Some(id1.clone()),
+        b_slot: Some(id2.clone()),
+        c_slot: Some(id3.clone()),
+    };
+
+    assert_eq!(foo.take_slots(), vec![Some(id1), Some(id2), Some(id3)]);
+    assert_eq!(foo.a_slot, None);
+    assert_eq!(foo.b_slot, None);
+    assert_eq!(foo.c_slot, None);
 }

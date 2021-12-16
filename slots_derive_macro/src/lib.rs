@@ -2,7 +2,7 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, Data, DeriveInput, Fields, FieldsNamed};
 
-/// derive macro for `Slots` trait, collect fields with `slot` in the name into `Vec<&TokenId>` of ref on values.
+/// derive macro for `Slots` trait, collect fields which contain `slot` in the name.
 #[proc_macro_derive(Slots)]
 pub fn slots(input: TokenStream) -> TokenStream {
     let ast = parse_macro_input!(input as DeriveInput);
@@ -22,16 +22,23 @@ fn impl_slots(ast: &DeriveInput) -> TokenStream {
         _ => panic!("works only with named fields"),
     };
 
-    let slots = fields.filter(|v| v.to_string().contains("slot"));
+    let slots1 = fields.filter(|v| v.to_string().contains("slot"));
+    let slots2 = slots1.clone();
 
     let gen = quote! {
         impl Slots for #name {
             fn slots_id(self) -> Vec<TokenId> {
                 std::iter::empty()
-                    #(.chain(self.#slots))*
+                    #(.chain(self.#slots1))*
                     .collect()
+            }
+
+            fn take_slots(&mut self) -> Vec<Option<TokenId>> {
+                vec![#(self.#slots2.take()),*]
             }
         }
     };
+
+    dbg!(gen.to_string());
     gen.into()
 }
