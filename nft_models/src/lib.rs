@@ -1,24 +1,32 @@
 pub mod lemon;
-mod slots;
-pub mod weapon;
+pub mod manager;
 pub mod suppressor;
-mod parent;
+pub mod weapon;
 
 use enum_dispatch::enum_dispatch;
 use lemon::Lemon;
+pub use manager::Manager;
 use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::serde::{Deserialize, Serialize};
-pub use slots::Slots;
-pub use parent::Parent;
-use weapon::Weapon;
 use suppressor::Suppressor;
+use weapon::Weapon;
 
-#[enum_dispatch(Slots, Parent)]
+#[enum_dispatch(Manager)]
 #[derive(Serialize, Deserialize, Clone, BorshSerialize, BorshDeserialize, Debug, PartialEq)]
 #[serde(crate = "near_sdk::serde")]
 pub enum ModelKind {
     Lemon,
     Weapon,
     Suppressor,
+}
+
+impl ModelKind {
+    fn is_compatible(&self, model_kind: &Self) -> bool {
+        match (self, model_kind) {
+            (ModelKind::Lemon(_), ModelKind::Weapon(_)) => true,
+            (ModelKind::Weapon(_), ModelKind::Suppressor(_)) => true,
+            _ => false,
+        }
+    }
 }

@@ -1,13 +1,12 @@
-use crate::parent::Parent;
-use crate::slots::Slots;
+use crate::manager::Manager;
+use manager_derive_macro::Manager;
 use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::serde::{Deserialize, Serialize};
-use parent_derive_macro::Parent;
-use slots_derive_macro::Slots;
+use std::collections::HashSet;
 
 #[derive(
-    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug, Slots, Parent,
+    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug, Manager,
 )]
 #[serde(crate = "near_sdk::serde")]
 pub struct Lemon {
@@ -25,9 +24,7 @@ pub struct Lemon {
     pub winrate: Option<u8>,
     pub rarity: u8,
     pub parent: Option<TokenId>,
-    pub body_slot: Option<TokenId>,
-    pub left_weapon_slot: Option<TokenId>,
-    pub right_weapon_slot: Option<TokenId>,
+    pub slots: Option<HashSet<TokenId>>,
 }
 
 #[derive(
@@ -171,9 +168,7 @@ mod tests {
             winrate: None,
             rarity: 0,
             parent: None,
-            body_slot: None,
-            left_weapon_slot: None,
-            right_weapon_slot: None,
+            slots: None,
             r#type: Type::Light,
         };
     }
