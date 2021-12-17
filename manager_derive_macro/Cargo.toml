@@ -1,5 +1,5 @@
 [package]
-name = "slots_derive_macro"
+name = "manager_derive_macro"
 version = "0.1.0"
 edition = "2021"
 
@@ -12,5 +12,4 @@ quote = "1.0.10"
 proc-macro2 = "1.0.33"
 
 [dev-dependencies]
-near-contract-standards = "4.0.0-pre.4"
-test_utils = { path = "../test_utils" }
+nft_models = { path = "../nft_models" }
