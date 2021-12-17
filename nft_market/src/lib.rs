@@ -492,8 +492,7 @@ impl NonFungibleTokenApprovalReceiver for Contract {
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {
-    use near_sdk::test_utils::{accounts, VMContextBuilder};
-    use near_sdk::{serde_json, testing_env};
+    use near_sdk::{test_utils::accounts, testing_env};
     use test_utils::*;
 
     use super::*;

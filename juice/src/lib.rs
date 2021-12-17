@@ -10,6 +10,7 @@ use near_sdk::{
     log, near_bindgen, AccountId, Balance, BorshStorageKey, PanicOnDefault, PromiseOrValue,
 };
 
+#[allow(dead_code)]
 #[derive(BorshSerialize, BorshStorageKey)]
 enum StorageKey {
     FungibleToken,
@@ -25,6 +26,7 @@ struct Contract {
 
 #[near_bindgen]
 impl Contract {
+    #[allow(dead_code)]
     #[init]
     pub fn init(owner_id: AccountId, total_supply: U128) -> Self {
         let metadata = FungibleTokenMetadata {
