@@ -5,7 +5,7 @@ use near_sdk::AccountId;
 use near_sdk_sim::to_yocto;
 use nft_models::lemon::Lemon;
 use nft_models::weapon::Weapon;
-use nft_models::{ModelKind, Parent, Slots};
+use nft_models::{Manager, ModelKind};
 use once_cell::unsync::Lazy;
 use token_metadata_ext::*;
 
@@ -43,7 +43,7 @@ pub fn tokens<const N: usize>() -> [TokenId; N] {
 
 pub fn fake_metadata_with<T>(model: T) -> TokenMetadataExt
 where
-    T: Slots + Parent + Into<ModelKind>,
+    T: Manager + Into<ModelKind>,
 {
     TokenMetadataExt {
         title: Some("fake title".into()),
@@ -100,9 +100,7 @@ pub fn get_foo_lemon() -> Lemon {
         winrate: None,
         rarity: 0,
         parent: None,
-        body_slot: None,
-        left_weapon_slot: None,
-        right_weapon_slot: None,
+        slots: None,
     }
 }
 
@@ -113,13 +111,7 @@ pub fn get_foo_weapon() -> Weapon {
         level: 0,
         r#type: Type::Instant,
         parent: None,
-        scope_slot: None,
-        perk_slot: None,
-        mag_slot: None,
-        barrel_slot: None,
-        muzzle_slot: None,
-        grip_slot: None,
-        stock_slot: None,
+        slots: None,
     }
 }
 
@@ -129,13 +121,7 @@ pub fn foo_token_metadata_ext() -> TokenMetadataExt {
         level: 0,
         r#type: Type::Instant,
         parent: None,
-        scope_slot: None,
-        perk_slot: None,
-        mag_slot: None,
-        barrel_slot: None,
-        muzzle_slot: None,
-        grip_slot: None,
-        stock_slot: None,
+        slots: None,
     }
     .into();
 
@@ -179,9 +165,7 @@ pub fn baz_token_metadata_ext() -> TokenMetadataExt {
         winrate: Some(33),
         rarity: 88,
         parent: None,
-        body_slot: None,
-        left_weapon_slot: None,
-        right_weapon_slot: None,
+        slots: None,
     }
     .into();
 
