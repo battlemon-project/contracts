@@ -44,6 +44,10 @@ fn impl_manager(ast: &DeriveInput) -> TokenStream {
                 self.slots = Some(slots);
 
                 ret
+           }
+
+            fn replace_parent(&mut self, token_id: &TokenId) -> Option<TokenId> {
+                self.parent.replace(token_id.clone())
             }
         }
     };

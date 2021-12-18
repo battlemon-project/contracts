@@ -168,3 +168,31 @@ fn insert_when_slot_has_eq_item_return_false() {
     assert!(!ret);
     assert_eq!(f.slots.unwrap(), [id1].into());
 }
+
+#[test]
+fn replace_parent_when_parent_is_none() {
+    let mut f = Model {
+        parent: None,
+        slots: None,
+    };
+    let id1 = "1".to_string();
+
+    let ret = f.replace_parent(&id1);
+    assert_eq!(None, ret);
+    assert_eq!(f.parent, Some(id1));
+}
+
+#[test]
+fn replace_parent_when_parent_is_some() {
+    let id1 = "1".to_string();
+    let id2 = "2".to_string();
+
+    let mut f = Model {
+        parent: Some(id1.clone()),
+        slots: None,
+    };
+
+    let ret = f.replace_parent(&id2);
+    assert_eq!(Some(id1), ret);
+    assert_eq!(f.parent, Some(id2));
+}
