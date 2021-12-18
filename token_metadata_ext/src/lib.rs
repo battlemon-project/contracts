@@ -87,9 +87,8 @@ mod tests {
             accessory: Accessory::Cigar,
             winrate: None,
             rarity: 0,
-            body_slot: None,
-            left_weapon_slot: None,
-            right_weapon_slot: None,
+            parent: None,
+            slots: None
         }
     }
 
