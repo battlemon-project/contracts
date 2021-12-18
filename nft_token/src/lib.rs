@@ -201,6 +201,34 @@ impl Contract {
                 .map(|model| TokenExt::from_parts(token, model))
         })
     }
+
+    fn put_slot(&mut self, body_id: TokenId, slot_id: TokenId) {
+        let body_owner = self
+            .tokens
+            .owner_by_id
+            .get(&body_id)
+            .expect("wrong id for body");
+
+        let slot_owner = self
+            .tokens
+            .owner_by_id
+            .get(&slot_id)
+            .expect("wrong id for slot");
+
+        require!(body_owner == slot_owner, "owner must be the same for both.");
+
+        let mut body_model = self.model_by_id.get(&body_id).unwrap();
+        let mut slot_model = self.model_by_id.get(&slot_id).unwrap();
+        require!(
+            body_model.is_compatible(&slot_model),
+            "models aren't compatible"
+        );
+
+        body_model.insert_slot(&slot_id);
+        slot_model.replace_parent(&body_id);
+        self.model_by_id.insert(&body_id, &body_model);
+        self.model_by_id.insert(&slot_id, &slot_model);
+    }
 }
 
 near_contract_standards::impl_non_fungible_token_approval!(Contract, tokens);
@@ -709,5 +737,78 @@ mod tests {
             }
             _ => unreachable!(),
         }
+    }
+
+    #[test]
+    #[should_panic(expected = "wrong id for body")]
+    fn put_slot_body_do_not_exist() {
+        let mut context = get_context(alice());
+        testing_env!(context.attached_deposit(MINT_STORAGE_COST).build());
+        let mut contract = Contract::init(alice());
+
+        let [lemon_id, weapon_id] = tokens::<2>();
+        let weapon_meta = fake_metadata_with(get_foo_weapon());
+        contract.mint(weapon_id.clone(), weapon_meta, Some(bob()));
+        contract.put_slot(lemon_id, weapon_id);
+    }
+
+    #[test]
+    #[should_panic(expected = "wrong id for slot")]
+    fn put_slot_when_slot_do_not_exist() {
+        let mut context = get_context(alice());
+        testing_env!(context.attached_deposit(MINT_STORAGE_COST).build());
+        let mut contract = Contract::init(alice());
+
+        let [lemon_id, weapon_id] = tokens::<2>();
+        let lemon_meta = fake_metadata_with(get_foo_lemon());
+        contract.mint(lemon_id.clone(), lemon_meta, Some(bob()));
+        contract.put_slot(lemon_id, weapon_id);
+    }
+
+    #[test]
+    #[should_panic(expected = "owner must be the same for both.")]
+    fn put_slot_when_body_and_slot_not_the_same_owner() {
+        let mut context = get_context(alice());
+        testing_env!(context.attached_deposit(MINT_STORAGE_COST * 2).build());
+        let mut contract = Contract::init(alice());
+
+        let [lemon_id, weapon_id] = tokens::<2>();
+        let lemon_meta = fake_metadata_with(get_foo_lemon());
+        let weapon_meta = fake_metadata_with(get_foo_weapon());
+        contract.mint(lemon_id.clone(), lemon_meta, Some(bob()));
+        contract.mint(weapon_id.clone(), weapon_meta, Some(carol()));
+        contract.put_slot(lemon_id, weapon_id);
+    }
+
+    #[test]
+    #[should_panic(expected = "models aren't compatible")]
+    fn put_slot_when_body_and_slot_is_not_compatible() {
+        let mut context = get_context(alice());
+        testing_env!(context.attached_deposit(MINT_STORAGE_COST * 2).build());
+        let mut contract = Contract::init(alice());
+
+        let [lemon_id, suppressor_id] = tokens::<2>();
+        let lemon_meta = fake_metadata_with(get_foo_lemon());
+        let suppressor_meta = fake_metadata_with(Suppressor {
+            parent: None,
+            slots: None,
+        });
+        contract.mint(lemon_id.clone(), lemon_meta, Some(bob()));
+        contract.mint(suppressor_id.clone(), suppressor_meta, Some(bob()));
+        contract.put_slot(lemon_id, suppressor_id);
+    }
+
+    #[test]
+    fn put_slot_when_body_and_slot_is_compatible() {
+        let mut context = get_context(alice());
+        testing_env!(context.attached_deposit(MINT_STORAGE_COST * 2).build());
+        let mut contract = Contract::init(alice());
+
+        let [lemon_id, weapon_id] = tokens::<2>();
+        let lemon_meta = fake_metadata_with(get_foo_lemon());
+        let weapon_meta = fake_metadata_with(get_foo_weapon());
+        contract.mint(lemon_id.clone(), lemon_meta, Some(bob()));
+        contract.mint(weapon_id.clone(), weapon_meta, Some(bob()));
+        contract.put_slot(lemon_id, weapon_id);
     }
 }
