@@ -132,10 +132,8 @@ impl Contract {
 
         buf.push(token_id);
 
-        if let Some(slots) = model.slots_id() {
-            for id in slots {
-                self.nested_tokens_id(id, buf);
-            }
+        for id in model.slots_id() {
+            self.nested_tokens_id(id, buf);
         }
     }
 
@@ -170,14 +168,13 @@ impl Contract {
             self.model_by_id.insert(&parent_id, &parent);
         };
 
-        let slots = model.clear_slots();
+        let slots = model.drain_slots();
         self.model_by_id.insert(&token_id, &model);
-        if let Some(slots) = slots {
-            for id in slots {
-                let mut child = self.model_by_id.get(&id).unwrap();
-                child.take_parent();
-                self.model_by_id.insert(&id, &child);
-            }
+
+        for id in slots {
+            let mut child = self.model_by_id.get(&id).unwrap();
+            child.take_parent();
+            self.model_by_id.insert(&id, &child);
         }
     }
 
@@ -229,6 +226,11 @@ impl Contract {
         self.model_by_id.insert(&body_id, &body_model);
         self.model_by_id.insert(&slot_id, &slot_model);
     }
+
+    #[payable]
+    pub fn assemble_compound_nft(&mut self, instructions: Vec<TokenId>) {
+        todo!()
+    }
 }
 
 near_contract_standards::impl_non_fungible_token_approval!(Contract, tokens);
@@ -240,7 +242,7 @@ mod tests {
     use nft_models::lemon::Lemon;
     use nft_models::suppressor::Suppressor;
     use nft_models::weapon::{Type as WeaponType, Weapon};
-    use std::collections::HashMap;
+    use std::collections::{HashMap, HashSet};
     use test_utils::*;
 
     const MINT_STORAGE_COST: u128 = 6_000_000_000_000_000_000_000;
@@ -486,7 +488,7 @@ mod tests {
             .insert(&weapon_token_id, &weapon.into());
 
         let lemon = Lemon {
-            slots: Some([weapon_token_id.clone()].into()),
+            slots: [weapon_token_id.clone()].into(),
             ..get_foo_lemon()
         };
         contract.model_by_id.insert(&lemon_token_id, &lemon.into());
@@ -515,7 +517,7 @@ mod tests {
 
         let lemon_slots = [left_weapon_token_id.clone(), right_weapon_token_id.clone()].into();
         let lemon = Lemon {
-            slots: Some(lemon_slots),
+            slots: lemon_slots,
             ..get_foo_lemon()
         };
 
@@ -551,20 +553,20 @@ mod tests {
 
         let suppressor = Suppressor {
             parent: None,
-            slots: None,
+            slots: HashSet::new(),
         };
 
         let left_weapon = get_foo_weapon();
         let right_weapon = Weapon {
             level: 1,
             r#type: WeaponType::Projection,
-            slots: Some([suppressor_token_id.clone()].into()),
+            slots: [suppressor_token_id.clone()].into(),
             ..left_weapon.clone()
         };
 
         let lemon_slots = [left_weapon_token_id.clone(), right_weapon_token_id.clone()].into();
         let lemon = Lemon {
-            slots: Some(lemon_slots),
+            slots: lemon_slots,
             ..get_foo_lemon()
         };
 
@@ -613,11 +615,11 @@ mod tests {
 
         let [lemon_id, weapon_id] = tokens::<2>();
         let lemon = Lemon {
-            slots: Some([weapon_id.clone()].into()),
+            slots: [weapon_id.clone()].into(),
             ..get_foo_lemon()
         };
         let weapon = Weapon {
-            slots: Some([lemon_id.clone()].into()),
+            slots: [lemon_id.clone()].into(),
             ..get_foo_weapon()
         };
 
@@ -651,7 +653,7 @@ mod tests {
                 ..
             } => {
                 assert_eq!(owner_id, danny());
-                assert_eq!(slots, None);
+                assert_eq!(slots, HashSet::new());
             }
             _ => unreachable!(),
         }
@@ -670,18 +672,18 @@ mod tests {
         let [lemon_id, weapon_id, suppressor_id] = tokens::<3>();
 
         let lemon = Lemon {
-            slots: Some([weapon_id.clone()].into()),
+            slots: [weapon_id.clone()].into(),
             ..get_foo_lemon()
         };
 
         let suppressor = Suppressor {
             parent: Some(weapon_id.clone()),
-            slots: None,
+            slots: HashSet::new(),
         };
 
         let weapon = Weapon {
             parent: Some(lemon_id.clone()),
-            slots: Some([suppressor_id.clone()].into()),
+            slots: [suppressor_id.clone()].into(),
             ..get_foo_weapon()
         };
 
@@ -709,7 +711,7 @@ mod tests {
             } => {
                 assert_eq!(owner_id, danny());
                 assert_eq!(parent, None);
-                assert_eq!(slots, None);
+                assert_eq!(slots, HashSet::new());
             }
             _ => unreachable!(),
         }
@@ -721,7 +723,7 @@ mod tests {
                 ..
             } => {
                 assert_eq!(owner_id, bob());
-                assert_eq!(slots, None);
+                assert_eq!(slots, HashSet::new());
             }
             _ => unreachable!(),
         }
@@ -791,7 +793,7 @@ mod tests {
         let lemon_meta = fake_metadata_with(get_foo_lemon());
         let suppressor_meta = fake_metadata_with(Suppressor {
             parent: None,
-            slots: None,
+            slots: HashSet::new(),
         });
         contract.mint(lemon_id.clone(), lemon_meta, Some(bob()));
         contract.mint(suppressor_id.clone(), suppressor_meta, Some(bob()));
