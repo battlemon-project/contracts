@@ -11,7 +11,7 @@ use std::collections::HashSet;
 #[serde(crate = "near_sdk::serde")]
 pub struct Suppressor {
     pub parent: Option<TokenId>,
-    pub slots: Option<HashSet<TokenId>>,
+    pub slots: HashSet<TokenId>,
 }
 
 #[cfg(test)]
@@ -22,7 +22,7 @@ mod tests {
     fn suppressor_model() {
         let _suppressor = Suppressor {
             parent: None,
-            slots: None,
+            slots: HashSet::new(),
         };
     }
 }

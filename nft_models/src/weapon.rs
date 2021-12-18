@@ -13,7 +13,7 @@ pub struct Weapon {
     pub level: u8,
     pub r#type: Type,
     pub parent: Option<TokenId>,
-    pub slots: Option<HashSet<TokenId>>,
+    pub slots: HashSet<TokenId>,
 }
 
 #[derive(
@@ -36,7 +36,7 @@ mod tests {
             level: 0,
             r#type: Type::Instant,
             parent: None,
-            slots: None,
+            slots: HashSet::new(),
         };
     }
 }

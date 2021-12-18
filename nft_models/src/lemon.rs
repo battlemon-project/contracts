@@ -24,7 +24,7 @@ pub struct Lemon {
     pub winrate: Option<u8>,
     pub rarity: u8,
     pub parent: Option<TokenId>,
-    pub slots: Option<HashSet<TokenId>>,
+    pub slots: HashSet<TokenId>,
 }
 
 #[derive(
@@ -168,7 +168,7 @@ mod tests {
             winrate: None,
             rarity: 0,
             parent: None,
-            slots: None,
+            slots: HashSet::new(),
             r#type: Type::Light,
         };
     }
