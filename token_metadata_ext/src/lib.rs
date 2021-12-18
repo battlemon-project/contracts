@@ -69,6 +69,7 @@ impl TokenExt {
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {
+    use std::collections::HashSet;
     use super::*;
     use nft_models::lemon::*;
 
@@ -88,7 +89,7 @@ mod tests {
             winrate: None,
             rarity: 0,
             parent: None,
-            slots: None
+            slots: HashSet::new()
         }
     }
 

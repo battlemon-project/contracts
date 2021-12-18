@@ -7,6 +7,7 @@ use nft_models::lemon::Lemon;
 use nft_models::weapon::Weapon;
 use nft_models::{Manager, ModelKind};
 use once_cell::unsync::Lazy;
+use std::collections::HashSet;
 use token_metadata_ext::*;
 
 pub const MARKET_ACCOUNT_ID: &str = "market";
@@ -100,7 +101,7 @@ pub fn get_foo_lemon() -> Lemon {
         winrate: None,
         rarity: 0,
         parent: None,
-        slots: None,
+        slots: HashSet::new(),
     }
 }
 
@@ -111,7 +112,7 @@ pub fn get_foo_weapon() -> Weapon {
         level: 0,
         r#type: Type::Instant,
         parent: None,
-        slots: None,
+        slots: HashSet::new(),
     }
 }
 
@@ -121,7 +122,7 @@ pub fn foo_token_metadata_ext() -> TokenMetadataExt {
         level: 0,
         r#type: Type::Instant,
         parent: None,
-        slots: None,
+        slots: HashSet::new(),
     }
     .into();
 
@@ -165,7 +166,7 @@ pub fn baz_token_metadata_ext() -> TokenMetadataExt {
         winrate: Some(33),
         rarity: 88,
         parent: None,
-        slots: None,
+        slots: HashSet::new(),
     }
     .into();
 
