@@ -22,7 +22,7 @@ pub enum ModelKind {
 }
 
 impl ModelKind {
-    fn is_compatible(&self, model_kind: &Self) -> bool {
+    pub fn is_compatible(&self, model_kind: &Self) -> bool {
         match (self, model_kind) {
             (ModelKind::Lemon(_), ModelKind::Weapon(_)) => true,
             (ModelKind::Weapon(_), ModelKind::Suppressor(_)) => true,

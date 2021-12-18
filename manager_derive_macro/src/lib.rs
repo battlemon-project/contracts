@@ -34,13 +34,17 @@ fn impl_manager(ast: &DeriveInput) -> TokenStream {
                 self.slots.clone().and_then(|v| Some(v.into_iter().collect()))
             }
 
-            // fn insert_slot(&mut self, token_id: &TokenId) -> bool {
-            //     self.slots
-            //         .or(Some(HashSet::new()))
-            //         .as_mut()
-            //         .unwrap()
-            //         .insert(token_id.clone())
-            // }
+           fn insert_slot(&mut self, token_id: &TokenId) -> bool {
+                let mut slots = self.slots
+                    .take()
+                    .or_else(|| Some(HashSet::new()))
+                    .unwrap();
+
+                let ret = slots.insert(token_id.clone());
+                self.slots = Some(slots);
+
+                ret
+            }
         }
     };
 

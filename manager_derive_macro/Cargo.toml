@@ -13,3 +13,4 @@ proc-macro2 = "1.0.33"
 
 [dev-dependencies]
 nft_models = { path = "../nft_models" }
+test_utils = { path = "../test_utils" }

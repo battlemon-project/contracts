@@ -1,6 +1,7 @@
 use manager_derive_macro::Manager;
 use nft_models::manager::Manager;
 use std::collections::HashSet;
+use test_utils::tokens;
 
 type TokenId = String;
 
@@ -51,8 +52,7 @@ fn clear_slots_with_none_nothing_change() {
 
 #[test]
 fn clear_slots_with_one_value() {
-    let id = "1".to_string();
-    let parent_id = "2".to_string();
+    let [id, parent_id] = tokens::<2>();
     let mut model = Model {
         parent: Some(parent_id.clone()),
         slots: Some([id.clone()].into()),
@@ -65,9 +65,9 @@ fn clear_slots_with_one_value() {
 
 #[test]
 fn clear_slots_with_two_value() {
-    let id1 = "1".to_string();
-    let id2 = "2".to_string();
+    let [id1, id2] = tokens::<2>();
     let parent_id = "2".to_string();
+
     let mut model = Model {
         parent: Some(parent_id.clone()),
         slots: Some([id1.clone(), id2.clone()].into()),
@@ -103,8 +103,7 @@ fn slots_id_with_empty_slots() {
 
 #[test]
 fn slots_id_with_one_slot() {
-    let parent_id = "1".to_string();
-    let id = "2".to_string();
+    let [parent_id, id] = tokens::<2>();
     let model = Model {
         parent: Some(parent_id.clone()),
         slots: Some([id.clone()].into()),
@@ -117,9 +116,7 @@ fn slots_id_with_one_slot() {
 
 #[test]
 fn slots_id_with_two_slots() {
-    let parent_id = "1".to_string();
-    let id1 = "2".to_string();
-    let id2 = "3".to_string();
+    let [parent_id, id1, id2] = tokens::<3>();
     let model = Model {
         parent: Some(parent_id.clone()),
         slots: Some([id1.clone(), id2.clone()].into()),
@@ -129,4 +126,45 @@ fn slots_id_with_two_slots() {
     assert_eq!(slots, vec![id1.clone(), id2.clone()]);
     assert_eq!(model.parent, Some(parent_id));
     assert_eq!(model.slots, Some([id1, id2].into()));
+}
+
+#[test]
+fn insert_when_slot_is_none() {
+    let mut f = Model {
+        parent: None,
+        slots: None,
+    };
+
+    let ret = f.insert_slot(&"1".to_string());
+    assert!(ret);
+    assert_eq!(f.slots.unwrap(), ["1".to_string()].into());
+}
+
+#[test]
+fn insert_when_slot_has_one_item() {
+    let id1 = "1".to_string();
+    let id2 = "2".to_string();
+
+    let mut f = Model {
+        parent: None,
+        slots: Some([id1.clone()].into()),
+    };
+
+    let ret = f.insert_slot(&id2);
+    assert!(ret);
+    assert_eq!(f.slots.unwrap(), [id1, id2].into());
+}
+
+#[test]
+fn insert_when_slot_has_eq_item_return_false() {
+    let id1 = "1".to_string();
+
+    let mut f = Model {
+        parent: None,
+        slots: Some([id1.clone()].into()),
+    };
+
+    let ret = f.insert_slot(&id1);
+    assert!(!ret);
+    assert_eq!(f.slots.unwrap(), [id1].into());
 }

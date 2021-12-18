@@ -7,6 +7,5 @@ pub trait Manager {
     fn take_slot(&mut self, token_id: &TokenId) -> Option<TokenId>;
     fn clear_slots(&mut self) -> Option<Vec<TokenId>>;
     fn slots_id(&self) -> Option<Vec<TokenId>>;
-
-    // fn insert_slot(&mut self, token_id: &TokenId) -> bool;
+    fn insert_slot(&mut self, token_id: &TokenId) -> bool;
 }
