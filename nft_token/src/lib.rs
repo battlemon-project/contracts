@@ -11,8 +11,8 @@ use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{LazyOption, LookupMap};
 use near_sdk::json_types::U128;
 use near_sdk::{
-    assert_one_yocto, env, near_bindgen, require, AccountId, PanicOnDefault,
-    Promise, PromiseOrValue,
+    assert_one_yocto, env, near_bindgen, require, AccountId, PanicOnDefault, Promise,
+    PromiseOrValue,
 };
 
 use nft_models::{Manager, ModelKind};
@@ -41,6 +41,7 @@ impl Contract {
             reference: None,
             reference_hash: None,
         };
+        metadata.assert_valid();
 
         Self::new(owner_id, metadata)
     }
@@ -164,7 +165,7 @@ near_contract_standards::impl_non_fungible_token_approval!(Contract, tokens);
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {
     use super::*;
-    use near_sdk:: testing_env;
+    use near_sdk::testing_env;
     use nft_models::lemon::Lemon;
     use nft_models::suppressor::Suppressor;
     use nft_models::weapon::Weapon;

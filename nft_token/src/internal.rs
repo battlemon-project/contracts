@@ -19,7 +19,6 @@ enum StorageKey {
 
 impl Contract {
     pub(crate) fn new(owner_id: AccountId, metadata: NFTContractMetadata) -> Self {
-        metadata.assert_valid();
         let metadata = LazyOption::new(StorageKey::Metadata, Some(&metadata));
         let tokens = NonFungibleToken::new(
             StorageKey::NonFungibleToken,
