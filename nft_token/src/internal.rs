@@ -1,11 +1,11 @@
-use crate::error::{BattlemonError as BtlError, Result};
+use crate::error::{BattlemonError as BtlError, InstructionErrorKind, Result};
 use crate::Contract;
 use near_contract_standards::non_fungible_token::metadata::NFTContractMetadata;
 use near_contract_standards::non_fungible_token::{NonFungibleToken, Token, TokenId};
 use near_sdk::borsh::{self, BorshSerialize};
 use near_sdk::collections::{LazyOption, LookupMap};
-use near_sdk::{require, AccountId, BorshStorageKey};
-use nft_models::{Manager, ModelKind};
+use near_sdk::{AccountId, BorshStorageKey};
+use nft_models::Manager;
 use token_metadata_ext::TokenExt;
 
 #[derive(BorshSerialize, BorshStorageKey)]
@@ -60,25 +60,9 @@ impl Contract {
             .collect()
     }
 
-    pub(crate) fn put_slot(&mut self, body_id: TokenId, slot_id: TokenId) -> Result<()> {
-        let body_owner = self.owner(&body_id)?;
-        let slot_owner = self.owner(&slot_id)?;
-
-        if body_owner != slot_owner {
-            return Err(BtlError::PutSlotError(
-                "owner for body and owner for slot are not the same.".to_string(),
-            ));
-        }
-
+    pub(crate) fn put_slot(&mut self, body_id: &TokenId, slot_id: &TokenId) -> Result<()> {
         let mut body_model = self.model(&body_id)?;
         let mut slot_model = self.model(&slot_id)?;
-
-        if !body_model.is_compatible(&slot_model) {
-            return Err(BtlError::PutSlotError(
-                "models aren't compatible".to_string(),
-            ));
-        }
-
         body_model.insert_slot(&slot_id);
         slot_model.replace_parent(&body_id);
         self.model_by_id.insert(&body_id, &body_model);
@@ -123,6 +107,7 @@ impl Contract {
     }
 
     pub(crate) fn disassemble_token(&mut self, token_id: &TokenId) -> Result<()> {
+        // TODO: to cover with unittests
         let mut model = self.model(&token_id)?;
 
         if let Some(parent_id) = model.take_parent() {
@@ -330,7 +315,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "value: couldn't find owner with id: 0")]
+    #[should_panic(expected = "value: couldn't find the model for token with id: 0")]
     fn put_slot_body_do_not_exist() {
         let mut context = get_context(alice());
         testing_env!(context.attached_deposit(MINT_STORAGE_COST).build());
@@ -339,11 +324,11 @@ mod tests {
         let [lemon_id, weapon_id] = tokens::<2>();
         let weapon_meta = fake_metadata_with(get_foo_weapon());
         contract.mint(weapon_id.clone(), weapon_meta, Some(bob()));
-        contract.put_slot(lemon_id, weapon_id).unwrap();
+        contract.put_slot(&lemon_id, &weapon_id).unwrap();
     }
 
     #[test]
-    #[should_panic(expected = "value: couldn't find owner with id: 1")]
+    #[should_panic(expected = "value: couldn't find the model for token with id: 1")]
     fn put_slot_when_slot_do_not_exist() {
         let mut context = get_context(alice());
         testing_env!(context.attached_deposit(MINT_STORAGE_COST).build());
@@ -352,42 +337,7 @@ mod tests {
         let [lemon_id, weapon_id] = tokens::<2>();
         let lemon_meta = fake_metadata_with(get_foo_lemon());
         contract.mint(lemon_id.clone(), lemon_meta, Some(bob()));
-        contract.put_slot(lemon_id, weapon_id).unwrap();
-    }
-
-    #[test]
-    #[should_panic(
-        expected = "value: couldn't put slot into body because: owner for body and owner for slot are not the same."
-    )]
-    fn put_slot_when_body_and_slot_not_the_same_owner() {
-        let mut context = get_context(alice());
-        testing_env!(context.attached_deposit(MINT_STORAGE_COST * 2).build());
-        let mut contract = Contract::init(alice());
-
-        let [lemon_id, weapon_id] = tokens::<2>();
-        let lemon_meta = fake_metadata_with(get_foo_lemon());
-        let weapon_meta = fake_metadata_with(get_foo_weapon());
-        contract.mint(lemon_id.clone(), lemon_meta, Some(bob()));
-        contract.mint(weapon_id.clone(), weapon_meta, Some(carol()));
-        contract.put_slot(lemon_id, weapon_id).unwrap();
-    }
-
-    #[test]
-    #[should_panic(expected = "models aren't compatible")]
-    fn put_slot_when_body_and_slot_is_not_compatible() {
-        let mut context = get_context(alice());
-        testing_env!(context.attached_deposit(MINT_STORAGE_COST * 2).build());
-        let mut contract = Contract::init(alice());
-
-        let [lemon_id, suppressor_id] = tokens::<2>();
-        let lemon_meta = fake_metadata_with(get_foo_lemon());
-        let suppressor_meta = fake_metadata_with(Suppressor {
-            parent: None,
-            slots: HashSet::new(),
-        });
-        contract.mint(lemon_id.clone(), lemon_meta, Some(bob()));
-        contract.mint(suppressor_id.clone(), suppressor_meta, Some(bob()));
-        contract.put_slot(lemon_id, suppressor_id).unwrap();
+        contract.put_slot(&lemon_id, &weapon_id).unwrap();
     }
 
     #[test]
@@ -401,6 +351,116 @@ mod tests {
         let weapon_meta = fake_metadata_with(get_foo_weapon());
         contract.mint(lemon_id.clone(), lemon_meta, Some(bob()));
         contract.mint(weapon_id.clone(), weapon_meta, Some(bob()));
-        contract.put_slot(lemon_id, weapon_id).unwrap();
+        contract.put_slot(&lemon_id, &weapon_id).unwrap();
+    }
+
+    #[test]
+    #[should_panic(expected = "value: couldn't find owner with id: 0")]
+    fn check_instructions_body_do_not_exist() {
+        let mut context = get_context(alice());
+        testing_env!(context.attached_deposit(MINT_STORAGE_COST).build());
+        let mut contract = Contract::init(alice());
+
+        let [lemon_id, weapon_id] = tokens::<2>();
+        let weapon_meta = fake_metadata_with(get_foo_weapon());
+        contract.mint(weapon_id.clone(), weapon_meta, Some(bob()));
+        contract.check_instructions(&[lemon_id, weapon_id]).unwrap();
+    }
+
+    #[test]
+    #[should_panic(expected = "value: couldn't find owner with id: 1")]
+    fn check_instructions_when_slot_do_not_exist() {
+        let mut context = get_context(alice());
+        testing_env!(context.attached_deposit(MINT_STORAGE_COST).build());
+        let mut contract = Contract::init(alice());
+
+        let [lemon_id, weapon_id] = tokens::<2>();
+        let lemon_meta = fake_metadata_with(get_foo_lemon());
+        contract.mint(lemon_id.clone(), lemon_meta, Some(bob()));
+        contract.check_instructions(&[lemon_id, weapon_id]).unwrap();
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "value: provided instructions contain errors because: owners for token's models must be the same"
+    )]
+    fn check_instructions_when_body_and_slot_not_the_same_owner() {
+        let mut context = get_context(alice());
+        testing_env!(context.attached_deposit(MINT_STORAGE_COST * 2).build());
+        let mut contract = Contract::init(alice());
+
+        let [lemon_id, weapon_id] = tokens::<2>();
+        let lemon_meta = fake_metadata_with(get_foo_lemon());
+        let weapon_meta = fake_metadata_with(get_foo_weapon());
+        contract.mint(lemon_id.clone(), lemon_meta, Some(bob()));
+        contract.mint(weapon_id.clone(), weapon_meta, Some(carol()));
+        contract.check_instructions(&[lemon_id, weapon_id]).unwrap();
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "value: provided instructions contain errors because: models are not compatible"
+    )]
+    fn check_instructions_when_body_and_slot_is_not_compatible() {
+        let mut context = get_context(alice());
+        testing_env!(context.attached_deposit(MINT_STORAGE_COST * 2).build());
+        let mut contract = Contract::init(alice());
+
+        let [lemon_id, suppressor_id] = tokens::<2>();
+        let lemon_meta = fake_metadata_with(get_foo_lemon());
+        let suppressor_meta = fake_metadata_with(Suppressor {
+            parent: None,
+            slots: HashSet::new(),
+        });
+        contract.mint(lemon_id.clone(), lemon_meta, Some(bob()));
+        contract.mint(suppressor_id.clone(), suppressor_meta, Some(bob()));
+        contract
+            .check_instructions(&[lemon_id, suppressor_id])
+            .unwrap();
+    }
+
+    #[test]
+    fn check_instructions_when_body_and_slot_is_compatible() {
+        let mut context = get_context(alice());
+        testing_env!(context.attached_deposit(MINT_STORAGE_COST * 2).build());
+        let mut contract = Contract::init(alice());
+
+        let [lemon_id, weapon_id] = tokens::<2>();
+        let lemon_meta = fake_metadata_with(get_foo_lemon());
+        let weapon_meta = fake_metadata_with(get_foo_weapon());
+        contract.mint(lemon_id.clone(), lemon_meta, Some(bob()));
+        contract.mint(weapon_id.clone(), weapon_meta, Some(bob()));
+        contract.check_instructions(&[lemon_id, weapon_id]).unwrap();
+    }
+
+    #[test]
+    #[should_panic(
+        expected = " value: provided instructions contain errors because: empty instructions are not allowed"
+    )]
+    fn check_instructions_when_empty_instructions() {
+        let mut context = get_context(alice());
+        testing_env!(context.attached_deposit(MINT_STORAGE_COST * 2).build());
+        let mut contract = Contract::init(alice());
+
+        let [lemon_id, weapon_id] = tokens::<2>();
+        let lemon_meta = fake_metadata_with(get_foo_lemon());
+        let weapon_meta = fake_metadata_with(get_foo_weapon());
+        contract.mint(lemon_id.clone(), lemon_meta, Some(bob()));
+        contract.mint(weapon_id.clone(), weapon_meta, Some(bob()));
+        contract.check_instructions(&[]).unwrap();
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "value: provided instructions contain errors because: index out of bound in chunk"
+    )]
+    fn check_instructions_when_not_enough_items_for_chunk() {
+        let mut context = get_context(alice());
+        testing_env!(context.attached_deposit(MINT_STORAGE_COST * 2).build());
+        let contract = Contract::init(alice());
+
+        let [lemon_id] = tokens::<1>();
+        let lemon_meta = fake_metadata_with(get_foo_lemon());
+        contract.check_instructions(&[lemon_id]).unwrap();
     }
 }
