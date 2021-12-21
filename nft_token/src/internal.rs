@@ -1,11 +1,12 @@
 use crate::error::{BattlemonError as BtlError, InstructionErrorKind, Result};
 use crate::Contract;
+use near_contract_standards::non_fungible_token::core::NonFungibleTokenCore;
 use near_contract_standards::non_fungible_token::metadata::NFTContractMetadata;
 use near_contract_standards::non_fungible_token::{NonFungibleToken, Token, TokenId};
 use near_sdk::borsh::{self, BorshSerialize};
 use near_sdk::collections::{LazyOption, LookupMap};
 use near_sdk::{AccountId, BorshStorageKey};
-use nft_models::Manager;
+use nft_models::{Manager, ModelKind};
 use token_metadata_ext::TokenExt;
 
 #[derive(BorshSerialize, BorshStorageKey)]
@@ -37,11 +38,13 @@ impl Contract {
         }
     }
 
-    /// Get all nested token's id for `token_id`.
-    /// `token_id` will be included to the returned collection.
-    pub(crate) fn nested_tokens_id(&self, token_id: TokenId, buf: &mut Vec<TokenId>) -> Result<()> {
+    pub(crate) fn nested_tokens_id(
+        &self,
+        token_id: TokenId,
+        buf: &mut Vec<(TokenId, ModelKind)>,
+    ) -> Result<()> {
         let model = self.model(&token_id)?;
-        buf.push(token_id);
+        buf.push((token_id, model.clone()));
 
         for id in model.slots_id() {
             self.nested_tokens_id(id, buf)?;
@@ -169,36 +172,41 @@ mod tests {
             .nested_tokens_id(token_id.clone(), &mut buf)
             .unwrap();
         assert_eq!(buf.len(), 1);
-        assert_eq!(buf[0], *token_id);
+        assert_eq!(buf[0].0, *token_id);
     }
 
     #[test]
     fn nested_tokens_id_must_return_self_and_weapon() {
         let mut contract = Contract::init(alice());
-        let weapon = get_foo_weapon();
+        let weapon = get_foo_weapon().into();
 
         let [weapon_token_id, lemon_token_id] = tokens::<2>();
-        contract
-            .model_by_id
-            .insert(&weapon_token_id, &weapon.into());
+        contract.model_by_id.insert(&weapon_token_id, &weapon);
 
         let lemon = Lemon {
             slots: [weapon_token_id.clone()].into(),
             ..get_foo_lemon()
-        };
-        contract.model_by_id.insert(&lemon_token_id, &lemon.into());
+        }
+        .into();
+        contract.model_by_id.insert(&lemon_token_id, &lemon);
 
         let mut weapon_nested_buf = Vec::new();
         contract
             .nested_tokens_id(weapon_token_id.clone(), &mut weapon_nested_buf)
             .unwrap();
-        assert_eq!(weapon_nested_buf, vec![weapon_token_id.clone()]);
+        assert_eq!(
+            weapon_nested_buf,
+            vec![(weapon_token_id.clone(), weapon.clone())]
+        );
 
         let mut lemon_nested_buf = Vec::new();
         contract
             .nested_tokens_id(lemon_token_id.clone(), &mut lemon_nested_buf)
             .unwrap();
-        assert_eq!(lemon_nested_buf, vec![lemon_token_id, weapon_token_id]);
+        assert_eq!(
+            lemon_nested_buf,
+            vec![(lemon_token_id, lemon), (weapon_token_id, weapon)]
+        );
     }
 
     #[test]
@@ -221,31 +229,41 @@ mod tests {
         };
 
         contract.model_by_id.extend([
-            (left_weapon_token_id.clone(), left_weapon.into()),
-            (right_weapon_token_id.clone(), right_weapon.into()),
-            (lemon_token_id.clone(), lemon.into()),
+            (left_weapon_token_id.clone(), left_weapon.clone().into()),
+            (right_weapon_token_id.clone(), right_weapon.clone().into()),
+            (lemon_token_id.clone(), lemon.clone().into()),
         ]);
 
         let mut left_weapon_nested_buf = Vec::new();
         contract
             .nested_tokens_id(left_weapon_token_id.clone(), &mut left_weapon_nested_buf)
             .unwrap();
-        assert_eq!(left_weapon_nested_buf, vec![left_weapon_token_id.clone()]);
+        assert_eq!(
+            left_weapon_nested_buf,
+            vec![(left_weapon_token_id.clone(), left_weapon.clone().into())]
+        );
 
         let mut right_weapon_nested_buf = Vec::new();
         contract
             .nested_tokens_id(right_weapon_token_id.clone(), &mut right_weapon_nested_buf)
             .unwrap();
-        assert_eq!(right_weapon_nested_buf, vec![right_weapon_token_id.clone()]);
+        assert_eq!(
+            right_weapon_nested_buf,
+            vec![(right_weapon_token_id.clone(), right_weapon.clone().into())]
+        );
 
         let mut lemon_nested_buf = Vec::new();
         contract
             .nested_tokens_id(lemon_token_id.clone(), &mut lemon_nested_buf)
             .unwrap();
-        lemon_nested_buf.sort();
+        lemon_nested_buf.sort_by_key(|k| k.0.clone());
         assert_eq!(
             lemon_nested_buf,
-            vec![left_weapon_token_id, right_weapon_token_id, lemon_token_id]
+            vec![
+                (left_weapon_token_id, left_weapon.into()),
+                (right_weapon_token_id, right_weapon.into()),
+                (lemon_token_id, lemon.into())
+            ]
         );
     }
 
@@ -276,40 +294,48 @@ mod tests {
         };
 
         contract.model_by_id.extend([
-            (left_weapon_token_id.clone(), left_weapon.into()),
-            (right_weapon_token_id.clone(), right_weapon.into()),
-            (suppressor_token_id.clone(), suppressor.into()),
-            (lemon_token_id.clone(), lemon.into()),
+            (left_weapon_token_id.clone(), left_weapon.clone().into()),
+            (right_weapon_token_id.clone(), right_weapon.clone().into()),
+            (suppressor_token_id.clone(), suppressor.clone().into()),
+            (lemon_token_id.clone(), lemon.clone().into()),
         ]);
 
         let mut left_weapon_nested_buf = Vec::new();
         contract
             .nested_tokens_id(left_weapon_token_id.clone(), &mut left_weapon_nested_buf)
             .unwrap();
-        assert_eq!(left_weapon_nested_buf, vec![left_weapon_token_id.clone()]);
+        assert_eq!(
+            left_weapon_nested_buf,
+            vec![(left_weapon_token_id.clone(), left_weapon.clone().into())]
+        );
 
         let mut right_weapon_nested_buf = Vec::new();
         contract
             .nested_tokens_id(right_weapon_token_id.clone(), &mut right_weapon_nested_buf)
             .unwrap();
-        right_weapon_nested_buf.sort();
+
+        let key = |k: &(TokenId, ModelKind)| k.0.clone();
+        right_weapon_nested_buf.sort_by_key(key);
         assert_eq!(
             right_weapon_nested_buf,
-            vec![right_weapon_token_id.clone(), suppressor_token_id.clone()]
+            vec![
+                (right_weapon_token_id.clone(), right_weapon.clone().into()),
+                (suppressor_token_id.clone(), suppressor.clone().into())
+            ]
         );
 
         let mut lemon_nested_buf = Vec::new();
         contract
             .nested_tokens_id(lemon_token_id.clone(), &mut lemon_nested_buf)
             .unwrap();
-        lemon_nested_buf.sort();
+        lemon_nested_buf.sort_by_key(key);
         assert_eq!(
             lemon_nested_buf,
             vec![
-                left_weapon_token_id,
-                right_weapon_token_id,
-                lemon_token_id,
-                suppressor_token_id
+                (left_weapon_token_id, left_weapon.into()),
+                (right_weapon_token_id, right_weapon.into()),
+                (lemon_token_id, lemon.into()),
+                (suppressor_token_id, suppressor.into()),
             ]
         );
     }

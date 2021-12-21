@@ -1,6 +1,6 @@
 mod error;
-mod internal;
 mod helpers;
+mod internal;
 
 use near_contract_standards::non_fungible_token::core::NonFungibleTokenCore;
 use near_contract_standards::non_fungible_token::enumeration::NonFungibleTokenEnumeration;
@@ -149,6 +149,14 @@ impl Contract {
             self.put_slot(&chunks[0], &chunks[1])
                 .expect("Couldn't assemble compound nft");
         }
+    }
+
+    pub fn compound_nft_token(&self, token_id: TokenId) -> Vec<(TokenId, ModelKind)> {
+        //todo: add tests
+        let mut buf = Vec::new();
+        self.nested_tokens_id(token_id, &mut buf)
+            .expect("Couldn't get nested tokens");
+        buf
     }
 }
 
