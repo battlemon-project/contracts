@@ -87,11 +87,39 @@ impl Contract {
         Ok(())
     }
 
-    pub(crate) fn owner(&self, body_id: &TokenId) -> Result<AccountId> {
-        self.tokens
-            .owner_by_id
-            .get(&body_id)
-            .ok_or(BtlError::OwnerNotFound(body_id.to_owned()))
+    pub(crate) fn check_instructions(&self, instructions: &[TokenId]) -> Result<()> {
+        if instructions.is_empty() {
+            return Err(BtlError::InstructionError(InstructionErrorKind::Empty));
+        }
+
+        for chunk in instructions.chunks(2) {
+            let body_id = chunk.get(0).ok_or(BtlError::InstructionError(
+                InstructionErrorKind::ChunkBoundsOut,
+            ))?;
+            let slot_id = chunk.get(1).ok_or(BtlError::InstructionError(
+                InstructionErrorKind::ChunkBoundsOut,
+            ))?;
+
+            let body_owner = self.owner(body_id)?;
+            let slot_owner = self.owner(slot_id)?;
+
+            if body_owner != slot_owner {
+                return Err(BtlError::InstructionError(
+                    InstructionErrorKind::NotEqualOwners,
+                ));
+            }
+
+            let body_model = self.model(body_id)?;
+            let slot_model = self.model(slot_id)?;
+
+            if !body_model.is_compatible(&slot_model) {
+                return Err(BtlError::InstructionError(
+                    InstructionErrorKind::IncompatibleModels,
+                ));
+            }
+        }
+
+        Ok(())
     }
 
     pub(crate) fn disassemble_token(&mut self, token_id: &TokenId) -> Result<()> {
@@ -113,12 +141,6 @@ impl Contract {
         }
 
         Ok(())
-    }
-
-    pub(crate) fn model(&self, token_id: &TokenId) -> Result<ModelKind> {
-        self.model_by_id
-            .get(token_id)
-            .ok_or(BtlError::ModelNotFound(token_id.to_owned()))
     }
 }
 
