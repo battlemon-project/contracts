@@ -1,5 +1,6 @@
 mod error;
 mod internal;
+mod helpers;
 
 use near_contract_standards::non_fungible_token::core::NonFungibleTokenCore;
 use near_contract_standards::non_fungible_token::enumeration::NonFungibleTokenEnumeration;
@@ -10,10 +11,7 @@ use near_contract_standards::non_fungible_token::{NonFungibleToken, TokenId};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{LazyOption, LookupMap};
 use near_sdk::json_types::U128;
-use near_sdk::{
-    assert_one_yocto, env, near_bindgen, require, AccountId, PanicOnDefault, Promise,
-    PromiseOrValue,
-};
+use near_sdk::{assert_one_yocto, env, near_bindgen, require, AccountId, PanicOnDefault, Promise};
 
 use nft_models::ModelKind;
 use token_metadata_ext::{TokenExt, TokenMetadataExt};
@@ -135,7 +133,7 @@ impl Contract {
         self.tokens.nft_token(token_id).and_then(|token| {
             let model = self
                 .model(&token.token_id)
-                .expect("Couldn't provide nft token.");
+                .expect("Couldn't provide nft token");
 
             Some(TokenExt::from_parts(token, model))
         })
@@ -144,12 +142,13 @@ impl Contract {
     #[payable]
     pub fn assemble_compound_nft(&mut self, instructions: Vec<TokenId>) {
         assert_one_yocto();
-        require!(
-            !instructions.is_empty(),
-            "empty instructions are not allowed"
-        );
+        self.check_instructions(&instructions)
+            .expect("Provided instructions contain errors");
 
-
+        for chunks in instructions.as_slice().chunks(2) {
+            self.put_slot(&chunks[0], &chunks[1])
+                .expect("Couldn't assemble compound nft");
+        }
     }
 }
 
@@ -528,12 +527,12 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "provided instructions are not valid.")]
+    #[should_panic(expected = "Provided instructions contain errors")]
     fn assemble_compound_nft_instructions_are_not_valid() {
         let mut context = get_context(alice());
         testing_env!(context.attached_deposit(1).build());
         let mut contract = Contract::init(alice());
-        let instructions = vec![];
+        let instructions = vec!["1".to_string()];
         contract.assemble_compound_nft(instructions);
     }
 }
