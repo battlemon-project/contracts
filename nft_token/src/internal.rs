@@ -1,10 +1,11 @@
+use crate::error::{BattlemonError as BtlError, Result};
 use crate::Contract;
 use near_contract_standards::non_fungible_token::metadata::NFTContractMetadata;
 use near_contract_standards::non_fungible_token::{NonFungibleToken, Token, TokenId};
 use near_sdk::borsh::{self, BorshSerialize};
 use near_sdk::collections::{LazyOption, LookupMap};
 use near_sdk::{require, AccountId, BorshStorageKey};
-use nft_models::Manager;
+use nft_models::{Manager, ModelKind};
 use token_metadata_ext::TokenExt;
 
 #[derive(BorshSerialize, BorshStorageKey)]
@@ -38,55 +39,86 @@ impl Contract {
 
     /// Get all nested token's id for `token_id`.
     /// `token_id` will be included to the returned collection.
-    pub(crate) fn nested_tokens_id(&self, token_id: TokenId, buf: &mut Vec<TokenId>) {
-        let model = self
-            .model_by_id
-            .get(&token_id)
-            .expect("token with provided id doesn't exist.");
-
+    pub(crate) fn nested_tokens_id(&self, token_id: TokenId, buf: &mut Vec<TokenId>) -> Result<()> {
+        let model = self.model(&token_id)?;
         buf.push(token_id);
 
         for id in model.slots_id() {
-            self.nested_tokens_id(id, buf);
+            self.nested_tokens_id(id, buf)?;
         }
+
+        Ok(())
     }
 
-    pub(crate) fn collect_ext_tokens(&self, tokens: Vec<Token>) -> Vec<TokenExt> {
+    pub(crate) fn collect_ext_tokens(&self, tokens: Vec<Token>) -> Result<Vec<TokenExt>> {
         tokens
             .into_iter()
             .map(|token| {
-                let model = self.model_by_id.get(&token.token_id).unwrap();
-                TokenExt::from_parts(token, model)
+                let model = self.model(&token.token_id)?;
+                Ok(TokenExt::from_parts(token, model))
             })
             .collect()
     }
 
-    pub(crate) fn put_slot(&mut self, body_id: TokenId, slot_id: TokenId) {
-        let body_owner = self
-            .tokens
-            .owner_by_id
-            .get(&body_id)
-            .expect("wrong id for body");
+    pub(crate) fn put_slot(&mut self, body_id: TokenId, slot_id: TokenId) -> Result<()> {
+        let body_owner = self.owner(&body_id)?;
+        let slot_owner = self.owner(&slot_id)?;
 
-        let slot_owner = self
-            .tokens
-            .owner_by_id
-            .get(&slot_id)
-            .expect("wrong id for slot");
+        if body_owner != slot_owner {
+            return Err(BtlError::PutSlotError(
+                "owner for body and owner for slot are not the same.".to_string(),
+            ));
+        }
 
-        require!(body_owner == slot_owner, "owner must be the same for both.");
+        let mut body_model = self.model(&body_id)?;
+        let mut slot_model = self.model(&slot_id)?;
 
-        let mut body_model = self.model_by_id.get(&body_id).unwrap();
-        let mut slot_model = self.model_by_id.get(&slot_id).unwrap();
-        require!(
-            body_model.is_compatible(&slot_model),
-            "models aren't compatible"
-        );
+        if !body_model.is_compatible(&slot_model) {
+            return Err(BtlError::PutSlotError(
+                "models aren't compatible".to_string(),
+            ));
+        }
 
         body_model.insert_slot(&slot_id);
         slot_model.replace_parent(&body_id);
         self.model_by_id.insert(&body_id, &body_model);
         self.model_by_id.insert(&slot_id, &slot_model);
+
+        Ok(())
+    }
+
+    pub(crate) fn owner(&self, body_id: &TokenId) -> Result<AccountId> {
+        self.tokens
+            .owner_by_id
+            .get(&body_id)
+            .ok_or(BtlError::OwnerNotFound(body_id.to_owned()))
+    }
+
+    pub(crate) fn disassemble_token(&mut self, token_id: &TokenId) -> Result<()> {
+        let mut model = self.model(&token_id)?;
+
+        if let Some(parent_id) = model.take_parent() {
+            let mut parent = self.model(&parent_id)?;
+            parent.take_slot(&token_id);
+            self.model_by_id.insert(&parent_id, &parent);
+        };
+
+        let slots = model.drain_slots();
+        self.model_by_id.insert(&token_id, &model);
+
+        for id in slots {
+            let mut child = self.model(&id)?;
+            child.take_parent();
+            self.model_by_id.insert(&id, &child);
+        }
+
+        Ok(())
+    }
+
+    pub(crate) fn model(&self, token_id: &TokenId) -> Result<ModelKind> {
+        self.model_by_id
+            .get(token_id)
+            .ok_or(BtlError::ModelNotFound(token_id.to_owned()))
     }
 }
 
@@ -111,11 +143,11 @@ mod tests {
     }
 
     #[test]
-    #[should_panic = "token with provided id doesn't exist."]
+    #[should_panic = "value: couldn't find the model for token with id: 0"]
     fn nested_tokens_id() {
         let contract = Contract::init(alice());
         let [token_id] = tokens::<1>();
-        contract.nested_tokens_id(token_id, &mut vec![]);
+        contract.nested_tokens_id(token_id, &mut vec![]).unwrap();
     }
 
     #[test]
@@ -126,7 +158,9 @@ mod tests {
         contract.model_by_id.insert(&token_id, &lemon.into());
 
         let mut buf = Vec::new();
-        contract.nested_tokens_id(token_id.clone(), &mut buf);
+        contract
+            .nested_tokens_id(token_id.clone(), &mut buf)
+            .unwrap();
         assert_eq!(buf.len(), 1);
         assert_eq!(buf[0], *token_id);
     }
@@ -148,11 +182,15 @@ mod tests {
         contract.model_by_id.insert(&lemon_token_id, &lemon.into());
 
         let mut weapon_nested_buf = Vec::new();
-        contract.nested_tokens_id(weapon_token_id.clone(), &mut weapon_nested_buf);
+        contract
+            .nested_tokens_id(weapon_token_id.clone(), &mut weapon_nested_buf)
+            .unwrap();
         assert_eq!(weapon_nested_buf, vec![weapon_token_id.clone()]);
 
         let mut lemon_nested_buf = Vec::new();
-        contract.nested_tokens_id(lemon_token_id.clone(), &mut lemon_nested_buf);
+        contract
+            .nested_tokens_id(lemon_token_id.clone(), &mut lemon_nested_buf)
+            .unwrap();
         assert_eq!(lemon_nested_buf, vec![lemon_token_id, weapon_token_id]);
     }
 
@@ -182,15 +220,21 @@ mod tests {
         ]);
 
         let mut left_weapon_nested_buf = Vec::new();
-        contract.nested_tokens_id(left_weapon_token_id.clone(), &mut left_weapon_nested_buf);
+        contract
+            .nested_tokens_id(left_weapon_token_id.clone(), &mut left_weapon_nested_buf)
+            .unwrap();
         assert_eq!(left_weapon_nested_buf, vec![left_weapon_token_id.clone()]);
 
         let mut right_weapon_nested_buf = Vec::new();
-        contract.nested_tokens_id(right_weapon_token_id.clone(), &mut right_weapon_nested_buf);
+        contract
+            .nested_tokens_id(right_weapon_token_id.clone(), &mut right_weapon_nested_buf)
+            .unwrap();
         assert_eq!(right_weapon_nested_buf, vec![right_weapon_token_id.clone()]);
 
         let mut lemon_nested_buf = Vec::new();
-        contract.nested_tokens_id(lemon_token_id.clone(), &mut lemon_nested_buf);
+        contract
+            .nested_tokens_id(lemon_token_id.clone(), &mut lemon_nested_buf)
+            .unwrap();
         lemon_nested_buf.sort();
         assert_eq!(
             lemon_nested_buf,
@@ -232,11 +276,15 @@ mod tests {
         ]);
 
         let mut left_weapon_nested_buf = Vec::new();
-        contract.nested_tokens_id(left_weapon_token_id.clone(), &mut left_weapon_nested_buf);
+        contract
+            .nested_tokens_id(left_weapon_token_id.clone(), &mut left_weapon_nested_buf)
+            .unwrap();
         assert_eq!(left_weapon_nested_buf, vec![left_weapon_token_id.clone()]);
 
         let mut right_weapon_nested_buf = Vec::new();
-        contract.nested_tokens_id(right_weapon_token_id.clone(), &mut right_weapon_nested_buf);
+        contract
+            .nested_tokens_id(right_weapon_token_id.clone(), &mut right_weapon_nested_buf)
+            .unwrap();
         right_weapon_nested_buf.sort();
         assert_eq!(
             right_weapon_nested_buf,
@@ -244,7 +292,9 @@ mod tests {
         );
 
         let mut lemon_nested_buf = Vec::new();
-        contract.nested_tokens_id(lemon_token_id.clone(), &mut lemon_nested_buf);
+        contract
+            .nested_tokens_id(lemon_token_id.clone(), &mut lemon_nested_buf)
+            .unwrap();
         lemon_nested_buf.sort();
         assert_eq!(
             lemon_nested_buf,
@@ -258,7 +308,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "wrong id for body")]
+    #[should_panic(expected = "value: couldn't find owner with id: 0")]
     fn put_slot_body_do_not_exist() {
         let mut context = get_context(alice());
         testing_env!(context.attached_deposit(MINT_STORAGE_COST).build());
@@ -267,11 +317,11 @@ mod tests {
         let [lemon_id, weapon_id] = tokens::<2>();
         let weapon_meta = fake_metadata_with(get_foo_weapon());
         contract.mint(weapon_id.clone(), weapon_meta, Some(bob()));
-        contract.put_slot(lemon_id, weapon_id);
+        contract.put_slot(lemon_id, weapon_id).unwrap();
     }
 
     #[test]
-    #[should_panic(expected = "wrong id for slot")]
+    #[should_panic(expected = "value: couldn't find owner with id: 1")]
     fn put_slot_when_slot_do_not_exist() {
         let mut context = get_context(alice());
         testing_env!(context.attached_deposit(MINT_STORAGE_COST).build());
@@ -280,11 +330,13 @@ mod tests {
         let [lemon_id, weapon_id] = tokens::<2>();
         let lemon_meta = fake_metadata_with(get_foo_lemon());
         contract.mint(lemon_id.clone(), lemon_meta, Some(bob()));
-        contract.put_slot(lemon_id, weapon_id);
+        contract.put_slot(lemon_id, weapon_id).unwrap();
     }
 
     #[test]
-    #[should_panic(expected = "owner must be the same for both.")]
+    #[should_panic(
+        expected = "value: couldn't put slot into body because: owner for body and owner for slot are not the same."
+    )]
     fn put_slot_when_body_and_slot_not_the_same_owner() {
         let mut context = get_context(alice());
         testing_env!(context.attached_deposit(MINT_STORAGE_COST * 2).build());
@@ -295,7 +347,7 @@ mod tests {
         let weapon_meta = fake_metadata_with(get_foo_weapon());
         contract.mint(lemon_id.clone(), lemon_meta, Some(bob()));
         contract.mint(weapon_id.clone(), weapon_meta, Some(carol()));
-        contract.put_slot(lemon_id, weapon_id);
+        contract.put_slot(lemon_id, weapon_id).unwrap();
     }
 
     #[test]
@@ -313,7 +365,7 @@ mod tests {
         });
         contract.mint(lemon_id.clone(), lemon_meta, Some(bob()));
         contract.mint(suppressor_id.clone(), suppressor_meta, Some(bob()));
-        contract.put_slot(lemon_id, suppressor_id);
+        contract.put_slot(lemon_id, suppressor_id).unwrap();
     }
 
     #[test]
@@ -327,6 +379,6 @@ mod tests {
         let weapon_meta = fake_metadata_with(get_foo_weapon());
         contract.mint(lemon_id.clone(), lemon_meta, Some(bob()));
         contract.mint(weapon_id.clone(), weapon_meta, Some(bob()));
-        contract.put_slot(lemon_id, weapon_id);
+        contract.put_slot(lemon_id, weapon_id).unwrap();
     }
 }
