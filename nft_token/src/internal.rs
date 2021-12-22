@@ -108,7 +108,7 @@ impl Contract {
             // }
             // also we can change slots type to Vec (now it's HashSet)
             // and left_weapon, right_weapon to Option<usize>, for storing indices of tokens id's
-            // benefits: can see used slots, understand id's of this slots, memory safe, fast operations.
+            // benefits: can see used slots, understand id's of this slots, low memory usage, fast operations.
 
             if !body_model.is_compatible(&slot_model) {
                 return Err(BtlError::InstructionError(
