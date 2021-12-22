@@ -1,6 +1,5 @@
 use crate::error::{BattlemonError as BtlError, InstructionErrorKind, Result};
 use crate::Contract;
-use near_contract_standards::non_fungible_token::core::NonFungibleTokenCore;
 use near_contract_standards::non_fungible_token::metadata::NFTContractMetadata;
 use near_contract_standards::non_fungible_token::{NonFungibleToken, Token, TokenId};
 use near_sdk::borsh::{self, BorshSerialize};
@@ -98,6 +97,18 @@ impl Contract {
 
             let body_model = self.model(body_id)?;
             let slot_model = self.model(slot_id)?;
+            // todo: add checking for amount attached models the same type (for example for Lemon is possible
+            // only attach two weapons)
+            // Like idea to store info about possible attachments like fields in models
+            // Lemon {
+            //      ...,
+            //      left_weapon: bool,
+            //      right_weapon: bool,
+            //      slots: [...]
+            // }
+            // also we can change slots type to Vec (now it's HashSet)
+            // and left_weapon, right_weapon to Option<usize>, for storing indices of tokens id's
+            // benefits: can see used slots, understand id's of this slots, memory safe, fast operations.
 
             if !body_model.is_compatible(&slot_model) {
                 return Err(BtlError::InstructionError(

@@ -14,7 +14,7 @@ use weapon::Weapon;
 
 #[enum_dispatch(Manager)]
 #[derive(Serialize, Deserialize, Clone, BorshSerialize, BorshDeserialize, Debug, PartialEq)]
-#[serde(crate = "near_sdk::serde")]
+#[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
 pub enum ModelKind {
     Lemon,
     Weapon,
