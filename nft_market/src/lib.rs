@@ -1,3 +1,5 @@
+mod consts;
+
 use near_contract_standards::non_fungible_token::{
     approval::NonFungibleTokenApprovalReceiver, TokenId,
 };
@@ -12,6 +14,7 @@ use near_sdk::{
     Promise, PromiseError, PromiseOrValue, PromiseResult, Timestamp,
 };
 
+use consts::EVENT_PREFIX;
 use token_metadata_ext::TokenExt;
 
 pub const NO_DEPOSIT: Balance = 0;
@@ -330,6 +333,13 @@ impl Contract {
         match env::promise_result(0) {
             PromiseResult::Successful(_) => {
                 self.asks.remove(&sale.token_id);
+                let log = json!({
+                    "prev_owner": sale.owner_id,
+                    "curr_owner": buyer_id,
+                    "token_id": sale.token_id,
+                    "price": sale.price,
+                });
+                log!(format!("{}:{}", EVENT_PREFIX, log));
                 self.add_trade_history(sale.clone(), buyer_id.clone());
 
                 let trade = Promise::new(sale.owner_id).transfer(sale.price.0);
