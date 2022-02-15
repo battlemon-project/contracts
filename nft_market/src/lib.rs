@@ -1,5 +1,3 @@
-mod consts;
-
 use near_contract_standards::non_fungible_token::{
     approval::NonFungibleTokenApprovalReceiver, TokenId,
 };
@@ -10,18 +8,17 @@ use near_sdk::json_types::U128;
 use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::serde_json::{self, json};
 use near_sdk::{
-    env, log, near_bindgen, require, AccountId, Balance, BorshStorageKey, Gas, PanicOnDefault,
-    Promise, PromiseError, PromiseOrValue, PromiseResult, Timestamp,
+    env, log, near_bindgen, require, AccountId, BorshStorageKey, Gas, PanicOnDefault, Promise,
+    PromiseError, PromiseOrValue, PromiseResult, Timestamp,
 };
 
-use consts::EVENT_PREFIX;
+use consts::{
+    AFTER_NFT_TRANSFER_GAS, BUY_METHOD_TOTAL_GAS, EVENT_PREFIX, NFT_TRANSFER_GAS, NO_DEPOSIT,
+    ONE_YOCTO,
+};
 use token_metadata_ext::TokenExt;
 
-pub const NO_DEPOSIT: Balance = 0;
-pub const ONE_YOCTO: Balance = 1;
-pub const BUY_METHOD_TOTAL_GAS: Gas = Gas(80_000_000_000_000);
-pub const NFT_TRANSFER_GAS: Gas = Gas(44_000_000_000_000);
-pub const AFTER_NFT_TRANSFER_GAS: Gas = Gas(20_000_000_000_000);
+mod consts;
 
 #[near_bindgen]
 #[derive(BorshSerialize, BorshDeserialize, PanicOnDefault)]
@@ -503,6 +500,7 @@ impl NonFungibleTokenApprovalReceiver for Contract {
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {
     use near_sdk::{test_utils::accounts, testing_env};
+
     use test_utils::*;
 
     use super::*;
