@@ -5,3 +5,4 @@
 .dockerignore
 docker/Dockerfile
 .idea
+nft_token/.near-credential
