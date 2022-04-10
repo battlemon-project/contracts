@@ -151,15 +151,14 @@ impl Contract {
     //         .nft_transfer_call(receiver_id, token_id, approval_id, memo, msg)
     // }
 
-    pub fn nft_token(&self, token_id: TokenId) -> Option<Token> {
-        // self.tokens.nft_token(token_id).and_then(|token| {
-        //     let model = self
-        //         .model(&token.token_id)
-        //         .expect("Couldn't provide nft token");
-        //
-        //     Some(TokenExt::from_parts(token, model))
-        // })
-        self.nft_token(token_id)
+    pub fn nft_token(&self, token_id: TokenId) -> Option<TokenExt> {
+        self.tokens.nft_token(token_id).map(|token| {
+            let model = self
+                .model(&token.token_id)
+                .expect("Couldn't provide nft token");
+
+            TokenExt::from_parts(token, model)
+        })
     }
 
     // #[payable]
@@ -183,12 +182,9 @@ impl Contract {
     // }
 }
 
-    pub fn compound_nft_token(&self, token_id: TokenId) -> Vec<(TokenId, ModelKind)> {
-        //todo: add tests
-        let mut buf = Vec::new();
-        self.nested_tokens_id(token_id, &mut buf)
-            .expect("Couldn't get nested tokens");
-        buf
+impl NonFungibleTokenMetadataProvider for Contract {
+    fn nft_metadata(&self) -> NFTContractMetadata {
+        self.metadata.get().expect("Metadata didn't set")
     }
 }
 
