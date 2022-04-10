@@ -24,5 +24,5 @@ jobs:
       - name: build
         run: cargo build --release --target wasm32-unknown-unknown
 
-      - name: tests
-        run: cargo test
+#      - name: tests
+#        run: cargo test
