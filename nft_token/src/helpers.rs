@@ -1,3 +1,4 @@
+use std::fmt::Debug;
 use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::{env, AccountId};
 use rand::distributions::uniform::SampleUniform;
@@ -24,8 +25,13 @@ impl Contract {
     }
 }
 
-pub(crate) fn get_random_vec_range<T: SampleUniform + Copy>(n: u64, begin: T, end: T) -> Vec<T> {
+pub(crate) fn get_random_arr_range<T: SampleUniform + Copy + Debug, const N: usize>(
+    begin: T,
+    end: T,
+) -> [T; N] {
     let seed: [u8; 32] = env::random_seed().try_into().unwrap();
     let mut rng = StdRng::from_seed(seed);
-    (0..n).map(|_| rng.gen_range(begin, end)).collect()
+    let range: Vec<_> = (0..N).map(|_| rng.gen_range(begin, end)).collect();
+
+    <[_; N]>::try_from(range).unwrap()
 }
