@@ -97,7 +97,6 @@ impl Contract {
 
         self.collect_ext_tokens(tokens)
             .expect("Couldn't collect tokens in extended format.")
-        // tokens
     }
 
     pub fn nft_total_supply(&self) -> U128 {
