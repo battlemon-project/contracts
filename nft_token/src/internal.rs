@@ -1,13 +1,12 @@
 use near_contract_standards::non_fungible_token::metadata::NFTContractMetadata;
-use near_contract_standards::non_fungible_token::{NonFungibleToken, Token, TokenId};
+use near_contract_standards::non_fungible_token::{NonFungibleToken, Token};
 use near_sdk::borsh::{self, BorshSerialize};
 use near_sdk::collections::{LazyOption, LookupMap};
 use near_sdk::{AccountId, BorshStorageKey};
 
-use nft_models::{Manager, ModelKind};
 use token_metadata_ext::TokenExt;
 
-use crate::error::{BattlemonError as BtlError, InstructionErrorKind, Result};
+use crate::error::Result;
 use crate::Contract;
 
 #[derive(BorshSerialize, BorshStorageKey)]
