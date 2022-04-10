@@ -1,13 +1,14 @@
+use std::collections::HashSet;
+
 use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::serde_json::json;
 use near_sdk::test_utils::VMContextBuilder;
 use near_sdk::AccountId;
 use near_sdk_sim::to_yocto;
-use nft_models::lemon::Lemon;
-use nft_models::weapon::Weapon;
-use nft_models::{Manager, ModelKind};
 use once_cell::unsync::Lazy;
-use std::collections::HashSet;
+
+use nft_models::lemon::Lemon;
+use nft_models::ModelKind;
 use token_metadata_ext::*;
 
 pub const MARKET_ACCOUNT_ID: &str = "market";
@@ -86,112 +87,96 @@ pub fn sample_token_metadata() -> TokenMetadataExt {
 pub fn get_foo_lemon() -> Lemon {
     use nft_models::lemon::*;
 
-    Lemon {
-        option: Option_::OnSale,
-        century: Century::Ancient,
-        r#type: Type::Light,
-        lemon_gen: LemonGen::Nakamoto,
-        background: Background::Red,
-        top: Top::Headdress,
-        cyber_suit: CyberSuit::Black,
-        expression: Expression::Brooding,
-        eyes: Eyes::Open,
-        hair: Hair::Elvis,
-        accessory: Accessory::Cigar,
-        winrate: None,
-        rarity: 0,
-        parent: None,
-        slots: HashSet::new(),
-    }
+    Lemon::from_random(&[10, 11, 12, 14])
 }
 
-pub fn get_foo_weapon() -> Weapon {
-    use nft_models::weapon::*;
-
-    Weapon {
-        level: 0,
-        r#type: Type::Instant,
-        parent: None,
-        slots: HashSet::new(),
-    }
-}
-
-pub fn foo_token_metadata_ext() -> TokenMetadataExt {
-    use nft_models::weapon::*;
-    let model: ModelKind = Weapon {
-        level: 0,
-        r#type: Type::Instant,
-        parent: None,
-        slots: HashSet::new(),
-    }
-    .into();
-
-    TokenMetadataExt {
-        title: Some("foo_token".into()),
-        description: Some("this is description for foo title's token".into()),
-        media: Some("link to media".into()),
-        media_hash: Some(vec![0, 1, 2, 3, 4].into()),
-        copies: Some(1),
-        issued_at: None,
-        expires_at: None,
-        starts_at: None,
-        updated_at: None,
-        extra: Some(
-            json!({
-                "some": "json",
-                "values": 9,
-            })
-            .to_string(),
-        ),
-        reference: None,
-        reference_hash: None,
-        model,
-    }
-}
-
-pub fn baz_token_metadata_ext() -> TokenMetadataExt {
-    use nft_models::lemon::*;
-    let model: ModelKind = Lemon {
-        option: Option_::Auction,
-        century: Century::Otherworldly,
-        r#type: Type::Heavy,
-        lemon_gen: LemonGen::Nakamoto,
-        background: Background::Red,
-        top: Top::Classical,
-        cyber_suit: CyberSuit::Black,
-        expression: Expression::Angry,
-        eyes: Eyes::Close,
-        hair: Hair::Punkkez,
-        accessory: Accessory::Toothpick,
-        winrate: Some(33),
-        rarity: 88,
-        parent: None,
-        slots: HashSet::new(),
-    }
-    .into();
-
-    TokenMetadataExt {
-        title: Some("baz_token".into()),
-        description: Some("this is description for baz title's token".into()),
-        media: Some("link to media".into()),
-        media_hash: Some(vec![2, 3, 4, 3, 4].into()),
-        copies: Some(1),
-        issued_at: None,
-        expires_at: None,
-        starts_at: None,
-        updated_at: None,
-        extra: Some(
-            json!({
-                "rust": "bless you!",
-                "values": 2,
-            })
-            .to_string(),
-        ),
-        reference: None,
-        reference_hash: None,
-        model,
-    }
-}
+// pub fn get_foo_weapon() -> Weapon {
+//     use nft_models::weapon::*;
+//
+//     Weapon {
+//         level: 0,
+//         r#type: Type::Instant,
+//         parent: None,
+//         slots: HashSet::new(),
+//     }
+// }
+//
+// pub fn foo_token_metadata_ext() -> TokenMetadataExt {
+//     use nft_models::weapon::*;
+//     let model: ModelKind = Weapon {
+//         level: 0,
+//         r#type: Type::Instant,
+//         parent: None,
+//         slots: HashSet::new(),
+//     }
+//     .into();
+//
+//     TokenMetadataExt {
+//         title: Some("foo_token".into()),
+//         description: Some("this is description for foo title's token".into()),
+//         media: Some("link to media".into()),
+//         media_hash: Some(vec![0, 1, 2, 3, 4].into()),
+//         copies: Some(1),
+//         issued_at: None,
+//         expires_at: None,
+//         starts_at: None,
+//         updated_at: None,
+//         extra: Some(
+//             json!({
+//                 "some": "json",
+//                 "values": 9,
+//             })
+//             .to_string(),
+//         ),
+//         reference: None,
+//         reference_hash: None,
+//         model,
+//     }
+// }
+//
+// pub fn baz_token_metadata_ext() -> TokenMetadataExt {
+//     use nft_models::lemon::*;
+//     let model: ModelKind = Lemon {
+//         option: Exo::MA01,
+//         cap: Cap::Otherworldly,
+//         r#type: Cloth::Heavy,
+//         eyes: Eyes::Nakamoto,
+//         background: Head::Red,
+//         top: Teeth::Classical,
+//         cyber_suit: CyberSuit::Black,
+//         expression: Expression::Angry,
+//         eyes: Eyes::Close,
+//         hair: Hair::Punkkez,
+//         accessory: Accessory::Toothpick,
+//         winrate: Some(33),
+//         rarity: 88,
+//         teeth: None,
+//         slots: HashSet::new(),
+//     }
+//     .into();
+//
+//     TokenMetadataExt {
+//         title: Some("baz_token".into()),
+//         description: Some("this is description for baz title's token".into()),
+//         media: Some("link to media".into()),
+//         media_hash: Some(vec![2, 3, 4, 3, 4].into()),
+//         copies: Some(1),
+//         issued_at: None,
+//         expires_at: None,
+//         starts_at: None,
+//         updated_at: None,
+//         extra: Some(
+//             json!({
+//                 "rust": "bless you!",
+//                 "values": 2,
+//             })
+//             .to_string(),
+//         ),
+//         reference: None,
+//         reference_hash: None,
+//         model,
+//     }
+// }
 
 pub fn get_context(predecessor_account_id: AccountId) -> VMContextBuilder {
     let mut builder = VMContextBuilder::new();
