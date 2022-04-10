@@ -3,16 +3,13 @@ use near_contract_standards::non_fungible_token::enumeration::NonFungibleTokenEn
 use near_contract_standards::non_fungible_token::metadata::{
     NFTContractMetadata, NonFungibleTokenMetadataProvider, NFT_METADATA_SPEC,
 };
-use near_contract_standards::non_fungible_token::{NonFungibleToken, Token, TokenId};
+use near_contract_standards::non_fungible_token::{NonFungibleToken, TokenId};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{LazyOption, LookupMap};
 use near_sdk::json_types::U128;
-use near_sdk::{
-    assert_one_yocto, env, log, near_bindgen, require, serde_json::json, AccountId, PanicOnDefault,
-    Promise,
-};
+use near_sdk::{near_bindgen, AccountId, PanicOnDefault, Promise};
 
-use consts::{DATA_IMAGE_SVG_LEMON_LOGO, EVENT_PREFIX};
+use consts::DATA_IMAGE_SVG_LEMON_LOGO;
 use nft_models::ModelKind;
 use token_metadata_ext::{TokenExt, TokenMetadataExt};
 
@@ -190,30 +187,30 @@ impl NonFungibleTokenMetadataProvider for Contract {
 
 near_contract_standards::impl_non_fungible_token_approval!(Contract, tokens);
 
-#[cfg(all(test, not(target_arch = "wasm32")))]
-mod tests {
-    use std::collections::{HashMap, HashSet};
-
-    use near_sdk::testing_env;
-
-    use nft_models::lemon::Lemon;
-    use nft_models::suppressor::Suppressor;
-    use nft_models::weapon::Weapon;
-    use test_utils::*;
-
-    use super::*;
-
-    const MINT_STORAGE_COST: u128 = 6_000_000_000_000_000_000_000;
-
-    #[test]
-    fn init() {
-        let mut context = get_context(bob());
-        testing_env!(context.build());
-        let contract = Contract::init(bob());
-        testing_env!(context.is_view(true).build());
-        assert_eq!(contract.nft_total_supply().0, 0);
-    }
-}
+// #[cfg(all(test, not(target_arch = "wasm32")))]
+// mod tests {
+//     use std::collections::{HashMap, HashSet};
+//
+//     use near_sdk::testing_env;
+//
+//     use nft_models::lemon::Lemon;
+//     use nft_models::suppressor::Suppressor;
+//     use nft_models::weapon::Weapon;
+//     use test_utils::*;
+//
+//     use super::*;
+//
+//     const MINT_STORAGE_COST: u128 = 6_000_000_000_000_000_000_000;
+//
+//     #[test]
+//     fn init() {
+//         let mut context = get_context(bob());
+//         testing_env!(context.build());
+//         let contract = Contract::init(bob());
+//         testing_env!(context.is_view(true).build());
+//         assert_eq!(contract.nft_total_supply().0, 0);
+//     }
+// }
 
 // #[cfg(all(test, not(target_arch = "wasm32")))]
 // mod tests {
