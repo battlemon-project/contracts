@@ -134,8 +134,8 @@ impl Contract {
 
         // After transfer NFT, we must disassemble compound NFT.
         // Put off token with `token_id` from tokens that contain it.
-        self.disassemble_token(&token_id)
-            .expect("Couldn't disassemble token");
+        // self.disassemble_token(&token_id)
+        //     .expect("Couldn't disassemble token");
     }
 
     // #[payable]
@@ -162,17 +162,26 @@ impl Contract {
         self.nft_token(token_id)
     }
 
-    #[payable]
-    pub fn assemble_compound_nft(&mut self, instructions: Vec<TokenId>) {
-        assert_one_yocto();
-        self.check_instructions(&instructions)
-            .expect("Provided instructions contain errors");
+    // #[payable]
+    // pub fn assemble_compound_nft(&mut self, instructions: Vec<TokenId>) {
+    //     assert_one_yocto();
+    //     self.check_instructions(&instructions)
+    //         .expect("Provided instructions contain errors");
+    //
+    //     for chunks in instructions.as_slice().chunks(2) {
+    //         self.put_slot(&chunks[0], &chunks[1])
+    //             .expect("Couldn't assemble compound nft");
+    //     }
+    // }
 
-        for chunks in instructions.as_slice().chunks(2) {
-            self.put_slot(&chunks[0], &chunks[1])
-                .expect("Couldn't assemble compound nft");
-        }
-    }
+    // pub fn compound_nft_token(&self, token_id: TokenId) -> Vec<(TokenId, ModelKind)> {
+    //     //todo: add tests
+    //     let mut buf = Vec::new();
+    //     self.nested_tokens_id(token_id, &mut buf)
+    //         .expect("Couldn't get nested tokens");
+    //     buf
+    // }
+}
 
     pub fn compound_nft_token(&self, token_id: TokenId) -> Vec<(TokenId, ModelKind)> {
         //todo: add tests
