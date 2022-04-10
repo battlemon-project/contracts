@@ -1,10 +1,12 @@
+use std::collections::HashMap;
+
 use near_contract_standards::non_fungible_token::metadata::TokenMetadata;
 use near_contract_standards::non_fungible_token::{Token, TokenId};
 use near_sdk::json_types::Base64VecU8;
 use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::AccountId;
+
 use nft_models::ModelKind;
-use std::collections::HashMap;
 
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(crate = "near_sdk::serde")]
@@ -70,27 +72,13 @@ impl TokenExt {
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {
     use std::collections::HashSet;
-    use super::*;
+
     use nft_models::lemon::*;
 
+    use super::*;
+
     fn get_lemon_model() -> Lemon {
-        Lemon {
-            option: Option_::ForRent,
-            century: Century::Ancient,
-            r#type: Type::Light,
-            lemon_gen: LemonGen::Buterin,
-            background: Background::Red,
-            top: Top::Headdress,
-            cyber_suit: CyberSuit::Gold,
-            expression: Expression::Brooding,
-            eyes: Eyes::Open,
-            hair: Hair::Elvis,
-            accessory: Accessory::Cigar,
-            winrate: None,
-            rarity: 0,
-            parent: None,
-            slots: HashSet::new()
-        }
+        Lemon::from_random(&[10, 12, 13, 14])
     }
 
     #[test]
