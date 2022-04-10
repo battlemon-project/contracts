@@ -23,6 +23,6 @@ jobs:
 
       - name: build
         run: cargo build --release --target wasm32-unknown-unknown
-
+# todo: return test invocation for ci
 #      - name: tests
 #        run: cargo test
