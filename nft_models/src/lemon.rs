@@ -1,171 +1,126 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::serde::{Deserialize, Serialize};
 
-#[derive(
-    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug, Manager,
-)]
+#[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug)]
 #[serde(crate = "near_sdk::serde")]
 pub struct Lemon {
-    pub option: Option_,
-    pub century: Century,
-    pub r#type: Type,
-    pub lemon_gen: LemonGen,
-    pub background: Background,
-    pub top: Top,
-    pub cyber_suit: CyberSuit,
-    pub expression: Expression,
+    pub cap: Option<Cap>,
+    pub cloth: Option<Cloth>,
+    pub exo: Exo,
     pub eyes: Eyes,
-    pub hair: Hair,
-    pub accessory: Accessory,
-    pub winrate: Option<u8>,
-    pub rarity: u8,
-    pub parent: Option<TokenId>,
-    pub slots: HashSet<TokenId>,
+    pub head: Head,
+    pub teeth: Teeth,
 }
 
-#[derive(
-    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
-)]
-#[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
-pub enum Option_ {
-    OnSale,
-    Auction,
-    ForRent,
-    LemonGen,
-}
+impl Lemon {
+    pub const TRAITS_COUNT: usize = 4;
 
-#[derive(
-    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
-)]
-#[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
-pub enum Century {
-    Ancient,
-    OurTime,
-    Future,
-    Otherworldly,
-}
+    pub fn from_random(nums: &[u8; Self::TRAITS_COUNT]) -> Self {
+        let [exo, eyes, head, teeth] = nums;
 
-#[derive(
-    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
-)]
-#[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
-pub enum Type {
-    Light,
-    Medium,
-    Heavy,
-}
-
-#[derive(
-    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
-)]
-#[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
-pub enum LemonGen {
-    Nakamoto,
-    Buterin,
-    Mask,
-    Jobs,
-}
-
-#[derive(
-    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
-)]
-#[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
-pub enum Background {
-    Red,
-    Purple,
-    Black,
-    Yellow,
-    Green,
-}
-
-#[derive(
-    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
-)]
-#[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
-pub enum Top {
-    Headdress,
-    Hairstyle,
-    Classical,
-}
-
-#[derive(
-    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
-)]
-#[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
-pub enum CyberSuit {
-    Black,
-    Metallic,
-    Blue,
-    Gold,
-}
-
-#[derive(
-    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
-)]
-#[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
-pub enum Expression {
-    Brooding,
-    Merry,
-    Angry,
-    Tense,
-    Relaxed,
-    Mask,
-}
-
-#[derive(
-    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
-)]
-#[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
-pub enum Eyes {
-    Open,
-    Close,
-    Medium,
-}
-
-#[derive(
-    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
-)]
-#[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
-pub enum Hair {
-    Elvis,
-    BobMarley,
-    Punkkez,
-    Disco,
-}
-
-#[derive(
-    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
-)]
-#[serde(crate = "near_sdk::serde", rename_all = "snake_case")]
-pub enum Accessory {
-    Cigar,
-    Toothpick,
-    Tattoo,
-    Scar,
-}
-
-mod tests {
-    #[allow(unused_imports)]
-    use super::*;
-
-    #[test]
-    fn lemon_model() {
-        let _lemon = Lemon {
-            option: Option_::OnSale,
-            century: Century::Ancient,
-            lemon_gen: LemonGen::Nakamoto,
-            background: Background::Red,
-            top: Top::Headdress,
-            cyber_suit: CyberSuit::Black,
-            expression: Expression::Brooding,
-            eyes: Eyes::Open,
-            hair: Hair::Elvis,
-            accessory: Accessory::Cigar,
-            winrate: None,
-            rarity: 0,
-            parent: None,
-            slots: HashSet::new(),
-            r#type: Type::Light,
+        let exo = match exo {
+            0..=33 => Exo::BA01,
+            34..=66 => Exo::MA01,
+            _ => Exo::ZA01,
         };
+
+        let eyes = match eyes {
+            0..=33 => Eyes::A01,
+            34..=66 => Eyes::B01,
+            _ => Eyes::Z01,
+        };
+
+        let head = match head {
+            0..=33 => Head::A01,
+            34..=66 => Head::B01,
+            _ => Head::Z01,
+        };
+
+        let teeth = match teeth {
+            0..=33 => Teeth::A01,
+            34..=66 => Teeth::B01,
+            _ => Teeth::Z01,
+        };
+
+        Self {
+            cap: None,
+            cloth: None,
+            exo,
+            eyes,
+            head,
+            teeth,
+        }
     }
+}
+
+#[derive(
+    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
+#[serde(crate = "near_sdk::serde")]
+)]
+pub enum Exo {
+    #[serde(rename = "ARM1_Exo_BA01")]
+    BA01,
+    #[serde(rename = "ARM1_Exo_MA01")]
+    MA01,
+    #[serde(rename = "ARM1_Exo_ZA01")]
+    ZA01,
+}
+
+#[derive(
+    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
+)]
+#[serde(crate = "near_sdk::serde")]
+pub enum Cap {
+    #[serde(rename = "ARM1_Cap_MA01")]
+    MA01,
+    #[serde(rename = "ARM1_Cap_ZA01")]
+    ZA01,
+}
+
+#[derive(
+    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
+)]
+#[serde(crate = "near_sdk::serde")]
+pub enum Cloth {
+    #[serde(rename = "ARM1_Cloth_MA01")]
+    MA01,
+}
+
+#[derive(
+    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
+)]
+#[serde(crate = "near_sdk::serde")]
+pub enum Eyes {
+    #[serde(rename = "ARM1_Eyes_A01")]
+    A01,
+    #[serde(rename = "ARM1_Eyes_B01")]
+    B01,
+    #[serde(rename = "ARM1_Eyes_Z01")]
+    Z01,
+}
+
+#[derive(
+    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
+)]
+#[serde(crate = "near_sdk::serde")]
+pub enum Head {
+    #[serde(rename = "ARM1_Head_A01")]
+    A01,
+    #[serde(rename = "ARM1_Head_B01")]
+    B01,
+    #[serde(rename = "ARM1_Head_Z01")]
+    Z01,
+}
+
+#[derive(
+    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
+)]
+#[serde(crate = "near_sdk::serde")]
+pub enum Teeth {
+    #[serde(rename = "ARM1_Teeth_A01")]
+    A01,
+    #[serde(rename = "ARM1_Teeth_B01")]
+    B01,
+    #[serde(rename = "ARM1_Teeth_Z01")]
+    Z01,
 }
