@@ -12,10 +12,19 @@ type Result<T> = std::result::Result<T, GenericError>;
 async fn rand() -> Result<()> {
     let worker = workspaces::testnet();
     let wasm = tokio::fs::read(CONTRACT_WASM).await?;
-    let contract = worker
-        .dev_deploy(&wasm)
+    let account = worker
+        .dev_create_account()
         .await
         .expect("could not dev-deploy contract");
+
+    let nft = account
+        .create_subaccount(&worker, "nft")
+        .initial_balance(100_000_000_000_000_000_000_000_000)
+        .transact()
+        .await?
+        .into_result()?;
+
+    let contract = nft.deploy(&worker, &wasm).await?.into_result()?;
 
     contract
         .call(&worker, "init")
