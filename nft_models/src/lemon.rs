@@ -55,8 +55,8 @@ impl Lemon {
 
 #[derive(
     Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
-#[serde(crate = "near_sdk::serde")]
 )]
+#[serde(crate = "near_sdk::serde")]
 pub enum Exo {
     #[serde(rename = "ARM1_Exo_BA01")]
     BA01,
