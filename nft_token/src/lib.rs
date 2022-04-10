@@ -1,7 +1,7 @@
 use near_contract_standards::non_fungible_token::core::NonFungibleTokenCore;
 use near_contract_standards::non_fungible_token::enumeration::NonFungibleTokenEnumeration;
 use near_contract_standards::non_fungible_token::metadata::{
-    NFTContractMetadata, NFT_METADATA_SPEC,
+    NFTContractMetadata, NonFungibleTokenMetadataProvider, NFT_METADATA_SPEC,
 };
 use near_contract_standards::non_fungible_token::{NonFungibleToken, Token, TokenId};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
@@ -48,42 +48,16 @@ impl Contract {
         Self::new(owner_id, metadata)
     }
 
-    pub fn nft_metadata(&self) -> NFTContractMetadata {
-        self.metadata.get().expect("Metadata didn't set")
-    }
-
     #[payable]
     pub fn nft_mint(&mut self, receiver_id: AccountId) -> TokenExt {
+        use nft_models::Lemon;
+
         let owner_id = receiver_id;
         self.last_token_id += 1;
-        let random: Vec<u8> = helpers::get_random_vec_range(2, 0, 100);
 
-        let option = match random[0] {
-            0..=25 => Option_::Auction,
-            26..=50 => Option_::ForRent,
-            51..=75 => Option_::OnSale,
-            _ => Option_::LemonGen,
-        };
+        let random = helpers::get_random_arr_range(0, 100);
 
-        use nft_models::lemon::*;
-        let model: ModelKind = Lemon {
-            option,
-            century: Century::Otherworldly,
-            r#type: Type::Heavy,
-            lemon_gen: LemonGen::Nakamoto,
-            background: Background::Red,
-            top: Top::Classical,
-            cyber_suit: CyberSuit::Black,
-            expression: Expression::Angry,
-            eyes: Eyes::Close,
-            hair: Hair::Punkkez,
-            accessory: Accessory::Toothpick,
-            winrate: Some(33),
-            rarity: 88,
-            parent: None,
-            slots: std::collections::HashSet::new(),
-        }
-        .into();
+        let model = ModelKind::Lemon(Lemon::from_random(&random));
 
         let token_metadata_ext = TokenMetadataExt {
             title: None,
@@ -103,15 +77,15 @@ impl Contract {
 
         let (mut metadata, _) = token_metadata_ext.split();
         // for test purpose
-        metadata.media = Some("https://demo.battlemon.com/img/2.png".to_string());
+        metadata.media = Some(
+            "https://api.monosnap.com/file/download?id=axPubUzmo1iTBzOr1yn7PhauYfvL8r".to_string(),
+        );
         let token_id = self.last_token_id.to_string();
-        // todo: add function for generating metadata and model
         self.model_by_id.insert(&token_id, &model);
         let token = self
             .tokens
-            .internal_mint(token_id.clone(), owner_id.clone(), Some(metadata));
+            .internal_mint(token_id.clone(), owner_id, Some(metadata));
         TokenExt::from_parts(token, model)
-        // token
     }
 
     pub fn get_owner_by_token_id(&self, token_id: TokenId) -> Option<AccountId> {
