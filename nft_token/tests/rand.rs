@@ -34,31 +34,24 @@ async fn rand() -> Result<()> {
         .transact()
         .await?;
 
-    let res = contract
-        .batch(&worker)
-        .call(
-            Function::new("nft_mint")
-                .args_json(json!({
-                    "receiver_id": "battlemon.testnet"
-                }))?
-                .deposit(6470000000000000000000),
-        )
-        .call(
-            Function::new("nft_mint")
-                .args_json(json!({
-                    "receiver_id": "battlemon.testnet"
-                }))?
-                .deposit(6470000000000000000000),
-        )
-        // .call(
-        //     Function::new("nft_mint")
-        //         .args(vec![])
-        //         .deposit(6470000000000000000000),
-        // )
+    contract
+        .call(&worker, "nft_mint")
+        .args_json(json!({
+            "receiver_id": "battlemon.testnet"
+        }))?
+        .deposit(6470000000000000000000)
         .transact()
         .await?;
 
-    println!("\nother: {:#?}", res);
+    contract
+        .call(&worker, "nft_mint")
+        .args_json(json!({
+            "receiver_id": "battlemon.testnet"
+        }))?
+        .deposit(6470000000000000000000)
+        .transact()
+        .await?;
+
     let result1 = contract
         .view(
             &worker,
