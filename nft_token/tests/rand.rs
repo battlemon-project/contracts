@@ -43,6 +43,13 @@ async fn rand() -> Result<()> {
                 }))?
                 .deposit(6470000000000000000000),
         )
+        .call(
+            Function::new("nft_mint")
+                .args_json(json!({
+                    "receiver_id": "battlemon.testnet"
+                }))?
+                .deposit(6470000000000000000000),
+        )
         // .call(
         //     Function::new("nft_mint")
         //         .args(vec![])
