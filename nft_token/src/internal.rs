@@ -39,20 +39,20 @@ impl Contract {
         }
     }
 
-    pub(crate) fn nested_tokens_id(
-        &self,
-        token_id: TokenId,
-        buf: &mut Vec<(TokenId, ModelKind)>,
-    ) -> Result<()> {
-        let model = self.model(&token_id)?;
-        buf.push((token_id, model.clone()));
-
-        for id in model.slots_id() {
-            self.nested_tokens_id(id, buf)?;
-        }
-
-        Ok(())
-    }
+    // pub(crate) fn nested_tokens_id(
+    //     &self,
+    //     token_id: TokenId,
+    //     buf: &mut Vec<(TokenId, ModelKind)>,
+    // ) -> Result<()> {
+    //     let model = self.model(&token_id)?;
+    //     buf.push((token_id, model.clone()));
+    //
+    //     for id in model.slots_id() {
+    //         self.nested_tokens_id(id, buf)?;
+    //     }
+    //
+    //     Ok(())
+    // }
 
     pub(crate) fn collect_ext_tokens(&self, tokens: Vec<Token>) -> Result<Vec<TokenExt>> {
         tokens
@@ -64,86 +64,86 @@ impl Contract {
             .collect()
     }
 
-    pub(crate) fn put_slot(&mut self, body_id: &TokenId, slot_id: &TokenId) -> Result<()> {
-        let mut body_model = self.model(&body_id)?;
-        let mut slot_model = self.model(&slot_id)?;
-        body_model.insert_slot(&slot_id);
-        slot_model.replace_parent(&body_id);
-        self.model_by_id.insert(&body_id, &body_model);
-        self.model_by_id.insert(&slot_id, &slot_model);
+    // pub(crate) fn put_slot(&mut self, body_id: &TokenId, slot_id: &TokenId) -> Result<()> {
+    // let mut body_model = self.model(&body_id)?;
+    // let mut slot_model = self.model(&slot_id)?;
+    // body_model.insert_slot(&slot_id);
+    // slot_model.replace_parent(&body_id);
+    // self.model_by_id.insert(&body_id, &body_model);
+    // self.model_by_id.insert(&slot_id, &slot_model);
+    //
+    // Ok(())
+    // }
 
-        Ok(())
-    }
+    // pub(crate) fn check_instructions(&self, instructions: &[TokenId]) -> Result<()> {
+    //     if instructions.is_empty() {
+    //         return Err(BtlError::InstructionError(InstructionErrorKind::Empty));
+    //     }
+    //
+    //     for chunk in instructions.chunks(2) {
+    //         let body_id = chunk.get(0).ok_or(BtlError::InstructionError(
+    //             InstructionErrorKind::ChunkBoundsOut,
+    //         ))?;
+    //         let slot_id = chunk.get(1).ok_or(BtlError::InstructionError(
+    //             InstructionErrorKind::ChunkBoundsOut,
+    //         ))?;
+    //
+    //         let body_owner = self.owner(body_id)?;
+    //         let slot_owner = self.owner(slot_id)?;
+    //
+    //         if body_owner != slot_owner {
+    //             return Err(BtlError::InstructionError(
+    //                 InstructionErrorKind::NotEqualOwners,
+    //             ));
+    //         }
+    //
+    //         let body_model = self.model(body_id)?;
+    //         let slot_model = self.model(slot_id)?;
+    //         todo: add checking for amount attached models the same type (for example for Lemon is possible
+    //         only attach two weapons)
+    //         Like idea to store info about possible attachments like fields in models
+    //         Lemon {
+    //              ...,
+    //              left_weapon: bool,
+    //              right_weapon: bool,
+    //              slots: [...]
+    //         }
+    //         also we can change slots type to Vec (now it's HashSet)
+    //         and left_weapon, right_weapon to Option<usize>, for storing indices of tokens id's
+    //         benefits: can see used slots, understand id's of this slots, low memory usage, fast operations.
+    //         todo: added additional tests for these cases
+    //
+    //         if !body_model.is_compatible(&slot_model) {
+    //             return Err(BtlError::InstructionError(
+    //                 InstructionErrorKind::IncompatibleModels,
+    //             ));
+    //         }
+    //     }
+    //
+    //     Ok(())
+    // }
 
-    pub(crate) fn check_instructions(&self, instructions: &[TokenId]) -> Result<()> {
-        if instructions.is_empty() {
-            return Err(BtlError::InstructionError(InstructionErrorKind::Empty));
-        }
-
-        for chunk in instructions.chunks(2) {
-            let body_id = chunk.get(0).ok_or(BtlError::InstructionError(
-                InstructionErrorKind::ChunkBoundsOut,
-            ))?;
-            let slot_id = chunk.get(1).ok_or(BtlError::InstructionError(
-                InstructionErrorKind::ChunkBoundsOut,
-            ))?;
-
-            let body_owner = self.owner(body_id)?;
-            let slot_owner = self.owner(slot_id)?;
-
-            if body_owner != slot_owner {
-                return Err(BtlError::InstructionError(
-                    InstructionErrorKind::NotEqualOwners,
-                ));
-            }
-
-            let body_model = self.model(body_id)?;
-            let slot_model = self.model(slot_id)?;
-            // todo: add checking for amount attached models the same type (for example for Lemon is possible
-            // only attach two weapons)
-            // Like idea to store info about possible attachments like fields in models
-            // Lemon {
-            //      ...,
-            //      left_weapon: bool,
-            //      right_weapon: bool,
-            //      slots: [...]
-            // }
-            // also we can change slots type to Vec (now it's HashSet)
-            // and left_weapon, right_weapon to Option<usize>, for storing indices of tokens id's
-            // benefits: can see used slots, understand id's of this slots, low memory usage, fast operations.
-            // todo: added additional tests for these cases
-
-            if !body_model.is_compatible(&slot_model) {
-                return Err(BtlError::InstructionError(
-                    InstructionErrorKind::IncompatibleModels,
-                ));
-            }
-        }
-
-        Ok(())
-    }
-
-    pub(crate) fn disassemble_token(&mut self, token_id: &TokenId) -> Result<()> {
-        // TODO: to cover with unittests
-        let mut model = self.model(&token_id)?;
-
-        if let Some(parent_id) = model.take_parent() {
-            let mut parent = self.model(&parent_id)?;
-            parent.take_slot(&token_id);
-            self.model_by_id.insert(&parent_id, &parent);
-        };
-
-        let slots = model.drain_slots();
-        self.model_by_id.insert(&token_id, &model);
-
-        for id in slots {
-            let mut child = self.model(&id)?;
-            child.take_parent();
-            self.model_by_id.insert(&id, &child);
-        }
-
-        Ok(())
-    }
+    // pub(crate) fn disassemble_token(&mut self, token_id: &TokenId) -> Result<()> {
+    //     // TODO: to cover with unittests
+    //     let mut model = self.model(&token_id)?;
+    //
+    //     if let Some(parent_id) = model.take_parent() {
+    //         let mut parent = self.model(&parent_id)?;
+    //         parent.take_slot(&token_id);
+    //         self.model_by_id.insert(&parent_id, &parent);
+    //     };
+    //
+    //     let slots = model.drain_slots();
+    //     self.model_by_id.insert(&token_id, &model);
+    //
+    //     for id in slots {
+    //         let mut child = self.model(&id)?;
+    //         child.take_parent();
+    //         self.model_by_id.insert(&id, &child);
+    //     }
+    //
+    //     Ok(())
+    // }
 }
 
 // #[cfg(all(test, not(target_arch = "wasm32")))]
