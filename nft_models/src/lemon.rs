@@ -59,6 +59,7 @@ impl Lemon {
 impl BuildQuery for Lemon {
     fn build_query(&self) -> String {
         let value = serde_json::to_value(self).expect("Couldn't serialize `Lemon` into `Value`");
+        dbg!(value.clone());
         let exo = value
             .get("exo")
             .expect("Couldn't get exo from value")
