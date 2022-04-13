@@ -1,5 +1,8 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::serde::{Deserialize, Serialize};
+use near_sdk::serde_json;
+
+use crate::BuildQuery;
 
 #[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug)]
 #[serde(crate = "near_sdk::serde")]
@@ -50,6 +53,43 @@ impl Lemon {
             head,
             teeth,
         }
+    }
+}
+
+impl BuildQuery for Lemon {
+    fn build_query(&self) -> String {
+        let value = serde_json::to_value(self).expect("Couldn't serialize `Lemon` into `Value`");
+        let exo = value
+            .get("exo")
+            .expect("Couldn't get exo from value")
+            .as_str()
+            .expect("Couldn't convert to str");
+        let cap = value
+            .get("cap")
+            .expect("Couldn't get cap from value")
+            .as_str()
+            .expect("Couldn't convert to str");
+        let cloth = value
+            .get("cloth")
+            .expect("Couldn't get cloth from value")
+            .as_str()
+            .expect("Couldn't convert to str");
+        let eyes = value
+            .get("eyes")
+            .expect("Couldn't get eyes from value")
+            .as_str()
+            .expect("Couldn't convert to str");
+        let head = value
+            .get("head")
+            .expect("Couldn't get head from value")
+            .as_str()
+            .expect("Couldn't convert to str");
+        let teeth = value
+            .get("teeth")
+            .expect("Couldn't get teeth from value")
+            .as_str()
+            .expect("Couldn't convert to str");
+        format!("?background=red&exo={exo}&cap={cap}&cloth={cloth}&eyes={eyes}&head={head}&teeth={teeth}")
     }
 }
 
