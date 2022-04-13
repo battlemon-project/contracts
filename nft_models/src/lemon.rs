@@ -62,22 +62,21 @@ impl Lemon {
 impl BuildQuery for Lemon {
     fn build_query(&self) -> String {
         let value = serde_json::to_value(self).expect("Couldn't serialize `Lemon` into `Value`");
-        dbg!(value.clone());
         let exo = value
             .get("exo")
             .expect("Couldn't get exo from value")
             .as_str()
             .expect("Couldn't convert to str");
-        // let cap = value
-        //     .get("cap")
-        //     .expect("Couldn't get cap from value")
-        //     .as_str()
-        //     .expect("Couldn't convert to str");
-        // let cloth = value
-        //     .get("cloth")
-        //     .expect("Couldn't get cloth from value")
-        //     .as_str()
-        //     .expect("Couldn't convert to str");
+        let cap = value
+            .get("cap")
+            .expect("Couldn't get cap from value")
+            .as_str()
+            .expect("Couldn't convert to str");
+        let cloth = value
+            .get("cloth")
+            .expect("Couldn't get cloth from value")
+            .as_str()
+            .expect("Couldn't convert to str");
         let eyes = value
             .get("eyes")
             .expect("Couldn't get eyes from value")
@@ -94,8 +93,7 @@ impl BuildQuery for Lemon {
             .as_str()
             .expect("Couldn't convert to str");
 
-        format!("?background=red&eyes={eyes}&head={head}&teeth={teeth}")
-        // format!("?background=red&exo={exo}&cap={cap}&cloth={cloth}&eyes={eyes}&head={head}&teeth={teeth}")
+        format!("?background=red&exo={exo}&cap={cap}&cloth={cloth}&eyes={eyes}&head={head}&teeth={teeth}")
     }
 }
 
