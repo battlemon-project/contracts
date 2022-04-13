@@ -7,8 +7,8 @@ use crate::BuildQuery;
 #[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug)]
 #[serde(crate = "near_sdk::serde")]
 pub struct Lemon {
-    pub cap: Option<Cap>,
-    pub cloth: Option<Cloth>,
+    pub cap: Cap,
+    pub cloth: Cloth,
     pub exo: Exo,
     pub eyes: Eyes,
     pub head: Head,
@@ -45,9 +45,12 @@ impl Lemon {
             _ => Teeth::Z01,
         };
 
+        let cap = Cap::ZA01;
+        let cloth = Cloth::MA01;
+
         Self {
-            cap: None,
-            cloth: None,
+            cap,
+            cloth,
             exo,
             eyes,
             head,
