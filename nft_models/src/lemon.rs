@@ -89,6 +89,7 @@ impl BuildQuery for Lemon {
             .expect("Couldn't get teeth from value")
             .as_str()
             .expect("Couldn't convert to str");
+
         format!("?background=red&exo={exo}&cap={cap}&cloth={cloth}&eyes={eyes}&head={head}&teeth={teeth}")
     }
 }

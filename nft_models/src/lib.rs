@@ -19,7 +19,7 @@ impl BuildQuery for ModelKind {
     }
 }
 
-trait BuildQuery {
+pub trait BuildQuery {
     fn build_query(&self) -> String;
 }
 // impl ModelKind {

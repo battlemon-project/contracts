@@ -19,13 +19,12 @@ async fn rand() -> Result<()> {
 
     let nft = account
         .create_subaccount(&worker, "nft")
-        .initial_balance(100_000_000_000_000_000_000_000_000)
+        .initial_balance(50_000_000_000_000_000_000_000_000)
         .transact()
         .await?
         .into_result()?;
 
     let contract = nft.deploy(&worker, &wasm).await?.into_result()?;
-
     contract
         .call(&worker, "init")
         .args_json(json!({
@@ -34,54 +33,67 @@ async fn rand() -> Result<()> {
         .transact()
         .await?;
 
-    let res1 = contract
-        .call(&worker, "nft_mint")
+    let res1 = account
+        .call(&worker, contract.id(), "nft_mint")
         .args_json(json!({
             "receiver_id": "battlemon.testnet"
         }))?
+        .gas(300_000_000_000_000)
         .deposit(6470000000000000000000)
         .transact()
         .await?;
 
-    contract
-        .call(&worker, "nft_mint")
+    account
+        .call(&worker, contract.id(), "nft_mint")
         .args_json(json!({
             "receiver_id": "battlemon.testnet"
         }))?
-        .deposit(6470000000000000000000)
-        .transact()
-        .await?;
-    contract
-        .call(&worker, "nft_mint")
-        .args_json(json!({
-            "receiver_id": "battlemon.testnet"
-        }))?
+        .gas(300_000_000_000_000)
         .deposit(6470000000000000000000)
         .transact()
         .await?;
 
-    contract
-        .call(&worker, "nft_mint")
+    account
+        .call(&worker, contract.id(), "nft_mint")
         .args_json(json!({
             "receiver_id": "battlemon.testnet"
         }))?
+        .gas(300_000_000_000_000)
         .deposit(6470000000000000000000)
         .transact()
         .await?;
+
+    account
+        .call(&worker, contract.id(), "nft_mint")
+        .args_json(json!({
+            "receiver_id": "battlemon.testnet"
+        }))?
+        .gas(300_000_000_000_000)
+        .deposit(6470000000000000000000)
+        .transact()
+        .await?;
+    // contract
+    //     .call(&worker, "nft_mint")
+    //     .args_json(json!({
+    //         "receiver_id": "battlemon.testnet"
+    //     }))?
+    //     .deposit(6470000000000000000000)
+    //     .transact()
+    //     .await?;
     println!("\nres1: {:#?}", res1);
 
-    let result1 = contract
-        .view(
-            &worker,
-            "nft_tokens",
-            json!({"from_index": null, "limit": null})
-                .to_string()
-                .into_bytes(),
-        )
-        .await?
-        .json::<Value>()?;
-
-    println!("{}", result1);
+    // let result1 = contract
+    //     .view(
+    //         &worker,
+    //         "nft_tokens",
+    //         json!({"from_index": null, "limit": null})
+    //             .to_string()
+    //             .into_bytes(),
+    //     )
+    //     .await?
+    //     .json::<Value>()?;
+    //
+    // println!("{}", result1);
 
     Ok(())
 }
