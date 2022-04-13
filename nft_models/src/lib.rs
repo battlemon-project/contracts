@@ -11,6 +11,17 @@ pub enum ModelKind {
     Lemon(Lemon),
 }
 
+impl BuildQuery for ModelKind {
+    fn build_query(&self) -> String {
+        match self {
+            Self::Lemon(lemon) => lemon.build_query(),
+        }
+    }
+}
+
+trait BuildQuery {
+    fn build_query(&self) -> String;
+}
 // impl ModelKind {
 //     pub fn is_compatible(&self, model_kind: &Self) -> bool {
 //         match (self, model_kind) {
