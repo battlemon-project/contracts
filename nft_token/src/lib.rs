@@ -1,11 +1,12 @@
 use near_contract_standards::non_fungible_token::core::NonFungibleTokenCore;
 use near_contract_standards::non_fungible_token::enumeration::NonFungibleTokenEnumeration;
 use near_contract_standards::non_fungible_token::metadata::{
-    NFTContractMetadata, NonFungibleTokenMetadataProvider, NFT_METADATA_SPEC,
+    NFTContractMetadata, NonFungibleTokenMetadataProvider, TokenMetadata, NFT_METADATA_SPEC,
 };
 use near_contract_standards::non_fungible_token::{NonFungibleToken, TokenId};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{LazyOption, LookupMap};
+use near_sdk::env::panic_str;
 use near_sdk::json_types::U128;
 use near_sdk::{near_bindgen, AccountId, PanicOnDefault, Promise};
 
@@ -127,7 +128,7 @@ impl Contract {
         memo: Option<String>,
     ) {
         self.tokens
-            .nft_transfer(receiver_id, token_id.clone(), approval_id, memo);
+            .nft_transfer(receiver_id, token_id, approval_id, memo);
 
         // After transfer NFT, we must disassemble compound NFT.
         // Put off token with `token_id` from tokens that contain it.
@@ -135,6 +136,23 @@ impl Contract {
         //     .expect("Couldn't disassemble token");
     }
 
+    // todo: add security checking
+    #[payable]
+    pub fn update_token_media(&mut self, token_id: TokenId, new_media: String) {
+        let token_metadata = self
+            .nft_token(token_id.clone())
+            .and_then(|token| token.metadata)
+            .map(|metadata| TokenMetadata {
+                media: Some(new_media),
+                ..metadata
+            })
+            .unwrap_or_else(|| panic_str("metadata for token doesn't exists"));
+
+        self.tokens
+            .token_metadata_by_id
+            .as_mut()
+            .and_then(|by_id| by_id.insert(&token_id, &token_metadata));
+    }
     // #[payable]
     // pub fn nft_transfer_call(
     //     &mut self,
