@@ -1,7 +1,5 @@
-use near_sdk::{AccountId, BlockHeight};
-use serde_json::{json, Value};
+use serde_json::json;
 use workspaces::prelude::DevAccountDeployer;
-use workspaces::Function;
 
 const CONTRACT_WASM: &str = "../target/wasm32-unknown-unknown/release/nft_token.wasm";
 
@@ -72,28 +70,7 @@ async fn rand() -> Result<()> {
         .deposit(6470000000000000000000)
         .transact()
         .await?;
-    // contract
-    //     .call(&worker, "nft_mint")
-    //     .args_json(json!({
-    //         "receiver_id": "battlemon.testnet"
-    //     }))?
-    //     .deposit(6470000000000000000000)
-    //     .transact()
-    //     .await?;
     println!("\nres1: {:#?}", res1);
-
-    // let result1 = contract
-    //     .view(
-    //         &worker,
-    //         "nft_tokens",
-    //         json!({"from_index": null, "limit": null})
-    //             .to_string()
-    //             .into_bytes(),
-    //     )
-    //     .await?
-    //     .json::<Value>()?;
-    //
-    // println!("{}", result1);
 
     Ok(())
 }
