@@ -13,6 +13,7 @@ use near_sdk::{near_bindgen, AccountId, PanicOnDefault, Promise};
 use consts::DATA_IMAGE_SVG_LEMON_LOGO;
 use nft_models::ModelKind;
 use token_metadata_ext::{TokenExt, TokenMetadataExt};
+use crate::consts::IPFS_GATEWAY_BASE_URL;
 
 mod consts;
 mod error;
@@ -37,7 +38,7 @@ impl Contract {
             name: "Battlemon".to_string(),
             symbol: "BTLMN".to_string(),
             icon: Some(DATA_IMAGE_SVG_LEMON_LOGO.to_string()),
-            base_uri: None,
+            base_uri: Some(IPFS_GATEWAY_BASE_URL.to_string()),
             reference: None,
             reference_hash: None,
         };
