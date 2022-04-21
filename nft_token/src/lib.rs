@@ -10,10 +10,10 @@ use near_sdk::env::panic_str;
 use near_sdk::json_types::U128;
 use near_sdk::{near_bindgen, AccountId, PanicOnDefault, Promise};
 
+use crate::consts::{IPFS_GATEWAY_BASE_URL, NFT_BACK_IMAGE};
 use consts::DATA_IMAGE_SVG_LEMON_LOGO;
 use nft_models::ModelKind;
 use token_metadata_ext::{TokenExt, TokenMetadataExt};
-use crate::consts::IPFS_GATEWAY_BASE_URL;
 
 mod consts;
 mod error;
@@ -58,10 +58,10 @@ impl Contract {
 
         let model = ModelKind::Lemon(Lemon::from_random(&random));
 
-        let token_metadata_ext = TokenMetadataExt {
+        let token_metadata = TokenMetadata {
             title: None,
             description: None,
-            media: None,
+            media: Some(NFT_BACK_IMAGE.to_string()),
             media_hash: None,
             copies: None,
             issued_at: None,
@@ -71,19 +71,13 @@ impl Contract {
             extra: None,
             reference: None,
             reference_hash: None,
-            model: model.clone(),
         };
 
-        let (mut metadata, _) = token_metadata_ext.split();
-        // for test purpose
-        metadata.media = Some(
-            "https://api.monosnap.com/file/download?id=axPubUzmo1iTBzOr1yn7PhauYfvL8r".to_string(),
-        );
         let token_id = self.last_token_id.to_string();
         self.model_by_id.insert(&token_id, &model);
         let token = self
             .tokens
-            .internal_mint(token_id.clone(), owner_id, Some(metadata));
+            .internal_mint(token_id.clone(), owner_id, Some(token_metadata));
         TokenExt::from_parts(token, model)
     }
 
