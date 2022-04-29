@@ -1,6 +1,6 @@
 mod utils;
 
-use crate::utils::{get_testnet_json_rpc_wrapper, TESTNET_JSON_RPC_WRAPPER};
+use crate::utils::get_testnet_json_rpc_wrapper;
 use near_primitives::hash::CryptoHash;
 use near_units::parse_near;
 use serde_json::json;
