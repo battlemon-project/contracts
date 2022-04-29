@@ -1,0 +1,14 @@
+[package]
+name = "tests"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dev-dependencies]
+workspaces = { git = "https://github.com/near/workspaces-rs", features = ["unstable"] }
+battlemon_near_json_rpc_client_wrapper = { git = "https://github.com/battlemon-project/battlemon_near_json_rpc_client_wrapper" }
+near-primitives = "0.12.0"
+near-units = "0.2.0"
+tokio = "1.17.0"
+serde_json = "1.0.79"
+token_metadata_ext = { path = "../token_metadata_ext" }

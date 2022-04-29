@@ -8,8 +8,9 @@ type Result<T> = std::result::Result<T, GenericError>;
 
 #[tokio::test]
 async fn rand() -> Result<()> {
-    let worker = workspaces::testnet();
-    let wasm = tokio::fs::read(CONTRACT_WASM).await?;
+    let worker = workspaces::testnet().await?;
+    let wasm = workspaces::compile_project("../nft_token").await?;
+    // let wasm = tokio::fs::read(CONTRACT_WASM).await?;
     let account = worker
         .dev_create_account()
         .await
@@ -23,54 +24,55 @@ async fn rand() -> Result<()> {
         .into_result()?;
 
     let contract = nft.deploy(&worker, &wasm).await?.into_result()?;
-    contract
+    let res = contract
         .call(&worker, "init")
         .args_json(json!({
                 "owner_id": contract.id(),
         }))?
         .transact()
         .await?;
-
+    println!("{:?}", res.outcome());
     let res1 = account
         .call(&worker, contract.id(), "nft_mint")
         .args_json(json!({
-            "receiver_id": "battlemon.testnet"
+            "receiver_id": "f0m0.testnet"
         }))?
-        .gas(300_000_000_000_000)
+        .max_gas()
         .deposit(6470000000000000000000)
         .transact()
         .await?;
-
-    account
-        .call(&worker, contract.id(), "nft_mint")
-        .args_json(json!({
-            "receiver_id": "battlemon.testnet"
-        }))?
-        .gas(300_000_000_000_000)
-        .deposit(6470000000000000000000)
-        .transact()
-        .await?;
-
-    account
-        .call(&worker, contract.id(), "nft_mint")
-        .args_json(json!({
-            "receiver_id": "battlemon.testnet"
-        }))?
-        .gas(300_000_000_000_000)
-        .deposit(6470000000000000000000)
-        .transact()
-        .await?;
-
-    account
-        .call(&worker, contract.id(), "nft_mint")
-        .args_json(json!({
-            "receiver_id": "battlemon.testnet"
-        }))?
-        .gas(300_000_000_000_000)
-        .deposit(6470000000000000000000)
-        .transact()
-        .await?;
-    println!("\nres1: {:#?}", res1);
+    println!("{res1:?}");
+    //
+    // account
+    //     .call(&worker, contract.id(), "nft_mint")
+    //     .args_json(json!({
+    //         "receiver_id": "battlemon.testnet"
+    //     }))?
+    //     .gas(300_000_000_000_000)
+    //     .deposit(6470000000000000000000)
+    //     .transact()
+    //     .await?;
+    //
+    // account
+    //     .call(&worker, contract.id(), "nft_mint")
+    //     .args_json(json!({
+    //         "receiver_id": "battlemon.testnet"
+    //     }))?
+    //     .gas(300_000_000_000_000)
+    //     .deposit(6470000000000000000000)
+    //     .transact()
+    //     .await?;
+    //
+    // account
+    //     .call(&worker, contract.id(), "nft_mint")
+    //     .args_json(json!({
+    //         "receiver_id": "battlemon.testnet"
+    //     }))?
+    //     .gas(300_000_000_000_000)
+    //     .deposit(6470000000000000000000)
+    //     .transact()
+    //     .await?;
+    // println!("\nres1: {:#?}", res1);
 
     Ok(())
 }

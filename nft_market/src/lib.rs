@@ -467,7 +467,7 @@ impl NonFungibleTokenApprovalReceiver for Contract {
         require!(env::predecessor_account_id() == self.nft_id);
 
         let SaleArgs { sale_type, price } =
-            serde_json::from_str(&msg).expect("couldn't parse json");
+            serde_json::from_str(&msg).expect("Couldn't parse json");
 
         match sale_type {
             SaleType::AcceptBid => {
