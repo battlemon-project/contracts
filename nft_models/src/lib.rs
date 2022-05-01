@@ -11,16 +11,16 @@ pub enum ModelKind {
     Lemon(Lemon),
 }
 
-impl BuildQuery for ModelKind {
-    fn build_query(&self) -> String {
+impl BuildUrlQuery for ModelKind {
+    fn build_url_query(&self) -> String {
         match self {
-            Self::Lemon(lemon) => lemon.build_query(),
+            Self::Lemon(lemon) => lemon.build_url_query(),
         }
     }
 }
 
-pub trait BuildQuery {
-    fn build_query(&self) -> String;
+pub trait BuildUrlQuery {
+    fn build_url_query(&self) -> String;
 }
 // impl ModelKind {
 //     pub fn is_compatible(&self, model_kind: &Self) -> bool {

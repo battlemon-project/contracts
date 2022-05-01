@@ -2,7 +2,7 @@ use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::serde_json;
 
-use crate::BuildQuery;
+use crate::BuildUrlQuery;
 
 #[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug)]
 #[serde(crate = "near_sdk::serde")]
@@ -59,8 +59,8 @@ impl Lemon {
     }
 }
 
-impl BuildQuery for Lemon {
-    fn build_query(&self) -> String {
+impl BuildUrlQuery for Lemon {
+    fn build_url_query(&self) -> String {
         let value = serde_json::to_value(self).expect("Couldn't serialize `Lemon` into `Value`");
         let exo = value
             .get("exo")
