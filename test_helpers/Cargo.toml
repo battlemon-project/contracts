@@ -1,0 +1,14 @@
+[package]
+name = "test_helpers"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.19.0", features = ["once_cell"] }
+workspaces = { git = "https://github.com/near/workspaces-rs", features = ["unstable"] }
+token_metadata_ext = { path = "../token_metadata_ext" }
+near-sdk = "4.0.0"
+near-contract-standards = "4.0.0"
+once_cell = "1.8.0"
+nft_models = { path = "../nft_models" }
+near-units = "0.2.0"

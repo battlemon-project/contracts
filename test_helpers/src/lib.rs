@@ -1,24 +1,23 @@
-use std::collections::HashSet;
+mod statics;
 
 use near_contract_standards::non_fungible_token::TokenId;
-use near_sdk::serde_json::json;
 use near_sdk::test_utils::VMContextBuilder;
 use near_sdk::AccountId;
-use near_sdk_sim::to_yocto;
-use once_cell::unsync::Lazy;
-
+use near_units::parse_near;
 use nft_models::lemon::Lemon;
 use nft_models::ModelKind;
+use once_cell::unsync::Lazy;
+pub use statics::*;
 use token_metadata_ext::*;
-
+pub use workspaces;
 pub const MARKET_ACCOUNT_ID: &str = "market";
 pub const NFT_ACCOUNT_ID: &str = "nft";
 pub const SPOILED_NFT_ACCOUNT_ID: &str = "spoiled_nft";
 pub const VALID_TOKEN_ID: &str = "valid token id";
 pub const INVALID_TOKEN_ID: &str = "invalid token id";
-pub const VALID_TOKEN_PRICE: Lazy<u128> = Lazy::new(|| to_yocto("10"));
-pub const INVALID_TOKEN_PRICE: Lazy<u128> = Lazy::new(|| to_yocto("5"));
-pub const BASE_DEPOSIT: Lazy<u128> = Lazy::new(|| to_yocto("100"));
+pub const VALID_TOKEN_PRICE: Lazy<u128> = Lazy::new(|| parse_near!("10"));
+pub const INVALID_TOKEN_PRICE: Lazy<u128> = Lazy::new(|| parse_near!("5"));
+pub const BASE_DEPOSIT: Lazy<u128> = Lazy::new(|| parse_near!("100"));
 
 pub fn alice() -> AccountId {
     AccountId::new_unchecked("alice.near".to_string())
@@ -43,29 +42,29 @@ pub fn tokens<const N: usize>() -> [TokenId; N] {
     <[_; N]>::try_from(range).unwrap()
 }
 
-pub fn fake_metadata_with<T>(model: T) -> TokenMetadataExt
-where
-    T: Manager + Into<ModelKind>,
-{
-    TokenMetadataExt {
-        title: Some("fake title".into()),
-        description: Some("this is fake description".into()),
-        media: Some("https://fakelinktomedia.com".into()),
-        media_hash: Some(vec![0, 1, 2, 3, 4].into()),
-        copies: None,
-        issued_at: None,
-        expires_at: None,
-        starts_at: None,
-        updated_at: None,
-        extra: None,
-        reference: None,
-        reference_hash: None,
-        model: model.into(),
-    }
-}
+// pub fn fake_metadata_with<T>(model: T) -> TokenMetadataExt
+// where
+//     T: Manager + Into<ModelKind>,
+// {
+//     TokenMetadataExt {
+//         title: Some("fake title".into()),
+//         description: Some("this is fake description".into()),
+//         media: Some("https://fakelinktomedia.com".into()),
+//         media_hash: Some(vec![0, 1, 2, 3, 4].into()),
+//         copies: None,
+//         issued_at: None,
+//         expires_at: None,
+//         starts_at: None,
+//         updated_at: None,
+//         extra: None,
+//         reference: None,
+//         reference_hash: None,
+//         model: model.into(),
+//     }
+// }
 
 pub fn sample_token_metadata() -> TokenMetadataExt {
-    let model: ModelKind = get_foo_lemon().into();
+    let model: ModelKind = ModelKind::Lemon(get_foo_lemon());
 
     TokenMetadataExt {
         title: Some("foo title".into()),
