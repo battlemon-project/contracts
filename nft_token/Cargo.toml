@@ -8,14 +8,14 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-near-sdk = "4.0.0-pre.8"
-near-contract-standards = "4.0.0-pre.8"
+near-sdk = "4.0.0"
+near-contract-standards = "4.0.0"
 token_metadata_ext = { path = "../token_metadata_ext" }
 nft_models = { path = "../nft_models" }
 rand = "0.7.3"
 
 [dev-dependencies]
-workspaces = { git = "https://github.com/near/workspaces-rs", features = ["unstable"] }
-tokio = "1.17.0"
+tokio = "1.19.0"
 serde_json = "1.0.79"
-#test_utils = { path = "../test_utils" }
+test_helpers = { path = "../test_helpers" }
+anyhow = "1.0.57"

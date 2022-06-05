@@ -5,10 +5,8 @@ edition = "2021"
 publish = false
 
 [dev-dependencies]
-workspaces = { git = "https://github.com/near/workspaces-rs", features = ["unstable"] }
-battlemon_near_json_rpc_client_wrapper = { git = "https://github.com/battlemon-project/battlemon_near_json_rpc_client_wrapper" }
-near-primitives = "0.12.0"
 near-units = "0.2.0"
-tokio = "1.17.0"
-serde_json = "1.0.79"
+anyhow = "1.0.57"
+tokio = { version = "1.19.0", features = ["macros"] }
+workspaces = { git = "https://github.com/near/workspaces-rs", features = ["unstable"] }
 token_metadata_ext = { path = "../token_metadata_ext" }

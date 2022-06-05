@@ -4,6 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-near-sdk = "4.0.0-pre.4"
-near-contract-standards = "4.0.0-pre.4"
+near-sdk = "4.0.0"
+near-contract-standards = "4.0.0"
 nft_models = { path = "../nft_models" }
