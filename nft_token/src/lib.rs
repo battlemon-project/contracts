@@ -6,9 +6,9 @@ use near_contract_standards::non_fungible_token::metadata::{
 use near_contract_standards::non_fungible_token::{NonFungibleToken, Token, TokenId};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{LazyOption, LookupMap};
-use near_sdk::env::panic_str;
+use near_sdk::env::{self, panic_str};
 use near_sdk::json_types::U128;
-use near_sdk::{near_bindgen, AccountId, PanicOnDefault, Promise};
+use near_sdk::{near_bindgen, require, AccountId, PanicOnDefault, Promise};
 
 use crate::consts::{IPFS_GATEWAY_BASE_URL, NFT_BACK_IMAGE};
 use consts::DATA_IMAGE_SVG_LEMON_LOGO;
@@ -134,6 +134,11 @@ impl Contract {
     // todo: add security checking
     #[payable]
     pub fn update_token_media(&mut self, token_id: TokenId, new_media: String) {
+        require!(
+           env::predecessor_account_id() == self.tokens.owner_id,
+            "Unauthorized"
+        );
+
         let token_metadata = self
             .nft_token(token_id.clone())
             .and_then(|token| token.metadata)
