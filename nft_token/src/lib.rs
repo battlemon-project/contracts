@@ -135,7 +135,7 @@ impl Contract {
     #[payable]
     pub fn update_token_media(&mut self, token_id: TokenId, new_media: String) {
         require!(
-           env::predecessor_account_id() == self.tokens.owner_id,
+            env::predecessor_account_id() == self.tokens.owner_id,
             "Unauthorized"
         );
 
