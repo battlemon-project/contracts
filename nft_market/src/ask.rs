@@ -26,11 +26,12 @@ impl Ask {
 }
 
 impl crate::Contract {
-    /// Add ask for concrete token.
+    /// Add ask for a concrete token.
     ///
-    /// If asker already set as price less than bid, then
-    /// bidder automatically wins the bid and get the asker's token
-    /// the difference between bidder price and asker price must be returned to bidder
+    /// If the asker has already set a price less than the bid,
+    /// then the bidder automatically wins the offer and gets the asker's token.
+    /// The difference between bidder and asker prices must be returned
+    /// to the bidder by the market.
     pub(crate) fn add_ask(&self, ask: Ask) -> Result<PromiseOrValue<String>, ContractError> {
         todo!("add ask for token_id");
     }
