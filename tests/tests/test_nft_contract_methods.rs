@@ -1,37 +1,3 @@
-mod helpers;
-
-// use token_metadata_ext::TokenExt;
-// use workspaces::prelude::DevAccountDeployer;
-use helpers::get_nft_wasm;
-use near_units::parse_near;
-use workspaces::prelude::*;
-
-#[tokio::test]
-async fn nft_contract_is_initable() -> anyhow::Result<()> {
-    let nft_wasm = get_nft_wasm().await;
-    let worker = workspaces::sandbox().await?;
-    let root_account = worker.dev_create_account().await?;
-    let nft_token_account = root_account
-        .create_subaccount(&worker, "nft.near")
-        .initial_balance(parse_near!("10 N"))
-        .transact()
-        .await?
-        .into_result()?;
-
-    let nft_contract = nft_token_account
-        .deploy(&worker, nft_wasm)
-        .await?
-        .into_result()?;
-
-    let owner_account = root_account
-        .create_subaccount(&worker, "owner.near")
-        .initial_balance(parse_near!("10 N"))
-        .transact()
-        .await?
-        .into_result()?;
-    
-    Ok(())
-}
 // #[tokio::test]
 // async fn mint_sell_buy() -> Result<()> {
 //     let worker = workspaces::testnet().await?;

@@ -1,13 +1,13 @@
-use tokio::sync::OnceCell;
-
-static NFT_WASM: OnceCell<Vec<u8>> = OnceCell::const_new();
-
-pub async fn get_nft_wasm(path: &str) -> &'static [u8] {
-    NFT_WASM
-        .get_or_init(|| async {
-            workspaces::compile_project(path)
-                .await
-                .expect("Failed to compile NFT token contract")
-        })
-        .await
-}
+use std::path::Path;
+// use tokio::sync::OnceCell;
+//
+// static WASM: OnceCell<Vec<u8>> = OnceCell::const_new();
+//
+// pub async fn load_wasm(path: impl AsRef<Path>) -> &'static [u8] {
+//     WASM.get_or_init(|| async {
+//         tokio::fs::read(path)
+//             .await
+//             .expect("Failed to load wasm file.")
+//     })
+//     .await
+// }
