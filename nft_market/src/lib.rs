@@ -2,18 +2,18 @@ use ask::*;
 use bid::*;
 use callback::*;
 use consts::*;
-use domain::*;
 use error::*;
-use internal::*;
+use external::*;
 use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::collections::UnorderedMap;
 use near_sdk::json_types::U128;
 use near_sdk::serde::Deserialize;
 use near_sdk::serde_json::{self, json};
+use near_sdk::store::UnorderedMap;
+use near_sdk::PromiseOrValue::Promise;
 use near_sdk::{
-    env, log, near_bindgen, require, AccountId, BorshStorageKey, Gas, PanicOnDefault, Promise,
-    PromiseError, PromiseOrValue, PromiseResult,
+    assert_one_yocto, env, log, near_bindgen, require, AccountId, BorshStorageKey, Gas,
+    PanicOnDefault, PromiseError, PromiseOrValue, PromiseResult,
 };
 use trade::*;
 
@@ -21,12 +21,8 @@ mod ask;
 mod bid;
 mod callback;
 mod consts;
-mod domain;
 mod error;
 mod external;
-mod internal;
-mod offer;
-mod order;
 mod trade;
 
 #[near_bindgen]
@@ -37,29 +33,29 @@ pub struct Contract {
     bids: UnorderedMap<TokenId, Vec<Bid>>,
 }
 
-enum OrderType {
-    AcceptAsk,
-    AskLessBid(AccountId),
-    AcceptBid {
-        owner_id: AccountId,
-        approval_id: u64,
-    },
-}
-
-#[derive(Deserialize)]
-#[serde(crate = "near_sdk::serde")]
-#[serde(rename_all = "snake_case")]
-pub enum SaleType {
-    AcceptBid,
-    Selling,
-}
-
-#[derive(Deserialize)]
-#[serde(crate = "near_sdk::serde")]
-pub struct SaleArgs {
-    sale_type: SaleType,
-    price: Option<U128>,
-}
+// enum OrderType {
+//     AcceptAsk,
+//     AskLessBid(AccountId),
+//     AcceptBid {
+//         owner_id: AccountId,
+//         approval_id: u64,
+//     },
+// }
+//
+// #[derive(Deserialize)]
+// #[serde(crate = "near_sdk::serde")]
+// #[serde(rename_all = "snake_case")]
+// pub enum SaleType {
+//     AcceptBid,
+//     Selling,
+// }
+//
+// #[derive(Deserialize)]
+// #[serde(crate = "near_sdk::serde")]
+// pub struct SaleArgs {
+//     sale_type: SaleType,
+//     price: Option<U128>,
+// }
 
 #[derive(BorshSerialize, BorshStorageKey)]
 enum StorageKey {
@@ -78,6 +74,7 @@ impl Contract {
         }
     }
 
+    #[payable]
     pub fn bid(&mut self, bid: Bid) {
         self.add_bid(bid);
     }

@@ -2,4 +2,6 @@
 pub enum ContractError {
     #[error("Contract's account id which call market's method are not supported")]
     NotAuthorized,
+    #[error("Failed to add bid: {0}")]
+    BidError(String),
 }

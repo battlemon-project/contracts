@@ -55,7 +55,7 @@ impl NonFungibleTokenApprovalReceiver for Contract {
 
         let ret = match msg {
             Action::AddAsk { price } => {
-                self.add_ask(Ask::new(owner_id, token_id, approval_id, price))?
+                self.add_ask(&Ask::new(owner_id, token_id, approval_id, price))?
             }
             Action::AcceptBid => {
                 todo!("call promise with accepting bid")
