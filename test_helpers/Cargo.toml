@@ -4,6 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+tokio = { version = "1.16.1", features = ["macros", "fs"] }
+anyhow = "1.0.57"
 workspaces = { git = "https://github.com/near/workspaces-rs", features = ["unstable"] }
 token_metadata_ext = { path = "../token_metadata_ext" }
 near-sdk = "4.0.0"

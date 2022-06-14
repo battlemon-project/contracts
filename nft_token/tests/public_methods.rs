@@ -1,14 +1,14 @@
 use anyhow::Context;
 use serde_json::json;
-use test_helpers::{load_wasm, parse_near, workspaces, workspaces::prelude::*};
+use test_helpers::{deploy_contract, parse_near, workspaces, workspaces::prelude::*};
 const CONTRACT_WASM: &str = "../target/wasm32-unknown-unknown/release/nft_token.wasm";
 
 #[tokio::test]
 async fn contract_is_initable() -> anyhow::Result<()> {
-    let wasm = load_wasm(CONTRACT_WASM).await;
     let worker = workspaces::testnet().await?;
-    let account = worker.dev_create_account().await?;
-    let contract = account.deploy(&worker, wasm).await?.into_result()?;
+    let root = worker.dev_create_account().await?;
+    let contract =
+        deploy_contract(&worker, "nft", parse_near!("10 N"), &root, CONTRACT_WASM).await?;
     let result = contract
         .call(&worker, "init")
         .args_json(json!({"owner_id": contract.id()}))?
@@ -22,19 +22,12 @@ async fn contract_is_initable() -> anyhow::Result<()> {
 
 #[tokio::test]
 async fn contract_is_initable_by_any_account() -> anyhow::Result<()> {
-    let wasm = load_wasm(CONTRACT_WASM).await;
     let worker = workspaces::testnet()
         .await
         .context("Failed to create worker")?;
-    let alice = worker
-        .dev_create_account()
-        .await
-        .context("Failed to create account for alice")?;
-    let contract = alice
-        .deploy(&worker, wasm)
-        .await
-        .context("Failed to deploy contract")?
-        .into_result()?;
+    let root = worker.dev_create_account().await?;
+    let contract =
+        deploy_contract(&worker, "nft", parse_near!("10 N"), &root, CONTRACT_WASM).await?;
     let bob = worker
         .dev_create_account()
         .await
@@ -54,19 +47,13 @@ async fn contract_is_initable_by_any_account() -> anyhow::Result<()> {
 
 #[tokio::test]
 async fn double_initialization_contract_rejected() -> anyhow::Result<()> {
-    let wasm = load_wasm(CONTRACT_WASM).await;
     let worker = workspaces::testnet()
         .await
         .context("Failed to create worker")?;
-    let account = worker
-        .dev_create_account()
-        .await
-        .context("Failed to create account")?;
-    let contract = account
-        .deploy(&worker, wasm)
-        .await
-        .context("Failed to deploy contract")?
-        .into_result()?;
+    let root = worker.dev_create_account().await?;
+    let contract =
+        deploy_contract(&worker, "nft", parse_near!("10 N"), &root, CONTRACT_WASM).await?;
+
     let result = contract
         .call(&worker, "init")
         .args_json(json!({"owner_id": contract.id()}))?
@@ -91,10 +78,11 @@ async fn double_initialization_contract_rejected() -> anyhow::Result<()> {
 
 #[tokio::test]
 async fn mint_works() -> anyhow::Result<()> {
-    let wasm = load_wasm(CONTRACT_WASM).await;
     let worker = workspaces::testnet().await?;
-    let account = worker.dev_create_account().await?;
-    let contract = account.deploy(&worker, wasm).await?.into_result()?;
+    let root = worker.dev_create_account().await?;
+    let contract =
+        deploy_contract(&worker, "nft", parse_near!("10 N"), &root, CONTRACT_WASM).await?;
+
     let result = contract
         .call(&worker, "init")
         .args_json(json!({"owner_id": contract.id()}))?
@@ -117,10 +105,10 @@ async fn mint_works() -> anyhow::Result<()> {
 
 #[tokio::test]
 async fn minted_token_belongs_to_receiver_id() -> anyhow::Result<()> {
-    let wasm = load_wasm(CONTRACT_WASM).await;
     let worker = workspaces::testnet().await?;
-    let account = worker.dev_create_account().await?;
-    let contract = account.deploy(&worker, wasm).await?.into_result()?;
+    let root = worker.dev_create_account().await?;
+    let contract =
+        deploy_contract(&worker, "nft", parse_near!("10 N"), &root, CONTRACT_WASM).await?;
     let result = contract
         .call(&worker, "init")
         .args_json(json!({"owner_id": contract.id()}))?
@@ -150,10 +138,10 @@ async fn minted_token_belongs_to_receiver_id() -> anyhow::Result<()> {
 
 #[tokio::test]
 async fn nft_transfer_works() -> anyhow::Result<()> {
-    let wasm = load_wasm(CONTRACT_WASM).await;
     let worker = workspaces::testnet().await?;
-    let account = worker.dev_create_account().await?;
-    let contract = account.deploy(&worker, wasm).await?.into_result()?;
+    let root = worker.dev_create_account().await?;
+    let contract =
+        deploy_contract(&worker, "nft", parse_near!("10 N"), &root, CONTRACT_WASM).await?;
     let result = contract
         .call(&worker, "init")
         .args_json(json!({"owner_id": contract.id()}))?
@@ -194,10 +182,10 @@ async fn nft_transfer_works() -> anyhow::Result<()> {
 
 #[tokio::test]
 async fn nft_transfer_is_prohibited_for_not_owner() -> anyhow::Result<()> {
-    let wasm = load_wasm(CONTRACT_WASM).await;
     let worker = workspaces::testnet().await?;
-    let account = worker.dev_create_account().await?;
-    let contract = account.deploy(&worker, wasm).await?.into_result()?;
+    let root = worker.dev_create_account().await?;
+    let contract =
+        deploy_contract(&worker, "nft", parse_near!("10 N"), &root, CONTRACT_WASM).await?;
     let result = contract
         .call(&worker, "init")
         .args_json(json!({"owner_id": contract.id()}))?
@@ -231,10 +219,10 @@ async fn nft_transfer_is_prohibited_for_not_owner() -> anyhow::Result<()> {
 
 #[tokio::test]
 async fn transferred_token_not_allowed_for_prev_owner() -> anyhow::Result<()> {
-    let wasm = load_wasm(CONTRACT_WASM).await;
     let worker = workspaces::testnet().await?;
-    let account = worker.dev_create_account().await?;
-    let contract = account.deploy(&worker, wasm).await?.into_result()?;
+    let root = worker.dev_create_account().await?;
+    let contract =
+        deploy_contract(&worker, "nft", parse_near!("10 N"), &root, CONTRACT_WASM).await?;
     let result = contract
         .call(&worker, "init")
         .args_json(json!({"owner_id": contract.id()}))?
@@ -276,10 +264,10 @@ async fn transferred_token_not_allowed_for_prev_owner() -> anyhow::Result<()> {
 
 #[tokio::test]
 async fn update_token_media_works() -> anyhow::Result<()> {
-    let wasm = load_wasm(CONTRACT_WASM).await;
     let worker = workspaces::testnet().await?;
-    let account = worker.dev_create_account().await?;
-    let contract = account.deploy(&worker, wasm).await?.into_result()?;
+    let root = worker.dev_create_account().await?;
+    let contract =
+        deploy_contract(&worker, "nft", parse_near!("10 N"), &root, CONTRACT_WASM).await?;
     let result = contract
         .call(&worker, "init")
         .args_json(json!({"owner_id": contract.id()}))?
@@ -317,10 +305,10 @@ async fn update_token_media_works() -> anyhow::Result<()> {
 
 #[tokio::test]
 async fn update_token_media_can_be_called_only_by_contract_account() -> anyhow::Result<()> {
-    let wasm = load_wasm(CONTRACT_WASM).await;
     let worker = workspaces::testnet().await?;
-    let account = worker.dev_create_account().await?;
-    let contract = account.deploy(&worker, wasm).await?.into_result()?;
+    let root = worker.dev_create_account().await?;
+    let contract =
+        deploy_contract(&worker, "nft", parse_near!("10 N"), &root, CONTRACT_WASM).await?;
     let result = contract
         .call(&worker, "init")
         .args_json(json!({"owner_id": contract.id()}))?

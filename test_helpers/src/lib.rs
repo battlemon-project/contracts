@@ -1,14 +1,21 @@
 mod statics;
 
+use anyhow::Context;
+use std::fmt::Display;
+use workspaces::{Account, Contract};
+
 use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::test_utils::VMContextBuilder;
 use near_sdk::AccountId;
-pub use near_units::{parse_near, parse_gas};
+pub use near_units::{parse_gas, parse_near};
 use nft_models::lemon::Lemon;
 use nft_models::ModelKind;
 pub use statics::*;
 use token_metadata_ext::*;
 pub use workspaces;
+use workspaces::types::Balance;
+use workspaces::Worker;
+
 pub const MARKET_ACCOUNT_ID: &str = "market";
 pub const NFT_ACCOUNT_ID: &str = "nft";
 pub const SPOILED_NFT_ACCOUNT_ID: &str = "spoiled_nft";
@@ -183,4 +190,30 @@ pub fn get_context(predecessor_account_id: AccountId) -> VMContextBuilder {
         .signer_account_id(predecessor_account_id.clone())
         .predecessor_account_id(predecessor_account_id);
     builder
+}
+
+pub async fn deploy_contract<T: workspaces::Network>(
+    worker: &Worker<T>,
+    account_id: &str,
+    deposit: Balance,
+    root: &Account,
+    path: impl AsRef<std::path::Path>,
+) -> anyhow::Result<Contract> {
+    let wasm = tokio::fs::read(path)
+        .await
+        .with_context(|| format!("Failed to load market wasm for {account_id}"))?;
+
+    let account = root
+        .create_subaccount(worker, account_id)
+        .initial_balance(deposit)
+        .transact()
+        .await
+        .with_context(|| format!("Failed to create sub-account for {account_id}"))?
+        .into_result()?;
+
+    account
+        .deploy(worker, &wasm)
+        .await
+        .with_context(|| format!("Failed to deploy contract for {account_id}"))?
+        .into_result()
 }
