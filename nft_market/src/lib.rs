@@ -1,6 +1,6 @@
 use ask::*;
 use bid::*;
-use callback::*;
+use xcc::*;
 use consts::*;
 use error::*;
 use external::*;
@@ -19,7 +19,7 @@ use trade::*;
 
 mod ask;
 mod bid;
-mod callback;
+mod xcc;
 mod consts;
 mod error;
 mod external;

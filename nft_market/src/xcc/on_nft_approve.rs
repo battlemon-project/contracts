@@ -1,4 +1,4 @@
-use crate::{Ask, Contract, ContractError, ContractExt};
+use crate::{serde_json, Ask, Contract, ContractError, ContractExt};
 use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::json_types::U128;
 use near_sdk::serde::{Deserialize, Serialize};
@@ -24,7 +24,7 @@ pub trait NonFungibleTokenApprovalReceiver {
         token_id: TokenId,
         owner_id: AccountId,
         approval_id: u64,
-        msg: Action,
+        msg: String,
     ) -> Result<PromiseOrValue<String>, ContractError>;
 }
 
@@ -47,13 +47,13 @@ impl NonFungibleTokenApprovalReceiver for Contract {
         token_id: TokenId,
         owner_id: AccountId,
         approval_id: u64,
-        msg: Action,
+        msg: String,
     ) -> Result<PromiseOrValue<String>, ContractError> {
         if env::predecessor_account_id() != self.nft_id {
             return Err(ContractError::NotAuthorized);
         }
 
-        let ret = match msg {
+        let ret = match serde_json::from_str(&*msg)? {
             Action::AddAsk { price } => {
                 self.add_ask(&Ask::new(owner_id, token_id, approval_id, price))?
             }
@@ -91,5 +91,17 @@ impl NonFungibleTokenApprovalReceiver for Contract {
         //         Ok(PromiseOrValue::Value(ret.to_string()))
         //     }
         // }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use near_sdk::serde_json;
+
+    #[test]
+    fn enum_action_deserialization_works_for_add_ask() {
+        let msg = r#"{"action":"add_ask","price":"1000"}"#;
+        serde_json::from_str::<Action>(msg).expect("Failed to deserialization");
     }
 }

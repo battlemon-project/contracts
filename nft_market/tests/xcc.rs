@@ -1,77 +1,117 @@
-use anyhow::Context;
 use near_sdk::serde_json::json;
 use test_helpers::workspaces::prelude::*;
 use test_helpers::*;
 
 #[tokio::test]
-async fn new_api_works() -> anyhow::Result<()> {
-    let nft_wasm = tokio::fs::read("../target/wasm32-unknown-unknown/release/nft_token.wasm")
-        .await
-        .context("Failed to load nft wasm")?;
+async fn alice_ask_for_nft_token_five_bob_bid_six_alice_receive_five_bob_receive_nft_token_and_change_one(
+) -> anyhow::Result<()> {
     let worker = workspaces::testnet().await?;
     let root = worker.dev_create_account().await?;
-    let nft = root
-        .create_subaccount(&worker, "nft")
-        .initial_balance(parse_near!("10 N"))
+    let ten_near = parse_near!("10 N");
+    let five_near = parse_near!("5 N");
+
+    let nft = deploy_contract(
+        &worker,
+        "nft",
+        ten_near,
+        &root,
+        "../target/wasm32-unknown-unknown/release/nft_token.wasm",
+    )
+    .await?;
+
+    nft.call(&worker, "init")
+        .args_json(json!({"owner_id": nft.id()}))?
+        .transact()
+        .await?;
+
+    let market = deploy_contract(
+        &worker,
+        "market",
+        ten_near,
+        &root,
+        "../target/wasm32-unknown-unknown/release/nft_market.wasm",
+    )
+    .await?;
+
+    market
+        .call(&worker, "init")
+        .args_json(json!({"nft_id": nft.id()}))?
+        .transact()
+        .await?;
+
+    let alice = root
+        .create_subaccount(&worker, "alice")
+        .initial_balance(ten_near)
         .transact()
         .await?
         .into_result()?;
 
-    let nft_contract = nft.deploy(&worker, &nft_wasm).await?.into_result()?;
-
-    let result = nft_contract
-        .call(&worker, "init")
-        .args_json(json!({"owner_id": nft_contract.id()}))?
+    let bob = root
+        .create_subaccount(&worker, "bob")
+        .initial_balance(ten_near)
         .transact()
-        .await?;
-    assert!(result.is_success());
+        .await?
+        .into_result()?;
 
-    let alice = worker.dev_create_account().await?;
     let result = alice
-        .call(&worker, nft_contract.id(), "nft_mint")
+        .call(&worker, nft.id(), "nft_mint")
         .deposit(parse_near!("1 N"))
         .args_json(json!({"receiver_id": alice.id()}))?
         .transact()
         .await?;
-
     assert!(result.is_success());
 
-    let market = root
-        .create_subaccount(&worker, "market")
-        .initial_balance(parse_near!("10 N"))
-        .transact()
-        .await?
-        .into_result()?;
-
-    let market_wasm = tokio::fs::read("../target/wasm32-unknown-unknown/release/nft_market.wasm")
-        .await
-        .context("Failed to load market wasm")?;
-    let market_contract = market.deploy(&worker, &market_wasm).await?.into_result()?;
+    let msg = format!("{{\"action\":\"add_ask\",\"price\":\"{five_near}\"}}");
     alice
-        .call(&worker, nft_contract.id(), "nft_approve")
+        .call(&worker, nft.id(), "nft_approve")
         .deposit(parse_near!("1 N"))
         .max_gas()
         .args_json(json!({
             "token_id": "1",
             "account_id": market.id(),
+            "msg": msg,
         }))?
         .transact()
         .await?;
 
-    market_contract
-        .call(&worker, "init")
-        .args_json(json!({"nft_id": nft_contract.id()}))?
-        .transact()
-        .await?;
-
-    let result = market_contract
-        .call(&worker, "test")
+    let result = bob
+        .call(&worker, market.id(), "bid")
+        .args_json(json!({
+            "bid": {
+               "token_id": "1"
+            }
+        }))?
         .max_gas()
-        .deposit(parse_near!("1 N"))
+        .deposit(parse_near!("6 N"))
         .transact()
         .await?;
 
-    assert!(result.is_success());
-    println!("{:#?}", result.outcomes());
+    // bob must have nft token
+    let nft_token = nft
+        .call(&worker, "nft_token")
+        .args_json(json!({"token_id": "1"}))?
+        .view()
+        .await?
+        .json::<token_metadata_ext::TokenExt>()?;
+    assert_eq!(nft_token.owner_id.as_str(), bob.id().as_str());
+
+    // bob must have balance ~5N
+    let bob_balance = bob.view_account(&worker).await?.balance;
+    let diff = parse_near!("5 N") - bob_balance;
+    assert!(
+        diff <= parse_near!("0.1 N"),
+        "Expected bob balance isn't less than 0.1 N, actual balance is {}",
+        bob_balance
+    );
+
+    // alice must receive 5N
+    let alice_balance = alice.view_account(&worker).await?.balance;
+    let diff = parse_near!("15 N") - alice_balance;
+    assert!(
+        diff <= parse_near!("0.1 N"),
+        "Expected bob balance isn't less than 0.1 N, actual balance is {}",
+        alice_balance
+    );
+
     Ok(())
 }

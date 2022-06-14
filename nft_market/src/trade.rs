@@ -1,7 +1,6 @@
 use crate::external::*;
 use crate::{Ask, Bid};
 use near_sdk::env;
-
 impl crate::Contract {
     /// * asker - wants near for token
     /// * bidder - gives near for token
@@ -24,8 +23,8 @@ impl crate::Contract {
     /// and the bidder accepts the asker's token and 1 Near for change.
     pub(crate) fn trade(&mut self, ask: Ask, bid: Bid, change: bool) {
         nft::ext(self.nft_id.clone())
-            .with_attached_deposit(env::attached_deposit())
-            .with_static_gas(env::prepaid_gas())
+            .with_attached_deposit(1)
+            .with_static_gas(10_000_000_000_000.into())
             .nft_transfer(
                 bid.account_id().to_owned(),
                 bid.token_id().to_owned(),
@@ -34,8 +33,8 @@ impl crate::Contract {
             )
             .then(
                 Self::ext(env::current_account_id())
-                    .with_attached_deposit(env::attached_deposit())
-                    .with_static_gas(env::prepaid_gas())
+                    // .with_attached_deposit(env::attached_deposit())
+                    .with_static_gas(10_000_000_000_000.into())
                     .on_trade(ask, bid, change),
             );
     }

@@ -104,7 +104,7 @@ mod tests {
         let bid: Bid = serde_json::from_str(r#"{"token_id":"1"}"#).unwrap();
         assert_eq!(bid.token_id(), "1");
         assert_eq!(*bid.account_id(), bob());
-        assert_eq!(bid.price(), U128(777));
+        assert_eq!(bid.price(), 777);
         assert_eq!(bid.create_at(), 666);
     }
 

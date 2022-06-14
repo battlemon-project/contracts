@@ -50,7 +50,8 @@ impl crate::Contract {
     /// Then, the asker gets the bidder's nears held by the market.
     pub(crate) fn add_ask(&mut self, ask: &Ask) -> Result<PromiseOrValue<String>, ContractError> {
         // if self.is_ask_less_than_highest_bid(&ask) {}
-        todo!("add ask for token_id");
+        self.asks.insert(ask.token_id().to_owned(), ask.clone());
+        Ok(PromiseOrValue::Value("done".to_string()))
     }
 
     pub(crate) fn ask_less_than_bid(&self, bid: &Bid) -> Option<Ask> {

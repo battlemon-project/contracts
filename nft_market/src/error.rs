@@ -4,4 +4,6 @@ pub enum ContractError {
     NotAuthorized,
     #[error("Failed to add bid: {0}")]
     BidError(String),
+    #[error(transparent)]
+    SerdeError(#[from] near_sdk::serde_json::Error),
 }
