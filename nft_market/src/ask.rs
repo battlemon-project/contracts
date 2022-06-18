@@ -1,9 +1,9 @@
-use crate::{Bid, ContractError};
+use crate::Bid;
 use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::json_types::U128;
 use near_sdk::serde::{Deserialize, Serialize};
-use near_sdk::{AccountId, PromiseOrValue};
+use near_sdk::AccountId;
 
 #[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 #[serde(crate = "near_sdk::serde")]
@@ -32,7 +32,7 @@ impl Ask {
         Some(self.approval_id)
     }
 
-    pub(crate) fn token_id(&self) -> &TokenId {
+    pub fn token_id(&self) -> &TokenId {
         &self.token_id
     }
 
@@ -48,10 +48,13 @@ impl crate::Contract {
     /// if the asker provides a price less than the highest bid.
     /// First, the bidder receives the asker's token.
     /// Then, the asker gets the bidder's nears held by the market.
-    pub(crate) fn add_ask(&mut self, ask: &Ask) -> Result<PromiseOrValue<String>, ContractError> {
-        // if self.is_ask_less_than_highest_bid(&ask) {}
-        self.asks.insert(ask.token_id().to_owned(), ask.clone());
-        Ok(PromiseOrValue::Value("done".to_string()))
+    pub(crate) fn add_ask(&mut self, ask: &Ask) {
+        match self.highest_bid_than_ask(ask) {
+            None => {
+                self.asks.insert(ask.token_id().to_owned(), ask.to_owned());
+            }
+            Some(bid) => self.trade(ask.to_owned(), bid, false),
+        }
     }
 
     pub(crate) fn ask_less_than_bid(&self, bid: &Bid) -> Option<Ask> {

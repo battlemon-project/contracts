@@ -1,6 +1,5 @@
-use ask::*;
-use bid::*;
-use xcc::*;
+pub use ask::*;
+pub use bid::*;
 use consts::*;
 use error::*;
 use external::*;
@@ -16,14 +15,15 @@ use near_sdk::{
     PanicOnDefault, PromiseError, PromiseOrValue, PromiseResult,
 };
 use trade::*;
+use xcc::*;
 
 mod ask;
 mod bid;
-mod xcc;
 mod consts;
 mod error;
 mod external;
 mod trade;
+mod xcc;
 
 #[near_bindgen]
 #[derive(BorshSerialize, BorshDeserialize, PanicOnDefault)]
@@ -75,8 +75,26 @@ impl Contract {
     }
 
     #[payable]
-    pub fn bid(&mut self, bid: Bid) {
-        self.add_bid(bid);
+    pub fn add_bid(&mut self, bid: Bid) {
+        match self.ask_less_than_bid(&bid) {
+            None => {
+                self.bids
+                    .entry(bid.token_id().clone())
+                    .and_modify(|bids| {
+                        bids.push(bid.clone());
+                    })
+                    .or_insert_with(|| vec![bid]);
+            }
+            Some(ask) => self.trade(ask, bid, true),
+        }
+    }
+
+    pub fn ask(&self, token_id: TokenId) -> Option<&Ask> {
+        self.asks.get(&token_id)
+    }
+
+    pub fn bids(&self, token_id: TokenId) -> Option<Vec<Bid>> {
+        self.bids.get(&token_id).cloned()
     }
 }
 

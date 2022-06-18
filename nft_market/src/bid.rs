@@ -1,9 +1,9 @@
-use crate::{Ask, ContractError};
+use crate::Ask;
 use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::env::block_timestamp;
+
 use near_sdk::json_types::U128;
-use near_sdk::serde::{Deserialize, Deserializer, Serialize};
+use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::{env, AccountId};
 
 #[derive(thiserror::Error, near_sdk::FunctionError, BorshSerialize, Debug)]
@@ -47,16 +47,6 @@ impl Bid {
     }
 }
 
-// impl Bid {
-//     pub fn new(token_id: TokenId, bidder_id: AccountId, price: u128) -> Self {
-//         Self {
-//             token_id,
-//             bidder_id,
-//             price: U128(price),
-//         }
-//     }
-// }
-
 impl crate::Contract {
     /// Add a bid to the auction to concrete the token.
     ///
@@ -64,21 +54,8 @@ impl crate::Contract {
     /// the bidder automatically gets the token.
     /// The difference between bidder and asker prices
     /// will be returned to the bidder by the market.
-    pub(crate) fn add_bid(&mut self, bid: Bid) {
-        match self.ask_less_than_bid(&bid) {
-            None => {
-                self.bids
-                    .entry(bid.token_id().clone())
-                    .and_modify(|bids| {
-                        bids.push(bid.clone());
-                    })
-                    .or_insert_with(|| vec![bid]);
-            }
-            Some(ask) => self.trade(ask, bid, true),
-        }
-    }
 
-    pub(crate) fn find_highest_bid_than_ask(&self, ask: &Ask) -> Option<Bid> {
+    pub(crate) fn highest_bid_than_ask(&self, ask: &Ask) -> Option<Bid> {
         let mut bids = self.bids.get(ask.token_id()).cloned().unwrap_or_default();
         bids.sort_by_key(|bid| (bid.price(), -(bid.create_at() as i128)));
         bids.pop()

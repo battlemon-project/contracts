@@ -25,7 +25,7 @@ pub trait NonFungibleTokenApprovalReceiver {
         owner_id: AccountId,
         approval_id: u64,
         msg: String,
-    ) -> Result<PromiseOrValue<String>, ContractError>;
+    ) -> Result<(), ContractError>;
 }
 
 #[derive(Deserialize, Serialize)]
@@ -48,49 +48,21 @@ impl NonFungibleTokenApprovalReceiver for Contract {
         owner_id: AccountId,
         approval_id: u64,
         msg: String,
-    ) -> Result<PromiseOrValue<String>, ContractError> {
+    ) -> Result<(), ContractError> {
         if env::predecessor_account_id() != self.nft_id {
             return Err(ContractError::NotAuthorized);
         }
 
-        let ret = match serde_json::from_str(&*msg)? {
+        match serde_json::from_str(&*msg)? {
             Action::AddAsk { price } => {
-                self.add_ask(&Ask::new(owner_id, token_id, approval_id, price))?
+                self.add_ask(&Ask::new(owner_id, token_id, approval_id, price))
             }
             Action::AcceptBid => {
                 todo!("call promise with accepting bid")
             }
         };
 
-        Ok(ret)
-        // let SaleArgs { sale_type, price } =
-        //     serde_json::from_str(&msg).expect("Couldn't parse json");
-        //
-        // match sale_type {
-        //     SaleType::AcceptBid => {
-        //         let promise = self.process_purchase(
-        //             token_id,
-        //             OrderType::AcceptBid {
-        //                 owner_id,
-        //                 approval_id,
-        //             },
-        //         );
-        //
-        //         PromiseOrValue::Promise(promise)
-        //     }
-        //     SaleType::Selling => {
-        //         let price = price.expect("The price didn't provided for selling").0;
-        //         let sale_conditions =
-        //             SaleCondition::new(owner_id, token_id.clone(), approval_id, price);
-        //         self.asks.insert(&token_id, &sale_conditions);
-        //         let ret = json!({
-        //             "status": true,
-        //             "message": format!("token {} with price {} was added to market", token_id, price)
-        //         });
-        //
-        //         Ok(PromiseOrValue::Value(ret.to_string()))
-        //     }
-        // }
+        Ok(())
     }
 }
 

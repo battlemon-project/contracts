@@ -1,5 +1,6 @@
 use crate::external::*;
 use crate::{Ask, Bid};
+use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::env;
 impl crate::Contract {
     /// * asker - wants near for token
@@ -33,12 +34,16 @@ impl crate::Contract {
             )
             .then(
                 Self::ext(env::current_account_id())
-                    // .with_attached_deposit(env::attached_deposit())
                     .with_static_gas(10_000_000_000_000.into())
                     .on_trade(ask, bid, change),
             );
     }
-}
 
-// self.trade(Ask(1), Bid(2));
-// self.trade(Ask(1), Bid(2));
+    pub(crate) fn clean_ask_and_bid(&mut self, bid: &Bid) {
+        let token_id = bid.token_id();
+        self.asks.remove(token_id);
+        if let Some(bids) = self.bids.get_mut(token_id) {
+            bids.iter().position(|b| b == bid).map(|i| bids.remove(i));
+        }
+    }
+}
