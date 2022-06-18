@@ -1,5 +1,6 @@
 use near_units::parse_near;
-use test_helpers::{workspaces::testnet, StateBuilder};
+use test_helpers::workspaces::testnet;
+use test_helpers::state_builder::StateBuilder;
 
 #[tokio::test]
 async fn builder_works() -> Result<(), anyhow::Error> {

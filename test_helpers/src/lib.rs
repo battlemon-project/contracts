@@ -1,16 +1,17 @@
 #![feature(map_try_insert)]
 
 mod consts;
+mod contract_initializer;
 mod errors;
+mod state;
+mod state_builder;
 
-use anyhow::Context;
-use std::collections::HashMap;
+pub use state::*;
+pub use state_builder::*;
 
 use errors::HelperError;
-use workspaces::{Account, Contract};
 
 pub use consts::*;
-use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::test_utils::VMContextBuilder;
 use near_sdk::AccountId;
 pub use near_units::{parse_gas, parse_near};
@@ -18,174 +19,7 @@ use nft_models::lemon::Lemon;
 use nft_models::ModelKind;
 use token_metadata_ext::*;
 pub use workspaces;
-use workspaces::network::{
-    AllowDevAccountCreation, DevAccountDeployer, NetworkClient, NetworkInfo, TopLevelAccountCreator,
-};
-use workspaces::types::Balance;
-use workspaces::Worker;
 
-pub fn alice() -> AccountId {
-    AccountId::new_unchecked("alice.near".to_string())
-}
-
-pub fn bob() -> AccountId {
-    AccountId::new_unchecked("bob.near".to_string())
-}
-pub fn danny() -> AccountId {
-    AccountId::new_unchecked("danny.near".to_string())
-}
-pub fn fargo() -> AccountId {
-    AccountId::new_unchecked("fargo.near".to_string())
-}
-
-pub fn carol() -> AccountId {
-    AccountId::new_unchecked("carol.near".to_string())
-}
-
-pub fn tokens<const N: usize>() -> [TokenId; N] {
-    let range: Vec<_> = (0..N).map(|v| v.to_string()).collect();
-    <[_; N]>::try_from(range).unwrap()
-}
-
-pub struct State<'a, T> {
-    root: Account,
-    worker: Worker<T>,
-    accounts: HashMap<&'a str, Account>,
-    contracts: HashMap<&'a str, Contract>,
-}
-
-impl<'a, T> State<'a, T> {
-    pub fn worker(&self) -> &Worker<T> {
-        &self.worker
-    }
-
-    pub fn root(&self) -> &Account {
-        &self.root
-    }
-
-    pub fn account(&self, id: &'a str) -> Result<&Account, HelperError> {
-        self.accounts
-            .get(id)
-            .ok_or_else(|| HelperError::AccountNotFound(id.to_string()))
-    }
-    pub fn contract(&self, id: &'a str) -> Result<&Contract, HelperError> {
-        self.contracts
-            .get(id)
-            .ok_or_else(|| HelperError::ContractNotFound(id.to_string()))
-    }
-
-    pub fn alice(&self) -> Result<&Account, HelperError> {
-        self.account("alice")
-    }
-
-    pub fn bob(&self) -> Result<&Account, HelperError> {
-        self.account("bob")
-    }
-}
-
-pub struct StateBuilder<'a, T> {
-    worker: Worker<T>,
-    accounts: HashMap<&'a str, Balance>,
-    contracts: HashMap<&'a str, (&'a str, Balance)>,
-}
-
-impl<T> StateBuilder<'static, T>
-where
-    T: TopLevelAccountCreator + NetworkInfo + AllowDevAccountCreation + Send + Sync + NetworkClient,
-{
-    pub fn new(worker: Worker<T>) -> Self {
-        Self {
-            worker,
-            accounts: HashMap::new(),
-            contracts: HashMap::new(),
-        }
-    }
-
-    pub fn with_contract(
-        mut self,
-        name: &'static str,
-        path: &'static str,
-        balance: Balance,
-    ) -> Result<Self, HelperError> {
-        self.contracts
-            .try_insert(name, (path, balance))
-            .map_err(|e| {
-                HelperError::BuilderError(format!(
-                    "Couldn't add task for contract creating with id `{}`",
-                    e.entry.key()
-                ))
-            })?;
-
-        Ok(self)
-    }
-
-    pub fn with_account(
-        mut self,
-        name: &'static str,
-        balance: Balance,
-    ) -> Result<Self, HelperError> {
-        self.accounts.try_insert(name, balance).map_err(|e| {
-            HelperError::BuilderError(format!(
-                "Couldn't add task for account creating with id `{}`",
-                e.entry.key()
-            ))
-        })?;
-        Ok(self)
-    }
-
-    pub fn with_alice(self, balance: u128) -> Result<Self, HelperError> {
-        self.with_account("alice", balance)
-    }
-
-    pub fn with_bob(self, balance: u128) -> Result<Self, HelperError> {
-        self.with_account("bob", balance)
-    }
-
-    pub async fn build(self) -> Result<State<'static, T>, HelperError> {
-        let root = self
-            .worker
-            .dev_create_account()
-            .await
-            .context("Failed to create root account while building")?;
-
-        let accounts = self
-            .accounts
-            .iter()
-            .chain(self.contracts.iter().map(|(k, v)| (k, &v.1)));
-
-        let mut accounts_buf = HashMap::new();
-        let mut contracts_buf = HashMap::new();
-
-        for (id, balance) in accounts {
-            let account = root
-                .create_subaccount(&self.worker, id)
-                .initial_balance(*balance)
-                .transact()
-                .await?
-                .into_result()?;
-
-            if let Some((path, balance)) = self.contracts.get(id) {
-                let wasm = tokio::fs::read(path).await.map_err(|e| {
-                    HelperError::BuilderError(format!(
-                        "Failed to read contract bytes from file {e}",
-                    ))
-                })?;
-
-                let contract = account.deploy(&self.worker, &wasm).await?.into_result()?;
-                contracts_buf.insert(*id, contract);
-                continue;
-            }
-            accounts_buf.insert(*id, account);
-        }
-
-        Ok(State {
-            root,
-            worker: self.worker,
-            accounts: accounts_buf,
-            contracts: contracts_buf,
-        })
-    }
-}
 // pub fn fake_metadata_with<T>(model: T) -> TokenMetadataExt
 // where
 //     T: Manager + Into<ModelKind>,
@@ -324,34 +158,8 @@ pub fn get_foo_lemon() -> Lemon {
 pub fn get_context(predecessor_account_id: AccountId) -> VMContextBuilder {
     let mut builder = VMContextBuilder::new();
     builder
-        .current_account_id(alice())
+        .current_account_id(AccountId::new_unchecked("alice".to_string()))
         .signer_account_id(predecessor_account_id.clone())
         .predecessor_account_id(predecessor_account_id);
     builder
-}
-
-pub async fn deploy_contract<T: workspaces::Network>(
-    worker: &Worker<T>,
-    account_id: &str,
-    deposit: Balance,
-    root: &Account,
-    path: impl AsRef<std::path::Path>,
-) -> anyhow::Result<Contract> {
-    let wasm = tokio::fs::read(path)
-        .await
-        .with_context(|| format!("Failed to load market wasm for {account_id}"))?;
-
-    let account = root
-        .create_subaccount(worker, account_id)
-        .initial_balance(deposit)
-        .transact()
-        .await
-        .with_context(|| format!("Failed to create sub-account for {account_id}"))?
-        .into_result()?;
-
-    account
-        .deploy(worker, &wasm)
-        .await
-        .with_context(|| format!("Failed to deploy contract for {account_id}"))?
-        .into_result()
 }
