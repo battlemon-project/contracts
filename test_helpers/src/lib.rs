@@ -1,22 +1,21 @@
 #![feature(map_try_insert)]
 
+mod consts;
 mod errors;
-mod statics;
 
 use anyhow::Context;
-use futures_util::{StreamExt, TryStreamExt};
 use std::collections::HashMap;
 
 use errors::HelperError;
-use workspaces::{testnet, Account, Contract};
+use workspaces::{Account, Contract};
 
+pub use consts::*;
 use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::test_utils::VMContextBuilder;
 use near_sdk::AccountId;
 pub use near_units::{parse_gas, parse_near};
 use nft_models::lemon::Lemon;
 use nft_models::ModelKind;
-pub use statics::*;
 use token_metadata_ext::*;
 pub use workspaces;
 use workspaces::network::{
@@ -24,15 +23,6 @@ use workspaces::network::{
 };
 use workspaces::types::Balance;
 use workspaces::Worker;
-
-pub const MARKET_ACCOUNT_ID: &str = "market";
-pub const NFT_ACCOUNT_ID: &str = "nft";
-pub const SPOILED_NFT_ACCOUNT_ID: &str = "spoiled_nft";
-pub const VALID_TOKEN_ID: &str = "valid token id";
-pub const INVALID_TOKEN_ID: &str = "invalid token id";
-// pub const VALID_TOKEN_PRICE: Lazy<u128> = Lazy::new(|| parse_near!("10"));
-// pub const INVALID_TOKEN_PRICE: Lazy<u128> = Lazy::new(|| parse_near!("5"));
-// pub const BASE_DEPOSIT: Lazy<u128> = Lazy::new(|| parse_near!("100"));
 
 pub fn alice() -> AccountId {
     AccountId::new_unchecked("alice.near".to_string())
