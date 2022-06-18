@@ -1,59 +1,60 @@
 use near_sdk::serde_json::json;
+use near_sdk::Balance;
 use test_helpers::workspaces::prelude::*;
 use test_helpers::*;
 
 const NFT_PATH: &str = "../target/wasm32-unknown-unknown/release/nft_token.wasm";
 const MARKET_PATH: &str = "../target/wasm32-unknown-unknown/release/nft_market.wasm";
 
+const ALMOST_ZERO: Balance = parse_near!("0.1 N");
+const ONE_NEAR: Balance = parse_near!("1 N");
+const FOUR_NEAR: Balance = parse_near!("4 N");
+const FIVE_NEAR: Balance = parse_near!("5 N");
+const SIX_NEAR: Balance = parse_near!("6 N");
+const TEN_NEAR: Balance = parse_near!("10 N");
+const FIFTEEN_NEAR: Balance = parse_near!("15 N");
+const SIXTEEN_NEAR: Balance = parse_near!("16 N");
+const NFT: &str = "nft";
+const MARKET: &str = "market";
+
 #[tokio::test]
 async fn alice_ask_for_nft_token_five_bob_bid_six_alice_receive_five_bob_receive_nft_token_and_change_one(
 ) -> anyhow::Result<()> {
     let worker = workspaces::testnet().await?;
-    let root = worker.dev_create_account().await?;
-    let ten_near = parse_near!("10 N");
-    let five_near = parse_near!("5 N");
+    let state = StateBuilder::new(worker)
+        .with_alice(TEN_NEAR)?
+        .with_bob(TEN_NEAR)?
+        .with_contract(NFT, NFT_PATH, TEN_NEAR)?
+        .with_contract(MARKET, MARKET_PATH, TEN_NEAR)?
+        .build()
+        .await?;
 
-    let nft = deploy_contract(&worker, "nft", ten_near, &root, NFT_PATH).await?;
+    let (alice, bob, worker) = (state.alice()?, state.bob()?, state.worker());
+    let (nft, market) = (state.contract(NFT)?, state.contract(MARKET)?);
 
-    nft.call(&worker, "init")
+    nft.call(worker, "init")
         .args_json(json!({"owner_id": nft.id()}))?
         .transact()
         .await?;
 
-    let market = deploy_contract(&worker, "market", ten_near, &root, MARKET_PATH).await?;
-
     market
-        .call(&worker, "init")
+        .call(worker, "init")
         .args_json(json!({"nft_id": nft.id()}))?
         .transact()
         .await?;
 
-    let alice = root
-        .create_subaccount(&worker, "alice")
-        .initial_balance(ten_near)
-        .transact()
-        .await?
-        .into_result()?;
-
-    let bob = root
-        .create_subaccount(&worker, "bob")
-        .initial_balance(ten_near)
-        .transact()
-        .await?
-        .into_result()?;
-
     let result = alice
-        .call(&worker, nft.id(), "nft_mint")
-        .deposit(parse_near!("1 N"))
+        .call(worker, nft.id(), "nft_mint")
+        .deposit(ONE_NEAR)
         .args_json(json!({"receiver_id": alice.id()}))?
         .transact()
         .await?;
     assert!(result.is_success());
 
-    let msg = format!("{{\"action\":\"add_ask\",\"price\":\"{five_near}\"}}");
+    let msg = format!("{{\"action\":\"add_ask\",\"price\":\"{FIVE_NEAR}\"}}");
     alice
-        .call(&worker, nft.id(), "nft_approve")
-        .deposit(parse_near!("1 N"))
+        .call(worker, nft.id(), "nft_approve")
+        .deposit(ONE_NEAR)
         .max_gas()
         .args_json(json!({
             "token_id": "1",
@@ -63,20 +64,20 @@ async fn alice_ask_for_nft_token_five_bob_bid_six_alice_receive_five_bob_receive
         .transact()
         .await?;
 
-    bob.call(&worker, market.id(), "bid")
+    bob.call(worker, market.id(), "bid")
         .args_json(json!({
             "bid": {
                "token_id": "1"
             }
         }))?
         .max_gas()
-        .deposit(parse_near!("6 N"))
+        .deposit(SIX_NEAR)
         .transact()
         .await?;
 
     // bob must have nft token
     let nft_token = nft
-        .call(&worker, "nft_token")
+        .call(worker, "nft_token")
         .args_json(json!({"token_id": "1"}))?
         .view()
         .await?
@@ -85,18 +86,18 @@ async fn alice_ask_for_nft_token_five_bob_bid_six_alice_receive_five_bob_receive
 
     // bob must have balance ~5N
     let bob_balance = bob.view_account(&worker).await?.balance;
-    let diff = parse_near!("5 N") - bob_balance;
+    let diff = FIVE_NEAR - bob_balance;
     assert!(
-        diff <= parse_near!("0.1 N"),
+        diff <= ALMOST_ZERO,
         "Expected bob balance isn't less than 0.1 N, actual balance is {}",
         bob_balance
     );
 
     // alice must receive 5N
     let alice_balance = alice.view_account(&worker).await?.balance;
-    let diff = parse_near!("15 N") - alice_balance;
+    let diff = FIFTEEN_NEAR - alice_balance;
     assert!(
-        diff <= parse_near!("0.1 N"),
+        diff <= ALMOST_ZERO,
         "Expected bob balance isn't less than 0.1 N, actual balance is {}",
         alice_balance
     );
@@ -108,62 +109,51 @@ async fn alice_ask_for_nft_token_five_bob_bid_six_alice_receive_five_bob_receive
 async fn bob_bid_six_alice_ask_for_nft_token_five_alice_receive_six_bob_receive_nft_token_and_no_change(
 ) -> anyhow::Result<()> {
     let worker = workspaces::testnet().await?;
-    let root = worker.dev_create_account().await?;
-    let ten_near = parse_near!("10 N");
-    let five_near = parse_near!("5 N");
+    let state = StateBuilder::new(worker)
+        .with_alice(TEN_NEAR)?
+        .with_bob(TEN_NEAR)?
+        .with_contract(NFT, NFT_PATH, TEN_NEAR)?
+        .with_contract(MARKET, MARKET_PATH, TEN_NEAR)?
+        .build()
+        .await?;
 
-    let nft = deploy_contract(&worker, "nft", ten_near, &root, NFT_PATH).await?;
+    let (alice, bob, worker) = (state.alice()?, state.bob()?, state.worker());
+    let (nft, market) = (state.contract(NFT)?, state.contract(MARKET)?);
 
-    nft.call(&worker, "init")
+    nft.call(worker, "init")
         .args_json(json!({"owner_id": nft.id()}))?
         .transact()
         .await?;
 
-    let market = deploy_contract(&worker, "market", ten_near, &root, MARKET_PATH).await?;
-
     market
-        .call(&worker, "init")
+        .call(worker, "init")
         .args_json(json!({"nft_id": nft.id()}))?
         .transact()
         .await?;
 
-    let alice = root
-        .create_subaccount(&worker, "alice")
-        .initial_balance(ten_near)
-        .transact()
-        .await?
-        .into_result()?;
-
-    let bob = root
-        .create_subaccount(&worker, "bob")
-        .initial_balance(ten_near)
-        .transact()
-        .await?
-        .into_result()?;
-
     let result = alice
-        .call(&worker, nft.id(), "nft_mint")
-        .deposit(parse_near!("1 N"))
+        .call(worker, nft.id(), "nft_mint")
+        .deposit(ONE_NEAR)
         .args_json(json!({"receiver_id": alice.id()}))?
         .transact()
         .await?;
     assert!(result.is_success());
 
-    bob.call(&worker, market.id(), "bid")
+    bob.call(worker, market.id(), "bid")
         .args_json(json!({
             "bid": {
                "token_id": "1"
             }
         }))?
         .max_gas()
-        .deposit(parse_near!("6 N"))
+        .deposit(SIX_NEAR)
         .transact()
         .await?;
 
-    let msg = format!("{{\"action\":\"add_ask\",\"price\":\"{five_near}\"}}");
+    let msg = format!("{{\"action\":\"add_ask\",\"price\":\"{FIVE_NEAR}\"}}");
     alice
-        .call(&worker, nft.id(), "nft_approve")
-        .deposit(parse_near!("1 N"))
+        .call(worker, nft.id(), "nft_approve")
+        .deposit(ONE_NEAR)
         .max_gas()
         .args_json(json!({
             "token_id": "1",
@@ -175,7 +165,7 @@ async fn bob_bid_six_alice_ask_for_nft_token_five_alice_receive_six_bob_receive_
 
     // bob must have nft token
     let nft_token = nft
-        .call(&worker, "nft_token")
+        .call(worker, "nft_token")
         .args_json(json!({"token_id": "1"}))?
         .view()
         .await?
@@ -183,22 +173,25 @@ async fn bob_bid_six_alice_ask_for_nft_token_five_alice_receive_six_bob_receive_
     assert_eq!(nft_token.owner_id.as_str(), bob.id().as_str());
 
     // bob must have balance <=4N
-    let bob_balance = bob.view_account(&worker).await?.balance;
-    let diff = parse_near!("4 N") - bob_balance;
+    let bob_balance = bob.view_account(worker).await?.balance;
+    let diff = FOUR_NEAR - bob_balance;
     assert!(
-        diff <= parse_near!("0.1 N"),
+        diff <= ALMOST_ZERO,
         "Expected bob balance isn't less than 0.1 N, actual balance is {}",
         bob_balance
     );
 
     // alice must receive 6N
-    let alice_balance = alice.view_account(&worker).await?.balance;
-    let diff = parse_near!("16 N") - alice_balance;
+    let alice_balance = alice.view_account(worker).await?.balance;
+    let diff = SIXTEEN_NEAR - alice_balance;
     assert!(
-        diff <= parse_near!("0.1 N"),
+        diff <= ALMOST_ZERO,
         "Expected bob balance isn't less than 0.1 N, actual balance is {}",
         alice_balance
     );
 
     Ok(())
 }
+
+#[test]
+fn after_trade_bid_and_ask_is_removed() {}
