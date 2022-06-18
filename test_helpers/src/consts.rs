@@ -11,3 +11,6 @@ pub const FIFTEEN_NEAR: Balance = parse_near!("15 N");
 pub const SIXTEEN_NEAR: Balance = parse_near!("16 N");
 pub const NFT: &str = "nft";
 pub const MARKET: &str = "market";
+
+pub const NFT_PATH: &str = "../target/wasm32-unknown-unknown/release/nft_token.wasm";
+pub const MARKET_PATH: &str = "../target/wasm32-unknown-unknown/release/nft_market.wasm";
