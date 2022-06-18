@@ -1,21 +1,5 @@
 use near_sdk::serde_json::json;
-use near_sdk::Balance;
-use test_helpers::workspaces::prelude::*;
 use test_helpers::*;
-
-const NFT_PATH: &str = "../target/wasm32-unknown-unknown/release/nft_token.wasm";
-const MARKET_PATH: &str = "../target/wasm32-unknown-unknown/release/nft_market.wasm";
-
-const ALMOST_ZERO: Balance = parse_near!("0.1 N");
-const ONE_NEAR: Balance = parse_near!("1 N");
-const FOUR_NEAR: Balance = parse_near!("4 N");
-const FIVE_NEAR: Balance = parse_near!("5 N");
-const SIX_NEAR: Balance = parse_near!("6 N");
-const TEN_NEAR: Balance = parse_near!("10 N");
-const FIFTEEN_NEAR: Balance = parse_near!("15 N");
-const SIXTEEN_NEAR: Balance = parse_near!("16 N");
-const NFT: &str = "nft";
-const MARKET: &str = "market";
 
 #[tokio::test]
 async fn alice_ask_for_nft_token_five_bob_bid_six_alice_receive_five_bob_receive_nft_token_and_change_one(
