@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-tokio = { version = "1.16.1", features = ["macros", "fs"] }
+tokio = { version = "1.16.1", features = ["macros", "fs", "once_cell"] }
 anyhow = "1.0.57"
 thiserror = "1.0.31"
 futures = "0.3.19"
