@@ -6,10 +6,9 @@ mod errors;
 mod state;
 mod state_builder;
 
+use errors::HelperError;
 pub use state::*;
 pub use state_builder::*;
-
-use errors::HelperError;
 
 pub use consts::*;
 use near_sdk::test_utils::VMContextBuilder;

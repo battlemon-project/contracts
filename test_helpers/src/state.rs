@@ -1,8 +1,8 @@
 use crate::HelperError;
 use std::collections::HashMap;
-use workspaces::{Account, Contract, Worker};
-type Accounts = HashMap<String, Account>;
-type Contracts = HashMap<String, Contract>;
+use workspaces::{Account, Contract, DevNetwork, Worker};
+pub type Accounts = HashMap<String, Account>;
+pub type Contracts = HashMap<String, Contract>;
 
 pub struct State<T> {
     root: Account,
@@ -11,8 +11,13 @@ pub struct State<T> {
     contracts: Contracts,
 }
 
-impl<T> State<T> {
-    pub fn new(root: Account, worker: Worker<T>, accounts: Accounts, contracts: Contracts) -> Self {
+impl<T: DevNetwork> State<T> {
+    pub(crate) fn new(
+        root: Account,
+        worker: Worker<T>,
+        accounts: Accounts,
+        contracts: Contracts,
+    ) -> Self {
         Self {
             root,
             worker,

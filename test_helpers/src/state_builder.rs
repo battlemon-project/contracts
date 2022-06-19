@@ -1,34 +1,26 @@
 use crate::{HelperError, State};
 use anyhow::Context;
 use std::collections::HashMap;
+use std::future::Future;
 use std::path::PathBuf;
-use workspaces::network::{
-    AllowDevAccountCreation, DevAccountDeployer, NetworkClient, NetworkInfo, TopLevelAccountCreator,
-};
+use workspaces::network::DevAccountDeployer;
 use workspaces::types::Balance;
-use workspaces::Worker;
+use workspaces::{Account, DevNetwork, Worker};
 
-pub struct StateBuilder<T> {
-    worker: Option<Worker<T>>,
+pub struct StateBuilder<F> {
+    worker_fut: fn() -> F,
     accounts: HashMap<String, Balance>,
     contracts: HashMap<String, (PathBuf, Balance)>,
 }
 
-impl<T> StateBuilder<T>
+impl<F, T> StateBuilder<F>
 where
-    T: TopLevelAccountCreator + NetworkInfo + AllowDevAccountCreation + Send + Sync + NetworkClient,
+    F: Future<Output = anyhow::Result<Worker<T>>>,
+    T: DevNetwork,
 {
-    pub fn new(worker: Worker<T>) -> Self {
+    pub fn new(worker_fut: fn() -> F) -> Self {
         Self {
-            worker: Some(worker),
-            accounts: HashMap::new(),
-            contracts: HashMap::new(),
-        }
-    }
-
-    fn _without_worker() -> Self {
-        Self {
-            worker: None,
+            worker_fut,
             accounts: HashMap::new(),
             contracts: HashMap::new(),
         }
@@ -76,28 +68,35 @@ where
         self.with_account("bob", balance)
     }
 
-    pub async fn build(mut self) -> Result<State<T>, HelperError> {
-        let worker = self
-            .worker
-            .take()
-            .ok_or_else(|| HelperError::BuilderError("Worker not set".to_string()))?;
+    pub async fn build(self) -> Result<State<T>, HelperError> {
+        let worker = (self.worker_fut)().await?;
 
         let root = worker
             .dev_create_account()
             .await
             .context("Failed to create root account while building")?;
 
+        let (accounts, contracts) = self.process_accounts(&worker, &root).await?;
+
+        Ok(State::new(root, worker, accounts, contracts))
+    }
+
+    async fn process_accounts(
+        self,
+        worker: &Worker<T>,
+        root: &Account,
+    ) -> Result<(crate::Accounts, crate::Contracts), HelperError> {
+        let mut accounts_buf = HashMap::new();
+        let mut contracts_buf = HashMap::new();
+
         let accounts = self
             .accounts
             .iter()
             .chain(self.contracts.iter().map(|(k, v)| (k, &v.1)));
 
-        let mut accounts_buf = HashMap::new();
-        let mut contracts_buf = HashMap::new();
-
         for (id, balance) in accounts {
             let account = root
-                .create_subaccount(&worker, id)
+                .create_subaccount(worker, id)
                 .initial_balance(*balance)
                 .transact()
                 .await?
@@ -110,14 +109,14 @@ where
                     ))
                 })?;
 
-                let contract = account.deploy(&worker, &wasm).await?.into_result()?;
+                let contract = account.deploy(worker, &wasm).await?.into_result()?;
                 contracts_buf.insert(id.to_owned(), contract);
                 continue;
             }
             accounts_buf.insert(id.to_owned(), account);
         }
 
-        Ok(State::new(root, worker, accounts_buf, contracts_buf))
+        Ok((accounts_buf, contracts_buf))
     }
 }
 
@@ -125,46 +124,45 @@ where
 mod tests {
     use super::*;
     use crate::{NFT, NFT_PATH};
-    use workspaces::network::Testnet;
 
     #[test]
     fn builder_path_works() {
-        StateBuilder::<Testnet>::_without_worker()
+        StateBuilder::new(workspaces::testnet)
             .with_contract(NFT, NFT_PATH, 10)
             .unwrap();
     }
 
     #[test]
     fn builder_path_buf_works() {
-        StateBuilder::<Testnet>::_without_worker()
+        StateBuilder::new(workspaces::testnet)
             .with_contract(NFT, PathBuf::from(NFT_PATH), 10)
             .unwrap();
     }
 
     #[test]
     fn builder_ref_on_path_buf_works() {
-        StateBuilder::<Testnet>::_without_worker()
+        StateBuilder::new(workspaces::testnet)
             .with_contract(NFT, &PathBuf::from(NFT_PATH), 10)
             .unwrap();
     }
 
     #[test]
     fn builder_account_str_works() {
-        StateBuilder::<Testnet>::_without_worker()
+        StateBuilder::new(workspaces::testnet)
             .with_account("alice", 10)
             .unwrap();
     }
 
     #[test]
     fn builder_account_string_works() {
-        StateBuilder::<Testnet>::_without_worker()
+        StateBuilder::new(workspaces::testnet)
             .with_account(String::from("alice"), 10)
             .unwrap();
     }
 
     #[test]
     fn builder_account_ref_on_string_works() {
-        StateBuilder::<Testnet>::_without_worker()
+        StateBuilder::new(workspaces::testnet)
             .with_account(&String::from("alice"), 10)
             .unwrap();
     }

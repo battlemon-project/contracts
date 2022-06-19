@@ -1,11 +1,10 @@
 use near_units::parse_near;
 use test_helpers::workspaces::testnet;
-use test_helpers::state_builder::StateBuilder;
+use test_helpers::StateBuilder;
 
 #[tokio::test]
 async fn builder_works() -> Result<(), anyhow::Error> {
-    let worker = testnet().await.unwrap();
-    StateBuilder::new(worker)
+    StateBuilder::new(testnet())
         .with_alice(parse_near!("10 N"))?
         .with_bob(parse_near!("10 N"))?
         .with_contract(

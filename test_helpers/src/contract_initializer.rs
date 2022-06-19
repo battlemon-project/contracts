@@ -1,11 +1,10 @@
 use crate::{HelperError, NFT};
 use crate::{State, MARKET};
 use near_sdk::serde_json::json;
-use workspaces::Network;
 
 impl<T> State<T>
 where
-    T: Network,
+    T: workspaces::DevNetwork,
 {
     pub async fn init_contracts(&self) -> Result<(), HelperError> {
         let nft = self.contract(NFT)?;
