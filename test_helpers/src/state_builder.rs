@@ -26,7 +26,7 @@ where
         }
     }
 
-    fn without_worker() -> Self {
+    fn _without_worker() -> Self {
         Self {
             worker: None,
             accounts: HashMap::new(),
@@ -129,42 +129,42 @@ mod tests {
 
     #[test]
     fn builder_path_works() {
-        StateBuilder::<Testnet>::without_worker()
+        StateBuilder::<Testnet>::_without_worker()
             .with_contract(NFT, NFT_PATH, 10)
             .unwrap();
     }
 
     #[test]
     fn builder_path_buf_works() {
-        StateBuilder::<Testnet>::without_worker()
+        StateBuilder::<Testnet>::_without_worker()
             .with_contract(NFT, PathBuf::from(NFT_PATH), 10)
             .unwrap();
     }
 
     #[test]
     fn builder_ref_on_path_buf_works() {
-        StateBuilder::<Testnet>::without_worker()
+        StateBuilder::<Testnet>::_without_worker()
             .with_contract(NFT, &PathBuf::from(NFT_PATH), 10)
             .unwrap();
     }
 
     #[test]
     fn builder_account_str_works() {
-        StateBuilder::<Testnet>::without_worker()
+        StateBuilder::<Testnet>::_without_worker()
             .with_account("alice", 10)
             .unwrap();
     }
 
     #[test]
     fn builder_account_string_works() {
-        StateBuilder::<Testnet>::without_worker()
+        StateBuilder::<Testnet>::_without_worker()
             .with_account(String::from("alice"), 10)
             .unwrap();
     }
 
     #[test]
     fn builder_account_ref_on_string_works() {
-        StateBuilder::<Testnet>::without_worker()
+        StateBuilder::<Testnet>::_without_worker()
             .with_account(&String::from("alice"), 10)
             .unwrap();
     }
