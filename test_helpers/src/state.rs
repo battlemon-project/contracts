@@ -1,23 +1,18 @@
 use crate::HelperError;
 use std::collections::HashMap;
 use workspaces::{Account, Contract, Worker};
-type Accounts<'a> = HashMap<&'a str, Account>;
-type Contracts<'a> = HashMap<&'a str, Contract>;
+type Accounts = HashMap<String, Account>;
+type Contracts = HashMap<String, Contract>;
 
-pub struct State<'a, T> {
+pub struct State<T> {
     root: Account,
     worker: Worker<T>,
-    accounts: Accounts<'a>,
-    contracts: Contracts<'a>,
+    accounts: Accounts,
+    contracts: Contracts,
 }
 
-impl<'a, T> State<'a, T> {
-    pub fn new(
-        root: Account,
-        worker: Worker<T>,
-        accounts: Accounts<'a>,
-        contracts: Contracts<'a>,
-    ) -> Self {
+impl<T> State<T> {
+    pub fn new(root: Account, worker: Worker<T>, accounts: Accounts, contracts: Contracts) -> Self {
         Self {
             root,
             worker,
@@ -34,15 +29,15 @@ impl<'a, T> State<'a, T> {
         &self.root
     }
 
-    pub fn account(&self, id: &'a str) -> Result<&Account, HelperError> {
+    pub fn account(&self, id: impl AsRef<str>) -> Result<&Account, HelperError> {
         self.accounts
-            .get(id)
-            .ok_or_else(|| HelperError::AccountNotFound(id.to_string()))
+            .get(id.as_ref())
+            .ok_or_else(|| HelperError::AccountNotFound(id.as_ref().to_owned()))
     }
-    pub fn contract(&self, id: &'a str) -> Result<&Contract, HelperError> {
+    pub fn contract(&self, id: impl AsRef<str>) -> Result<&Contract, HelperError> {
         self.contracts
-            .get(id)
-            .ok_or_else(|| HelperError::ContractNotFound(id.to_string()))
+            .get(id.as_ref())
+            .ok_or_else(|| HelperError::ContractNotFound(id.as_ref().to_owned()))
     }
 
     pub fn alice(&self) -> Result<&Account, HelperError> {
