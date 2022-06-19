@@ -3,7 +3,7 @@ use crate::{State, MARKET};
 use near_sdk::serde_json::json;
 use workspaces::Network;
 
-impl<'a, T> State<'a, T>
+impl<T> State<T>
 where
     T: Network,
 {
