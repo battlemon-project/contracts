@@ -4,7 +4,7 @@ use token_metadata_ext::TokenExt;
 
 const NFT_PATH: &str = "../target/wasm32-unknown-unknown/release/nft_token.wasm";
 const NFT: &str = "nft_contract";
-add_helpers!("./nft_token/nft_schema.json");
+add_helpers!("./nft_schema.json");
 
 #[tokio::test]
 async fn contract_is_initable() -> anyhow::Result<()> {
@@ -280,6 +280,34 @@ async fn update_token_media_can_be_called_only_by_contract_account() -> anyhow::
 
     let error = format!("{:?}", result.unwrap_err());
     assert!(error.contains("Smart contract panicked: Unauthorized"));
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn nft_approve_method_works() -> anyhow::Result<()> {
+    let blockchain = StateBuilder::sandbox()
+        .with_contract(NFT, NFT_PATH, Near(10))?
+        .with_alice(Near(10))?
+        .with_bob(Near(10))?
+        .build()
+        .await?;
+
+    let [nft, alice, bob] = blockchain.string_ids()?;
+
+    let result = blockchain
+        .call_nft_contract_init(&nft)?
+        .with_gas(Tgas(10))
+        .then()
+        .alice_call_nft_contract_nft_mint(&alice)?
+        .with_gas(Tgas(10))
+        .with_deposit(Near(1))
+        .then()
+        .alice_call_nft_contract_nft_approve("1", &bob, None)?
+        .with_deposit(490000000000000000000)
+        .with_gas(Tgas(10))
+        .execute()
+        .await?;
 
     Ok(())
 }
