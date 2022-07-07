@@ -295,7 +295,7 @@ async fn nft_approve_method_works() -> anyhow::Result<()> {
 
     let [nft, alice, bob] = blockchain.string_ids()?;
 
-    let result = blockchain
+    blockchain
         .call_nft_contract_init(&nft)?
         .with_gas(Tgas(10))
         .then()
@@ -309,5 +309,32 @@ async fn nft_approve_method_works() -> anyhow::Result<()> {
         .execute()
         .await?;
 
+    Ok(())
+}
+
+#[tokio::test]
+async fn after_mint_exceeded_attached_deposit_is_refunded() -> anyhow::Result<()> {
+    let bchain = StateBuilder::sandbox()
+        .with_contract(NFT, NFT_PATH, Near(10))?
+        .with_alice(Near(10))?
+        .build()
+        .await?;
+
+    let [nft, alice] = bchain.string_ids()?;
+
+    let result = bchain
+        .call_nft_contract_init(&nft)?
+        .with_gas(Tgas(10))
+        .then()
+        .alice_call_nft_contract_nft_mint(&alice)?
+        .with_gas(Tgas(10))
+        .with_deposit(Near(9))
+        .then()
+        .view_account(ALICE)?
+        .execute()
+        .await?;
+    let alice_balance = result[2].balance();
+
+    assert!(alice_balance > Near(9));
     Ok(())
 }
