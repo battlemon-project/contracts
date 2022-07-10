@@ -13,10 +13,9 @@ use near_sdk::json_types::U128;
 use near_sdk::serde::Deserialize;
 use near_sdk::serde_json::{self, json};
 use near_sdk::store::{LookupMap, UnorderedMap};
-use near_sdk::PromiseOrValue::Promise;
 use near_sdk::{
     assert_one_yocto, env, log, near_bindgen, require, AccountId, Balance, BorshStorageKey, Gas,
-    PanicOnDefault, PromiseError, PromiseOrValue, PromiseResult,
+    PanicOnDefault, Promise, PromiseError, PromiseOrValue, PromiseResult,
 };
 use std::ops::AddAssign;
 use trade::*;
@@ -83,7 +82,12 @@ impl Contract {
     }
 
     #[payable]
-    pub fn add_bid(&mut self, token_id: TokenId, expire_at: Option<u64>) {
+    #[handle_result]
+    pub fn add_bid(
+        &mut self,
+        token_id: TokenId,
+        expire_at: Option<u64>,
+    ) -> Result<(), ContractError> {
         let bid = Bid::new(token_id, expire_at);
         match self.ask_less_than_bid(&bid) {
             None => {
@@ -96,6 +100,8 @@ impl Contract {
             }
             Some(ask) => self.trade(ask, bid, true),
         }
+
+        Ok(())
     }
 
     pub fn ask(&self, token_id: TokenId) -> Option<&Ask> {
@@ -120,6 +126,37 @@ impl Contract {
 
         Ok(())
     }
+
+    #[payable]
+    #[handle_result]
+    pub fn storage_withdraw(&mut self) -> Result<(), ContractError> {
+        check_one_yocto()?;
+        let owner_id = env::predecessor_account_id();
+        let deposit = self.storage_deposits.remove(&owner_id).unwrap_or_default();
+
+        let amount_bids_and_asks =
+            self.count_bids_for_account(&owner_id) + self.count_asks_for_account(&owner_id);
+        let effective_deposit = (amount_bids_and_asks as u128) * STORAGE_PER_SALE;
+        let diff = deposit - effective_deposit;
+
+        if diff > 0 {
+            Promise::new(owner_id.clone()).transfer(diff);
+        }
+
+        if effective_deposit > 0 {
+            self.storage_deposits.insert(owner_id, effective_deposit);
+        }
+
+        Ok(())
+    }
+}
+
+fn check_one_yocto() -> Result<(), ContractError> {
+    if env::attached_deposit() != 1 {
+        return Err(ContractError::OneYoctoDeposit);
+    }
+
+    Ok(())
 }
 
 fn check_deposit(deposit: Balance) -> Result<(), ContractError> {

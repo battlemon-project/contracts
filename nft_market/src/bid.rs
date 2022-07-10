@@ -63,6 +63,14 @@ impl crate::Contract {
         bids.sort_unstable_by_key(|bid| (bid.price(), -(bid.create_at() as i128)));
         bids.pop()
     }
+
+    pub(crate) fn count_bids_for_account(&self, account_id: &AccountId) -> usize {
+        self.bids
+            .values()
+            .flatten()
+            .filter(|bid| bid.account_id() == account_id)
+            .count()
+    }
 }
 
 #[cfg(test)]

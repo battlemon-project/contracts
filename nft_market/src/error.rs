@@ -11,6 +11,8 @@ pub enum ContractError {
     SerdeError(#[from] near_sdk::serde_json::Error),
     #[error("Requires minimum deposit of {STORAGE_PER_SALE}")]
     InsufficientDeposit,
+    #[error("The attached deposit must be equal to 1 yoctoNear")]
+    OneYoctoDeposit,
 }
 
 impl Debug for ContractError {

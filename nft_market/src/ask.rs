@@ -63,6 +63,13 @@ impl crate::Contract {
             .filter(|ask| ask.price() <= bid.price())
             .cloned()
     }
+
+    pub(crate) fn count_asks_for_account(&self, account_id: &AccountId) -> usize {
+        self.asks
+            .iter()
+            .filter(|(_, ask)| ask.account_id() == account_id)
+            .count()
+    }
 }
 
 #[cfg(all(test, not(target = "wasm32")))]
