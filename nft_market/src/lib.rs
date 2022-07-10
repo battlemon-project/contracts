@@ -4,16 +4,21 @@ use consts::*;
 use error::*;
 use external::*;
 use near_contract_standards::non_fungible_token::TokenId;
+use near_contract_standards::storage_management::{
+    StorageBalance, StorageBalanceBounds, StorageManagement,
+};
+
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::json_types::U128;
 use near_sdk::serde::Deserialize;
 use near_sdk::serde_json::{self, json};
-use near_sdk::store::UnorderedMap;
+use near_sdk::store::{LookupMap, UnorderedMap};
 use near_sdk::PromiseOrValue::Promise;
 use near_sdk::{
-    assert_one_yocto, env, log, near_bindgen, require, AccountId, BorshStorageKey, Gas,
+    assert_one_yocto, env, log, near_bindgen, require, AccountId, Balance, BorshStorageKey, Gas,
     PanicOnDefault, PromiseError, PromiseOrValue, PromiseResult,
 };
+use std::ops::AddAssign;
 use trade::*;
 use xcc::*;
 
@@ -31,6 +36,7 @@ pub struct Contract {
     nft_id: AccountId,
     asks: UnorderedMap<TokenId, Ask>,
     bids: UnorderedMap<TokenId, Vec<Bid>>,
+    storage_deposits: LookupMap<AccountId, Balance>,
 }
 
 // enum OrderType {
@@ -61,6 +67,7 @@ pub struct Contract {
 enum StorageKey {
     Asks,
     Bids,
+    StorageDeposits,
 }
 
 #[near_bindgen]
@@ -71,15 +78,17 @@ impl Contract {
             nft_id,
             asks: UnorderedMap::new(StorageKey::Asks),
             bids: UnorderedMap::new(StorageKey::Bids),
+            storage_deposits: LookupMap::new(StorageKey::StorageDeposits),
         }
     }
 
     #[payable]
-    pub fn add_bid(&mut self, bid: Bid) {
+    pub fn add_bid(&mut self, token_id: TokenId, expire_at: Option<u64>) {
+        let bid = Bid::new(token_id, expire_at);
         match self.ask_less_than_bid(&bid) {
             None => {
                 self.bids
-                    .entry(bid.token_id().clone())
+                    .entry(bid.token_id().to_owned())
                     .and_modify(|bids| {
                         bids.push(bid.clone());
                     })
@@ -93,9 +102,32 @@ impl Contract {
         self.asks.get(&token_id)
     }
 
-    pub fn bids(&self, token_id: TokenId) -> Option<Vec<Bid>> {
-        self.bids.get(&token_id).cloned()
+    pub fn bids(&self, token_id: TokenId) -> Option<&Vec<Bid>> {
+        self.bids.get(&token_id)
     }
+
+    #[payable]
+    #[handle_result]
+    pub fn storage_deposit(&mut self, account_id: Option<AccountId>) -> Result<(), ContractError> {
+        let storage_account_id = account_id.unwrap_or_else(env::predecessor_account_id);
+        let deposit = env::attached_deposit();
+        check_deposit(deposit)?;
+
+        self.storage_deposits
+            .entry(storage_account_id)
+            .or_default()
+            .add_assign(deposit);
+
+        Ok(())
+    }
+}
+
+fn check_deposit(deposit: Balance) -> Result<(), ContractError> {
+    if deposit < STORAGE_PER_SALE {
+        return Err(ContractError::InsufficientDeposit);
+    }
+
+    Ok(())
 }
 
 #[cfg(all(not(target_arch = "wasm32"), test))]
@@ -103,6 +135,8 @@ mod tests {
     use super::*;
     use near_sdk::test_utils::{accounts, VMContextBuilder};
     use near_sdk::testing_env;
+
+    const DEPOSIT: Balance = 1720000000000000000000;
 
     fn get_context(predecessor_account_id: AccountId) -> VMContextBuilder {
         let mut builder = VMContextBuilder::new();
@@ -127,6 +161,48 @@ mod tests {
         let context = get_context(accounts(1));
         testing_env!(context.build());
         Contract::default();
+    }
+
+    #[test]
+    fn storage_deposit_works() {
+        let mut context = get_context(accounts(1));
+        context.attached_deposit(DEPOSIT);
+        testing_env!(context.build());
+        let mut contract = Contract::init(accounts(0));
+        contract.storage_deposit(None).unwrap();
+
+        assert_eq!(contract.storage_deposits.get(&accounts(1)), Some(&DEPOSIT));
+    }
+
+    #[test]
+    fn storage_deposit_sums_correctly() {
+        let mut context = get_context(accounts(1));
+        context.attached_deposit(DEPOSIT);
+        testing_env!(context.build());
+        let mut contract = Contract::init(accounts(0));
+        contract.storage_deposit(None).unwrap();
+        contract.storage_deposit(None).unwrap();
+
+        assert_eq!(
+            contract.storage_deposits.get(&accounts(1)),
+            Some(&(DEPOSIT * 2))
+        );
+    }
+
+    #[test]
+    fn storage_deposit_fails_if_insufficient_deposit() {
+        let mut context = get_context(accounts(1));
+        context.attached_deposit(DEPOSIT);
+        testing_env!(context.build());
+        let mut contract = Contract::init(accounts(0));
+        contract.storage_deposit(None).unwrap();
+        context.attached_deposit(DEPOSIT - 1);
+        testing_env!(context.build());
+
+        matches!(
+            contract.storage_deposit(None),
+            Err(ContractError::InsufficientDeposit)
+        );
     }
 }
 // pub fn list_asks(&self) -> Vec<Ask> {
