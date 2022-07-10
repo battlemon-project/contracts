@@ -1,0 +1,42 @@
+{
+  "name": "market_contract",
+  "functions": [
+    {
+      "name": "init",
+      "initable": true,
+      "kind": "call",
+      "arguments": [
+        {
+          "name": "nft_id",
+          "type": "String"
+        }
+      ]
+    },
+    {
+      "name": "add_bid",
+      "initable": false,
+      "kind": "call",
+      "arguments": [
+        {
+          "name": "token_id",
+          "type": "String"
+        },
+        {
+          "name": "expire_at",
+          "type": "Option<u64>"
+        }
+      ]
+    },
+    {
+      "name": "bids",
+      "initable": false,
+      "kind": "view",
+      "arguments": [
+        {
+          "name": "token_id",
+          "type": "String"
+        }
+      ]
+    }
+  ]
+}

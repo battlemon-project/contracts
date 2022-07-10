@@ -1,0 +1,95 @@
+{
+  "name": "nft_contract",
+  "functions": [
+    {
+      "name": "init",
+      "initable": true,
+      "kind": "call",
+      "arguments": [
+        {
+          "name": "owner_id",
+          "type": "String"
+        }
+      ]
+    },
+    {
+      "name": "nft_mint",
+      "initable": false,
+      "kind": "call",
+      "arguments": [
+        {
+          "name": "receiver_id",
+          "type": "String"
+        }
+      ]
+    },
+    {
+      "name": "nft_token",
+      "initable": false,
+      "kind": "view",
+      "arguments": [
+        {
+          "name": "token_id",
+          "type": "String"
+        }
+      ]
+    },
+    {
+      "name": "nft_transfer",
+      "initable": false,
+      "kind": "call",
+      "arguments": [
+        {
+          "name": "receiver_id",
+          "type": "String"
+        },
+        {
+          "name": "token_id",
+          "type": "String"
+        },
+        {
+          "name": "approval_id",
+          "type": "Option<u64>"
+        },
+        {
+          "name": "memo",
+          "type": "Option<String>"
+        }
+      ]
+    },
+    {
+      "name": "update_token_media",
+      "initable": false,
+      "kind": "call",
+      "arguments": [
+        {
+          "name": "token_id",
+          "type": "String"
+        },
+        {
+          "name": "new_media",
+          "type": "String"
+        }
+      ]
+    },
+    {
+      "name": "nft_approve",
+      "initable": false,
+      "kind": "call",
+      "arguments": [
+        {
+          "name": "token_id",
+          "type": "String"
+        },
+        {
+          "name": "account_id",
+          "type": "String"
+        },
+        {
+          "name": "msg",
+          "type": "Option<String>"
+        }
+      ]
+    }
+  ]
+}
