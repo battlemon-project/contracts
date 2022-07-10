@@ -8,10 +8,10 @@ use near_sdk::AccountId;
 #[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 #[serde(crate = "near_sdk::serde")]
 pub struct Ask {
-    account_id: AccountId,
-    token_id: TokenId,
-    approval_id: u64,
-    price: U128,
+    pub account_id: AccountId,
+    pub token_id: TokenId,
+    pub approval_id: u64,
+    pub price: U128,
 }
 
 impl Ask {
