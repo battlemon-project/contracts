@@ -1,6 +1,6 @@
 [workspace]
 
-members = ["tests", "nft_token", "test_helpers", "token_metadata_ext", "nft_market", "play2earn", "juice", "spoiled_nft_token", "nft_models"]
+members = ["tests", "nft_token", "token_metadata_ext", "nft_market", "play2earn", "juice", "spoiled_nft_token", "nft_models"]
 #default-members = ["nft_token", "nft_market", "play2earn", "juice", "spoiled_nft_token"]
 default-members = ["nft_token", "nft_market", "juice", "spoiled_nft_token"]
 

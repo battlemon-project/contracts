@@ -5,3 +5,4 @@ neardev
 nft_token/.near-credentials
 */.cargo
 .DS_Store
+.cargo
