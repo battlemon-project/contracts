@@ -43,7 +43,7 @@ impl crate::Contract {
         let token_id = bid.token_id();
         self.asks.remove(token_id);
         if let Some(bids) = self.bids.get_mut(token_id) {
-            bids.iter().position(|b| b == bid).map(|i| bids.remove(i));
+            bids.iter().position(|b| b == bid).map(|i| bids.swap_remove(i));
         }
     }
 }
