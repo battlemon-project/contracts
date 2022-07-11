@@ -54,6 +54,23 @@
       "initable": false,
       "kind": "call",
       "arguments": []
+    },
+    {
+      "name": "storage_minimum_balance",
+      "initable": false,
+      "kind": "view",
+      "arguments": []
+    },
+    {
+      "name": "storage_balance_of",
+      "initable": false,
+      "kind": "view",
+      "arguments": [
+        {
+          "name": "account_id",
+          "type": "Option<String>"
+        }
+      ]
     }
   ]
 }
