@@ -149,6 +149,20 @@ impl Contract {
 
         Ok(())
     }
+
+    pub fn storage_minimum_balance(&self) -> U128 {
+        U128(STORAGE_PER_SALE)
+    }
+
+    pub fn storage_balance_of(&self, account_id: AccountId) -> U128 {
+        let ret = self
+            .storage_deposits
+            .get(&account_id)
+            .copied()
+            .unwrap_or_default();
+
+        U128(ret)
+    }
 }
 
 fn check_one_yocto() -> Result<(), ContractError> {
