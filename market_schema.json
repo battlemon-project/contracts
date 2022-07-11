@@ -37,6 +37,23 @@
           "type": "String"
         }
       ]
+    },
+    {
+      "name": "storage_deposit",
+      "initable": false,
+      "kind": "call",
+      "arguments": [
+        {
+          "name": "account_id",
+          "type": "Option<String>"
+        }
+      ]
+    },
+    {
+      "name": "storage_withdraw",
+      "initable": false,
+      "kind": "call",
+      "arguments": []
     }
   ]
 }
