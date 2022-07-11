@@ -129,7 +129,7 @@ impl Contract {
 
     #[payable]
     #[handle_result]
-    pub fn storage_withdraw(&mut self) -> Result<(), ContractError> {
+    pub fn storage_withdraw(&mut self) -> Result<U128, ContractError> {
         check_one_yocto()?;
         let owner_id = env::predecessor_account_id();
         let deposit = self.storage_deposits.remove(&owner_id).unwrap_or_default();
@@ -147,7 +147,7 @@ impl Contract {
             self.storage_deposits.insert(owner_id, effective_deposit);
         }
 
-        Ok(())
+        Ok(U128(diff))
     }
 
     pub fn storage_minimum_balance(&self) -> U128 {
