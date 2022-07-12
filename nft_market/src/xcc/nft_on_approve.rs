@@ -1,8 +1,8 @@
-use crate::{serde_json, Ask, Contract, ContractError, ContractExt};
+use crate::{helpers, serde_json, Ask, Contract, ContractError, ContractExt};
 use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::json_types::U128;
 use near_sdk::serde::{Deserialize, Serialize};
-use near_sdk::{env, ext_contract, near_bindgen, AccountId, PromiseOrValue};
+use near_sdk::{ext_contract, near_bindgen, AccountId};
 
 #[ext_contract(ext_nft_approval_receiver)]
 pub trait NonFungibleTokenApprovalReceiver {
@@ -35,7 +35,7 @@ pub trait NonFungibleTokenApprovalReceiver {
 pub enum Action {
     /// Create ask order for token with provided price.
     AddAsk { price: U128 },
-    /// Token owner accept the bid with the biggest price.
+    /// The token owner accepts the bid with the biggest price.
     AcceptBid,
 }
 
@@ -49,9 +49,8 @@ impl NonFungibleTokenApprovalReceiver for Contract {
         approval_id: u64,
         msg: String,
     ) -> Result<(), ContractError> {
-        if env::predecessor_account_id() != self.nft_id {
-            return Err(ContractError::NotAuthorized);
-        }
+        helpers::check_cross_contract_call(&self.nft_id)?;
+        self.check_storage_deposits(&owner_id)?;
 
         match serde_json::from_str(&*msg)? {
             Action::AddAsk { price } => {

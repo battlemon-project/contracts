@@ -1,4 +1,4 @@
-mod on_nft_approve;
+mod nft_on_approve;
 mod on_trade;
-pub use on_nft_approve::*;
+pub use nft_on_approve::*;
 pub use on_trade::*;
