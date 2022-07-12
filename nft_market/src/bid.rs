@@ -72,26 +72,3 @@ impl crate::Contract {
             .count()
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use near_sdk::test_utils::test_env::bob;
-    use near_sdk::test_utils::VMContextBuilder;
-    use near_sdk::{serde_json, testing_env};
-
-    #[test]
-    fn deserialization_into_bid_works() {
-        testing_env!(VMContextBuilder::new()
-            .predecessor_account_id(bob())
-            .attached_deposit(777)
-            .block_timestamp(666)
-            .build());
-
-        let bid: Bid = serde_json::from_str(r#"{"token_id":"1"}"#).unwrap();
-        assert_eq!(bid.token_id(), "1");
-        assert_eq!(*bid.account_id(), bob());
-        assert_eq!(bid.price(), 777);
-        assert_eq!(bid.create_at(), 666);
-    }
-}
