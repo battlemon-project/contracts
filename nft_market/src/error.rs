@@ -3,8 +3,8 @@ use std::fmt::{Debug, Display, Formatter};
 
 #[derive(thiserror::Error, near_sdk::FunctionError)]
 pub enum ContractError {
-    #[error("Contract's account id which call market's method are not supported")]
-    NotAuthorized,
+    #[error("Failed to authorize contract call: {0}")]
+    NotAuthorized(&'static str),
     #[error("Failed to add bid: {0}")]
     BidError(String),
     #[error(transparent)]
@@ -13,6 +13,8 @@ pub enum ContractError {
     InsufficientDeposit,
     #[error("The attached deposit must be equal to 1 yoctoNear")]
     OneYoctoDeposit,
+    #[error("The storage error occurred: {0}")]
+    StorageError(&'static str),
 }
 
 impl Debug for ContractError {
