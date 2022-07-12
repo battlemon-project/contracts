@@ -92,7 +92,7 @@ async fn alice_ask_for_nft_token_five_bob_bid_six_alice_receive_five_bob_receive
 
     let required_storage_deposit = result.tx("minimum_deposit")?.json::<U128>()?.0;
 
-    let msg = format!("{{\"action\":\"add_ask\",\"price\":\"{}\"}}", Near(5));
+    let msg = format!("{{\"price\":\"{}\"}}", Near(5));
     let result = result
         .into_state()
         .alice_call_market_contract_storage_deposit(None)?

@@ -96,7 +96,7 @@ async fn ask_rejected_without_storage_deposit() -> anyhow::Result<()> {
         .await?;
 
     let [nft, market, alice] = bchain.string_ids()?;
-    let msg = format!("{{\"action\":\"add_ask\",\"price\":\"{}\"}}", Near(5));
+    let msg = format!("{{\"price\":\"{}\"}}", Near(5));
 
     let result = bchain
         .call_nft_contract_init(&nft)?

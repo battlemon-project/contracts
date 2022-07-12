@@ -71,23 +71,3 @@ impl crate::Contract {
             .count()
     }
 }
-
-#[cfg(all(test, not(target = "wasm32")))]
-mod tests {
-    use super::*;
-    use near_sdk::test_utils::accounts;
-
-    #[ignore]
-    #[test]
-    fn add_ask_works() {
-        let mut contract = crate::Contract::init(accounts(1));
-        let ask = Ask {
-            account_id: accounts(2),
-            token_id: "1".to_string(),
-            approval_id: 0,
-            price: U128(100),
-        };
-
-        contract.add_ask(&ask);
-    }
-}

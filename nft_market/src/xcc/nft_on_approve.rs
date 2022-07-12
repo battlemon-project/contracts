@@ -30,13 +30,9 @@ pub trait NonFungibleTokenApprovalReceiver {
 
 #[derive(Deserialize, Serialize)]
 #[serde(crate = "near_sdk::serde")]
-#[serde(rename_all = "snake_case")]
-#[serde(tag = "action")]
-pub enum Action {
-    /// Create ask order for token with provided price.
-    AddAsk { price: U128 },
-    /// The token owner accepts the bid with the biggest price.
-    AcceptBid,
+/// Create ask order for token with provided price.
+struct Message {
+    price: U128,
 }
 
 #[near_bindgen]
@@ -52,14 +48,8 @@ impl NonFungibleTokenApprovalReceiver for Contract {
         helpers::check_cross_contract_call(&self.nft_id)?;
         self.check_storage_deposits(&owner_id)?;
 
-        match near_sdk::serde_json::from_str(&*msg)? {
-            Action::AddAsk { price } => {
-                self.add_ask(&Ask::new(owner_id, token_id, approval_id, price))
-            }
-            Action::AcceptBid => {
-                todo!("call promise with accepting bid")
-            }
-        };
+        let message: Message = near_sdk::serde_json::from_str(&*msg)?;
+        self.add_ask(&Ask::new(owner_id, token_id, approval_id, message.price));
 
         Ok(())
     }
@@ -71,8 +61,8 @@ mod tests {
     use near_sdk::serde_json;
 
     #[test]
-    fn enum_action_deserialization_works_for_add_ask() {
-        let msg = r#"{"action":"add_ask","price":"1000"}"#;
-        serde_json::from_str::<Action>(msg).expect("Failed to deserialization");
+    fn message_deserialization_works_for_add_ask() {
+        let msg = r#"{"price":"1000"}"#;
+        serde_json::from_str::<Message>(msg).expect("Failed to deserialization");
     }
 }
