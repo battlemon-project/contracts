@@ -1,4 +1,4 @@
-use crate::{ContractError, STORAGE_PER_SALE};
+use crate::{Bid, ContractError, STORAGE_PER_SALE};
 use near_sdk::{env, AccountId};
 
 impl crate::Contract {
