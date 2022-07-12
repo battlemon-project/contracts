@@ -2,30 +2,18 @@ pub use ask::*;
 pub use bid::*;
 use consts::*;
 use error::*;
-use external::*;
 use near_contract_standards::non_fungible_token::TokenId;
-use near_contract_standards::storage_management::{
-    StorageBalance, StorageBalanceBounds, StorageManagement,
-};
-
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::json_types::U128;
-use near_sdk::serde::Deserialize;
-use near_sdk::serde_json::{self, json};
 use near_sdk::store::{LookupMap, UnorderedMap};
-use near_sdk::{
-    assert_one_yocto, env, log, near_bindgen, require, AccountId, Balance, BorshStorageKey, Gas,
-    PanicOnDefault, Promise, PromiseError, PromiseOrValue, PromiseResult,
-};
+use near_sdk::{env, near_bindgen, AccountId, Balance, BorshStorageKey, PanicOnDefault, Promise};
 use std::ops::AddAssign;
-use trade::*;
-use xcc::*;
-
 mod ask;
 mod bid;
 mod consts;
 mod error;
 mod external;
+mod helpers;
 mod trade;
 mod xcc;
 
@@ -134,9 +122,8 @@ impl Contract {
         let owner_id = env::predecessor_account_id();
         let deposit = self.storage_deposits.remove(&owner_id).unwrap_or_default();
 
-        let amount_bids_and_asks =
-            self.count_bids_for_account(&owner_id) + self.count_asks_for_account(&owner_id);
-        let effective_deposit = (amount_bids_and_asks as u128) * STORAGE_PER_SALE;
+        let amount_orders = self.total_orders_by_id(&owner_id);
+        let effective_deposit = (amount_orders as u128) * STORAGE_PER_SALE;
         let diff = deposit - effective_deposit;
 
         if diff > 0 {

@@ -1,4 +1,4 @@
-use crate::{helpers, serde_json, Ask, Contract, ContractError, ContractExt};
+use crate::{helpers, Ask, Contract, ContractError, ContractExt};
 use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::json_types::U128;
 use near_sdk::serde::{Deserialize, Serialize};
@@ -52,7 +52,7 @@ impl NonFungibleTokenApprovalReceiver for Contract {
         helpers::check_cross_contract_call(&self.nft_id)?;
         self.check_storage_deposits(&owner_id)?;
 
-        match serde_json::from_str(&*msg)? {
+        match near_sdk::serde_json::from_str(&*msg)? {
             Action::AddAsk { price } => {
                 self.add_ask(&Ask::new(owner_id, token_id, approval_id, price))
             }
