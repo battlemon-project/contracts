@@ -38,12 +38,4 @@ impl crate::Contract {
                     .on_trade(ask, bid, change),
             );
     }
-
-    pub(crate) fn clean_ask_and_bid(&mut self, bid: &Bid) {
-        let token_id = bid.token_id();
-        self.asks.remove(token_id);
-        if let Some(bids) = self.bids.get_mut(token_id) {
-            bids.iter().position(|b| b == bid).map(|i| bids.swap_remove(i));
-        }
-    }
 }

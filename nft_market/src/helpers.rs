@@ -1,5 +1,5 @@
 use crate::{ContractError, STORAGE_PER_SALE};
-use near_sdk::{AccountId, env};
+use near_sdk::{env, AccountId};
 
 impl crate::Contract {
     pub(crate) fn total_orders_by_id(&self, id: &AccountId) -> usize {
@@ -18,6 +18,16 @@ impl crate::Contract {
         }
 
         Ok(())
+    }
+
+    pub(crate) fn clean_ask_and_bid(&mut self, bid: &Bid) {
+        let token_id = bid.token_id();
+        self.asks.remove(token_id);
+        if let Some(bids) = self.bids.get_mut(token_id) {
+            bids.iter()
+                .position(|b| b == bid)
+                .map(|i| bids.swap_remove(i));
+        }
     }
 }
 
