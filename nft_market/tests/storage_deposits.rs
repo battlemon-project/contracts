@@ -1,12 +1,11 @@
+mod helpers;
+
+use helpers::{MARKET, MARKET_PATH, NFT, NFT_PATH};
 use lemotests::prelude::*;
 use lemotests_macro::add_helpers;
 use near_sdk::json_types::U128;
 
 add_helpers!("./nft_schema.json", "./market_schema.json",);
-
-const MARKET_PATH: &str = "../target/wasm32-unknown-unknown/release/nft_market.wasm";
-const NFT: &str = "nft_contract";
-const MARKET: &str = "market_contract";
 
 #[tokio::test]
 async fn remove_deposits_works_without_stored_data_correctly() -> anyhow::Result<()> {
@@ -83,6 +82,40 @@ async fn remove_deposits_works_with_stored_one_bid_works_correctly() -> anyhow::
     let actual_withdraw: U128 = result.tx("storage_withdraw")?.json()?;
 
     assert_eq!(actual_withdraw.0, 0);
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn ask_rejected_without_storage_deposit() -> anyhow::Result<()> {
+    let bchain = StateBuilder::sandbox()
+        .with_contract(NFT, NFT_PATH, Near(10))?
+        .with_contract(MARKET, MARKET_PATH, Near(10))?
+        .with_alice(Near(10))?
+        .build()
+        .await?;
+
+    let [nft, market, alice] = bchain.string_ids()?;
+    let msg = format!("{{\"action\":\"add_ask\",\"price\":\"{}\"}}", Near(5));
+
+    let result = bchain
+        .call_nft_contract_init(&nft)?
+        .with_gas(Tgas(10))
+        .then()
+        .call_market_contract_init(&nft)?
+        .with_gas(Tgas(10))
+        .then()
+        .alice_call_nft_contract_nft_mint(&alice)?
+        .with_deposit(Near(1))
+        .with_gas(Tgas(10))
+        .then()
+        .alice_call_nft_contract_nft_approve("1", &market, Some(&msg))?
+        .with_deposit(Near(1))
+        .with_gas(Tgas(10))
+        .execute()
+        .await;
+
+    assert!(result.contains_error("Not enough storage deposits to create new order"));
 
     Ok(())
 }

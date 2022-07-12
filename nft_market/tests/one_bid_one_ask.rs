@@ -1,16 +1,13 @@
+mod helpers;
+
+use helpers::{MARKET, MARKET_PATH, NFT, NFT_PATH};
 use lemotests::prelude::*;
-use lemotests::Nearable;
 use lemotests_macro::add_helpers;
 use near_sdk::json_types::U128;
 use nft_market::Bid;
 use token_metadata_ext::TokenExt;
 
 add_helpers!("./nft_schema.json", "./market_schema.json",);
-
-const NFT_PATH: &str = "../target/wasm32-unknown-unknown/release/nft_token.wasm";
-const MARKET_PATH: &str = "../target/wasm32-unknown-unknown/release/nft_market.wasm";
-const NFT: &str = "nft_contract";
-const MARKET: &str = "market_contract";
 
 #[tokio::test]
 async fn alice_bid_for_token_5_near_then_balance_is_changed_and_bid_in_bids() -> anyhow::Result<()>
