@@ -1,7 +1,7 @@
 use crate::external::*;
 use crate::{Ask, Bid};
-use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::env;
+
 impl crate::Contract {
     /// * asker - wants near for token
     /// * bidder - gives near for token
