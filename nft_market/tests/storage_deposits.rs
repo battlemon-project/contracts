@@ -119,3 +119,26 @@ async fn ask_rejected_without_storage_deposit() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+#[tokio::test]
+async fn bids_rejected_without_storage_deposit() -> anyhow::Result<()> {
+    let bchain = StateBuilder::sandbox()
+        .with_contract(MARKET, MARKET_PATH, Near(10))?
+        .with_alice(Near(10))?
+        .build()
+        .await?;
+
+    let result = bchain
+        .call_market_contract_init(NFT)?
+        .with_gas(Tgas(10))
+        .then()
+        .alice_call_market_contract_add_bid("1", None)?
+        .with_deposit(Near(1))
+        .with_gas(Tgas(10))
+        .execute()
+        .await;
+
+    assert!(result.contains_error("Not enough storage deposits to create new order"));
+
+    Ok(())
+}
