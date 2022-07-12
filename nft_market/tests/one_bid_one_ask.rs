@@ -24,6 +24,19 @@ async fn alice_bid_for_token_5_near_then_balance_is_changed_and_bid_in_bids() ->
         .call_market_contract_init(NFT)?
         .with_gas(Tgas(10))
         .then()
+        .view_market_contract_storage_minimum_balance()?
+        .with_label("minimum_deposit")
+        .execute()
+        .await?;
+
+    let required_storage_deposit = result.tx("minimum_deposit")?.json::<U128>()?.0;
+
+    let result = result
+        .into_state()
+        .alice_call_market_contract_storage_deposit(None)?
+        .with_gas(Tgas(10))
+        .with_deposit(required_storage_deposit)
+        .then()
         .alice_call_market_contract_add_bid("1", None)?
         .with_deposit(Near(5))
         .with_gas(Tgas(10))
@@ -89,6 +102,10 @@ async fn alice_ask_for_nft_token_five_bob_bid_six_alice_receive_five_bob_receive
         .alice_call_nft_contract_nft_approve("1", &market, Some(&msg))?
         .with_deposit(Near(1))
         .with_gas(Tgas(10))
+        .then()
+        .bob_call_market_contract_storage_deposit(None)?
+        .with_gas(Tgas(10))
+        .with_deposit(required_storage_deposit)
         .then()
         .bob_call_market_contract_add_bid("1", None)?
         .with_deposit(Near(6))

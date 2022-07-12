@@ -76,6 +76,8 @@ impl Contract {
         token_id: TokenId,
         expire_at: Option<u64>,
     ) -> Result<(), ContractError> {
+        self.check_storage_deposits(&env::predecessor_account_id())?;
+
         let bid = Bid::new(token_id, expire_at);
         match self.ask_less_than_bid(&bid) {
             None => {
