@@ -301,78 +301,74 @@ async fn bid_first_ask_second_then_trade_then_bid_is_removed_and_ask_does_not_cr
 
     Ok(())
 }
-//
-// #[tokio::test]
-// async fn ask_first_bid_second_then_trade_then_ask_is_removed_and_bid_does_not_created(
-// ) -> anyhow::Result<()> {
-//     let worker = workspaces::testnet().await?;
-//     let state = StateBuilder::new(&worker)
-// let state = StateBuilder::net()
-//     .await
-//     .with_alice(TEN_NEAR)?
-//     .with_bob(TEN_NEAR)?
-//     .with_contract(NFT, NFT_PATH, TEN_NEAR)?
-//     .with_contract(MARKET, MARKET_PATH, TEN_NEAR)?
-//     .build()
-//     .await?;
-// state.init_contracts().await?;
-// let (alice, bob, worker) = (state.alice()?, state.bob()?, state.worker());
-// let (nft, market) = (state.contract(NFT)?, state.contract(MARKET)?);
-//
-// let result = alice
-//     .call(worker, nft.id(), "nft_mint")
-//     .deposit(ONE_NEAR)
-//     .args_json(json!({"receiver_id": alice.id()}))?
-//     .transact()
-//     .await?;
-// assert!(result.is_success());
-//
-// let msg = format!("{{\"action\":\"add_ask\",\"price\":\"{FIVE_NEAR}\"}}");
-// alice
-//     .call(worker, nft.id(), "nft_approve")
-//     .deposit(ONE_NEAR)
-//     .max_gas()
-//     .args_json(json!({
-//         "token_id": "1",
-//         "account_id": market.id(),
-//         "msg": msg,
-//     }))?
-//     .transact()
-//     .await?;
-//
-// let ask = market
-//     .call(worker, "ask")
-//     .args_json(json!({"token_id": "1"}))?
-//     .view()
-//     .await?
-//     .json::<Option<Ask>>()?;
-//
-// assert_eq!(ask.unwrap().token_id(), "1");
-//
-// bob.call(worker, market.id(), "add_bid")
-//     .args_json(json!({"bid": {"token_id": "1"}}))?
-//     .max_gas()
-//     .deposit(SIX_NEAR)
-//     .transact()
-//     .await?;
-//
-// let bids = market
-//     .call(worker, "bids")
-//     .args_json(json!({"token_id": "1"}))?
-//     .view()
-//     .await?
-//     .json::<Option<Vec<Bid>>>()?;
-//
-// assert_eq!(bids, None);
-//
-// let ask = market
-//     .call(worker, "ask")
-//     .args_json(json!({"token_id": "1"}))?
-//     .view()
-//     .await?
-//     .json::<Option<Ask>>()?;
-//
-// assert_eq!(ask, None);
-//
-// Ok(())
-// }
+
+#[tokio::test]
+async fn ask_first_bid_second_then_trade_then_ask_is_removed_and_bid_does_not_created(
+) -> anyhow::Result<()> {
+    let bchain = StateBuilder::sandbox()
+        .with_alice(Near(10))?
+        .with_bob(Near(10))?
+        .with_contract(NFT, NFT_PATH, Near(10))?
+        .with_contract(MARKET, MARKET_PATH, Near(10))?
+        .build()
+        .await?;
+
+    let [nft, market, alice, _] = bchain.string_ids()?;
+
+    let result = bchain
+        .call_nft_contract_init(&nft)?
+        .with_gas(Tgas(10))
+        .then()
+        .call_market_contract_init(&nft)?
+        .with_gas(Tgas(10))
+        .then()
+        .alice_call_nft_contract_nft_mint(&alice)?
+        .with_deposit(Near(1))
+        .with_gas(Tgas(10))
+        .then()
+        .view_market_contract_storage_minimum_balance()?
+        .with_label("minimum_deposit")
+        .execute()
+        .await?;
+
+    let required_storage_deposit = result.tx("minimum_deposit")?.json::<U128>()?.0;
+
+    let msg = format!("{{\"price\":\"{}\"}}", Near(5));
+    let result = result
+        .into_state()
+        .alice_call_market_contract_storage_deposit(None)?
+        .with_gas(Tgas(10))
+        .with_deposit(required_storage_deposit)
+        .then()
+        .alice_call_nft_contract_nft_approve("1", &market, Some(&msg))?
+        .with_deposit(Near(5))
+        .with_gas(Tgas(50))
+        .then()
+        .view_market_contract_ask("1")?
+        .with_label("ask_before")
+        .then()
+        .bob_call_market_contract_storage_deposit(None)?
+        .with_gas(Tgas(10))
+        .with_deposit(required_storage_deposit)
+        .then()
+        .bob_call_market_contract_add_bid("1", None)?
+        .with_deposit(Near(5))
+        .with_gas(Tgas(40))
+        .then()
+        .view_market_contract_ask("1")?
+        .with_label("ask_after")
+        .then()
+        .view_market_contract_bids("1")?
+        .with_label("bids")
+        .execute()
+        .await?;
+
+    let ask_before: Option<Ask> = result.tx("ask_before")?.json()?;
+    assert!(ask_before.is_some());
+    let ask_after: Option<Ask> = result.tx("ask_after")?.json()?;
+    assert!(ask_after.is_none());
+    let bids: Option<Vec<Bid>> = result.tx("bids")?.json()?;
+    assert!(bids.is_none());
+
+    Ok(())
+}
