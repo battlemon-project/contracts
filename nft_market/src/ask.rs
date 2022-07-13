@@ -47,7 +47,7 @@ impl crate::Contract {
     /// The market automatically completes the trade
     /// if the asker provides a price less than the highest bid.
     /// First, the bidder receives the asker's token.
-    /// Then, the asker gets the bidder's nears held by the market.
+    /// Then, the asker gets the bidder's Nears held by the market.
     pub(crate) fn add_ask(&mut self, ask: &Ask) {
         match self.highest_bid_than_ask(ask) {
             None => {

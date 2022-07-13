@@ -55,8 +55,7 @@ impl crate::Contract {
     ///
     /// If the bid is more than the asker's token price,
     /// the bidder automatically gets the token.
-    /// The difference between bidder and asker prices
-    /// will be returned to the bidder by the market.
+    /// The market will return the difference between bidder and asker prices to the bidder.
 
     pub(crate) fn highest_bid_than_ask(&self, ask: &Ask) -> Option<Bid> {
         let mut bids = self.bids.get(ask.token_id()).cloned().unwrap_or_default();

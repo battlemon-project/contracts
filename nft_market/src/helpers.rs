@@ -27,6 +27,8 @@ impl crate::Contract {
             bids.iter()
                 .position(|b| b == bid)
                 .map(|i| bids.swap_remove(i));
+
+            bids.is_empty().then(|| self.bids.remove(token_id));
         }
     }
 }
