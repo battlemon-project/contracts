@@ -4,37 +4,36 @@ use token_metadata_ext::TokenExt;
 
 const NFT_PATH: &str = "../target/wasm32-unknown-unknown/release/nft_token.wasm";
 const NFT: &str = "nft_contract";
+
 add_helpers!("./nft_schema.json");
 
 #[tokio::test]
 async fn contract_is_initable() -> anyhow::Result<()> {
-    let blockchain = StateBuilder::sandbox()
+    let bchain = StateBuilder::sandbox()
         .with_contract(NFT, NFT_PATH, Near(10))?
         .build()
         .await?;
 
-    let results = blockchain
+    bchain
         .call_nft_contract_init(ALICE)?
         .with_gas(Tgas(10))
         .execute()
         .await?;
-
-    assert!(results[0].is_success());
 
     Ok(())
 }
 
 #[tokio::test]
 async fn contract_is_initable_by_any_account() -> anyhow::Result<()> {
-    let blockchain = StateBuilder::sandbox()
+    let bchain = StateBuilder::sandbox()
         .with_contract(NFT, NFT_PATH, Near(10))?
         .with_alice(Near(10))?
         .build()
         .await?;
 
-    let alice = blockchain.alice_id()?.to_owned();
+    let alice = bchain.alice_id()?.to_owned();
 
-    let result = blockchain
+    let result = bchain
         .alice_call_nft_contract_init(&alice)?
         .with_gas(Tgas(10))
         .execute()
@@ -47,12 +46,12 @@ async fn contract_is_initable_by_any_account() -> anyhow::Result<()> {
 
 #[tokio::test]
 async fn double_initialization_contract_rejected() -> anyhow::Result<()> {
-    let blockchain = StateBuilder::sandbox()
+    let bchain = StateBuilder::sandbox()
         .with_contract(NFT, NFT_PATH, Near(10))?
         .build()
         .await?;
 
-    let result = blockchain
+    let result = bchain
         .call_nft_contract_init(ALICE)?
         .with_gas(Tgas(10))
         .then()
@@ -61,23 +60,22 @@ async fn double_initialization_contract_rejected() -> anyhow::Result<()> {
         .execute()
         .await;
 
-    let error = format!("{:?}", result.unwrap_err());
-    assert!(error.contains("The contract has already been initialized"));
+    assert!(result.contains_error("The contract has already been initialized"));
 
     Ok(())
 }
 
 #[tokio::test]
 async fn mint_works() -> anyhow::Result<()> {
-    let blockchain = StateBuilder::sandbox()
+    let bchain = StateBuilder::sandbox()
         .with_contract(NFT, NFT_PATH, Near(10))?
         .with_alice(Near(10))?
         .build()
         .await?;
 
-    let [nft, alice] = blockchain.string_ids()?;
+    let [nft, alice] = bchain.string_ids()?;
 
-    blockchain
+    bchain
         .call_nft_contract_init(&nft)?
         .with_gas(Tgas(10))
         .then()
@@ -94,15 +92,15 @@ async fn mint_works() -> anyhow::Result<()> {
 
 #[tokio::test]
 async fn minted_token_belongs_to_receiver_id() -> anyhow::Result<()> {
-    let blockchain = StateBuilder::sandbox()
+    let bchain = StateBuilder::sandbox()
         .with_contract(NFT, NFT_PATH, Near(10))?
         .with_alice(Near(10))?
         .build()
         .await?;
 
-    let [nft, alice] = blockchain.string_ids()?;
+    let [nft, alice] = bchain.string_ids()?;
 
-    let result = blockchain
+    let result = bchain
         .call_nft_contract_init(&nft)?
         .with_gas(Tgas(10))
         .then()
@@ -123,16 +121,16 @@ async fn minted_token_belongs_to_receiver_id() -> anyhow::Result<()> {
 
 #[tokio::test]
 async fn nft_transfer_works() -> anyhow::Result<()> {
-    let blockchain = StateBuilder::sandbox()
+    let bchain = StateBuilder::sandbox()
         .with_contract(NFT, NFT_PATH, Near(10))?
         .with_alice(Near(10))?
         .with_bob(Near(10))?
         .build()
         .await?;
 
-    let [nft, alice, bob] = blockchain.string_ids()?;
+    let [nft, alice, bob] = bchain.string_ids()?;
 
-    let result = blockchain
+    let result = bchain
         .call_nft_contract_init(&nft)?
         .with_gas(Tgas(10))
         .then()
@@ -156,16 +154,16 @@ async fn nft_transfer_works() -> anyhow::Result<()> {
 
 #[tokio::test]
 async fn nft_transfer_is_prohibited_for_not_owner() -> anyhow::Result<()> {
-    let blockchain = StateBuilder::sandbox()
+    let bchain = StateBuilder::sandbox()
         .with_contract(NFT, NFT_PATH, Near(10))?
         .with_alice(Near(10))?
         .with_bob(Near(10))?
         .build()
         .await?;
 
-    let [nft, alice, bob] = blockchain.string_ids()?;
+    let [nft, alice, bob] = bchain.string_ids()?;
 
-    let result = blockchain
+    let result = bchain
         .call_nft_contract_init(&nft)?
         .with_gas(Tgas(10))
         .then()
@@ -179,24 +177,23 @@ async fn nft_transfer_is_prohibited_for_not_owner() -> anyhow::Result<()> {
         .execute()
         .await;
 
-    let error = format!("{:?}", result.unwrap_err());
-    assert!(error.contains("Smart contract panicked: Unauthorized"));
+    assert!(result.contains_error("Smart contract panicked: Unauthorized"));
 
     Ok(())
 }
 
 #[tokio::test]
 async fn transferred_token_not_allowed_for_prev_owner() -> anyhow::Result<()> {
-    let blockchain = StateBuilder::sandbox()
+    let bchain = StateBuilder::sandbox()
         .with_contract(NFT, NFT_PATH, Near(10))?
         .with_alice(Near(10))?
         .with_bob(Near(10))?
         .build()
         .await?;
 
-    let [nft, alice, bob] = blockchain.string_ids()?;
+    let [nft, alice, bob] = bchain.string_ids()?;
 
-    let result = blockchain
+    let result = bchain
         .call_nft_contract_init(&nft)?
         .with_gas(Tgas(10))
         .then()
@@ -222,15 +219,15 @@ async fn transferred_token_not_allowed_for_prev_owner() -> anyhow::Result<()> {
 
 #[tokio::test]
 async fn update_token_media_works() -> anyhow::Result<()> {
-    let blockchain = StateBuilder::sandbox()
+    let bchain = StateBuilder::sandbox()
         .with_contract(NFT, NFT_PATH, Near(10))?
         .with_alice(Near(10))?
         .build()
         .await?;
 
-    let [nft, alice] = blockchain.string_ids()?;
+    let [nft, alice] = bchain.string_ids()?;
 
-    let result = blockchain
+    let result = bchain
         .call_nft_contract_init(&nft)?
         .with_gas(Tgas(10))
         .then()
@@ -256,15 +253,15 @@ async fn update_token_media_works() -> anyhow::Result<()> {
 
 #[tokio::test]
 async fn update_token_media_can_be_called_only_by_contract_account() -> anyhow::Result<()> {
-    let blockchain = StateBuilder::sandbox()
+    let bchain = StateBuilder::sandbox()
         .with_contract(NFT, NFT_PATH, Near(10))?
         .with_alice(Near(10))?
         .build()
         .await?;
 
-    let [nft, alice] = blockchain.string_ids()?;
+    let [nft, alice] = bchain.string_ids()?;
 
-    let result = blockchain
+    let result = bchain
         .call_nft_contract_init(&nft)?
         .with_gas(Tgas(10))
         .then()
@@ -278,24 +275,23 @@ async fn update_token_media_can_be_called_only_by_contract_account() -> anyhow::
         .execute()
         .await;
 
-    let error = format!("{:?}", result.unwrap_err());
-    assert!(error.contains("Smart contract panicked: Unauthorized"));
+    assert!(result.contains_error("Smart contract panicked: Unauthorized"));
 
     Ok(())
 }
 
 #[tokio::test]
 async fn nft_approve_method_works() -> anyhow::Result<()> {
-    let blockchain = StateBuilder::sandbox()
+    let bchain = StateBuilder::sandbox()
         .with_contract(NFT, NFT_PATH, Near(10))?
         .with_alice(Near(10))?
         .with_bob(Near(10))?
         .build()
         .await?;
 
-    let [nft, alice, bob] = blockchain.string_ids()?;
+    let [nft, alice, bob] = bchain.string_ids()?;
 
-    blockchain
+    bchain
         .call_nft_contract_init(&nft)?
         .with_gas(Tgas(10))
         .then()

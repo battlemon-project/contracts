@@ -3,22 +3,22 @@ use near_contract_standards::non_fungible_token::enumeration::NonFungibleTokenEn
 use near_contract_standards::non_fungible_token::metadata::{
     NFTContractMetadata, NonFungibleTokenMetadataProvider, TokenMetadata, NFT_METADATA_SPEC,
 };
-use near_contract_standards::non_fungible_token::{NonFungibleToken, Token, TokenId};
+use near_contract_standards::non_fungible_token::{NonFungibleToken, TokenId};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{LazyOption, LookupMap};
 use near_sdk::env::{self, panic_str};
 use near_sdk::json_types::U128;
 use near_sdk::{near_bindgen, require, AccountId, PanicOnDefault, Promise};
 
-use crate::consts::{IPFS_GATEWAY_BASE_URL, NFT_BACK_IMAGE};
-use consts::DATA_IMAGE_SVG_LEMON_LOGO;
-use nft_models::ModelKind;
-use token_metadata_ext::{TokenExt, TokenMetadataExt};
+use crate::consts::{DATA_IMAGE_SVG_LEMON_LOGO, IPFS_GATEWAY_BASE_URL, NFT_BACK_IMAGE};
+use nft_models::{Lemon, ModelKind};
+use token_metadata_ext::TokenExt;
 
 mod consts;
 mod error;
 mod helpers;
 mod internal;
+mod mint;
 
 #[near_bindgen]
 #[derive(BorshSerialize, BorshDeserialize, PanicOnDefault)]
@@ -49,11 +49,6 @@ impl Contract {
 
     #[payable]
     pub fn nft_mint(&mut self, receiver_id: AccountId) -> TokenExt {
-        use nft_models::Lemon;
-
-        let owner_id = receiver_id;
-        self.last_token_id += 1;
-
         let random = helpers::get_random_arr_range(0, 100);
 
         let model = ModelKind::Lemon(Lemon::from_random(&random));
@@ -73,12 +68,7 @@ impl Contract {
             reference_hash: None,
         };
 
-        let token_id = self.last_token_id.to_string();
-        self.model_by_id.insert(&token_id, &model);
-        let token = self
-            .tokens
-            .internal_mint(token_id.clone(), owner_id, Some(token_metadata));
-        TokenExt::from_parts(token, model)
+        self.internal_mint(receiver_id, token_metadata, model)
     }
 
     pub fn get_owner_by_token_id(&self, token_id: TokenId) -> Option<AccountId> {
@@ -164,7 +154,7 @@ impl Contract {
     // ) -> PromiseOrValue<bool> {
     //     self.tokens
     //         .nft_transfer_call(receiver_id, token_id, approval_id, memo, msg)
-    // }
+    //
 
     pub fn nft_token(&self, token_id: TokenId) -> Option<TokenExt> {
         self.tokens.nft_token(token_id).map(|token| {

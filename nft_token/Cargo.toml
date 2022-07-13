@@ -17,5 +17,6 @@ rand = "0.7.3"
 [dev-dependencies]
 tokio = "1.19.0"
 serde_json = "1.0.79"
-test_helpers = { path = "../test_helpers" }
+lemotests = { git = "https://github.com/battlemon-project/lemotests" }
+lemotests-macro = { git = "https://github.com/battlemon-project/lemotests" }
 anyhow = "1.0.57"

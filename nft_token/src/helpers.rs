@@ -1,9 +1,9 @@
-use std::fmt::Debug;
 use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::{env, AccountId};
 use rand::distributions::uniform::SampleUniform;
 use rand::prelude::StdRng;
 use rand::{Rng, SeedableRng};
+use std::fmt::Debug;
 
 use nft_models::ModelKind;
 
@@ -25,10 +25,10 @@ impl Contract {
     }
 }
 
-pub(crate) fn get_random_arr_range<T: SampleUniform + Copy + Debug, const N: usize>(
-    begin: T,
-    end: T,
-) -> [T; N] {
+pub(crate) fn get_random_arr_range<T, const N: usize>(begin: T, end: T) -> [T; N]
+where
+    T: SampleUniform + Copy + Debug,
+{
     let seed: [u8; 32] = env::random_seed().try_into().unwrap();
     let mut rng = StdRng::from_seed(seed);
     let range: Vec<_> = (0..N).map(|_| rng.gen_range(begin, end)).collect();
