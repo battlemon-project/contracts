@@ -4,7 +4,9 @@ use near_sdk::serde_json;
 
 use crate::BuildUrlQuery;
 
-#[derive(Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, PartialEq, Debug)]
+#[derive(
+    Serialize, Deserialize, BorshSerialize, BorshDeserialize, Clone, Copy, PartialEq, Debug,
+)]
 #[serde(crate = "near_sdk::serde")]
 pub struct Lemon {
     pub cap: Cap,

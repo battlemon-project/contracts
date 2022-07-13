@@ -5,7 +5,9 @@ pub use lemon::Lemon;
 
 pub mod lemon;
 
-#[derive(Serialize, Deserialize, Clone, BorshSerialize, BorshDeserialize, Debug, PartialEq)]
+#[derive(
+    Serialize, Deserialize, Clone, Copy, BorshSerialize, BorshDeserialize, Debug, PartialEq,
+)]
 #[serde(crate = "near_sdk::serde", rename_all = "snake_case", tag = "kind")]
 pub enum ModelKind {
     Lemon(Lemon),
