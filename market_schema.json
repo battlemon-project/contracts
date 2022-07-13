@@ -39,6 +39,17 @@
       ]
     },
     {
+      "name": "ask",
+      "initable": false,
+      "kind": "view",
+      "arguments": [
+        {
+          "name": "token_id",
+          "type": "String"
+        }
+      ]
+    },
+    {
       "name": "storage_deposit",
       "initable": false,
       "kind": "call",
