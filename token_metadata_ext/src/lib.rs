@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use near_contract_standards::non_fungible_token::metadata::TokenMetadata;
+pub use near_contract_standards::non_fungible_token::metadata::TokenMetadata;
 use near_contract_standards::non_fungible_token::{Token, TokenId};
 use near_sdk::json_types::Base64VecU8;
 use near_sdk::serde::{Deserialize, Serialize};
