@@ -6,3 +6,4 @@ nft_token/.near-credentials
 */.cargo
 .DS_Store
 .cargo
+testnet_creds
