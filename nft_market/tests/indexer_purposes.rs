@@ -3,9 +3,11 @@ mod helpers;
 use crate::helpers::{MARKET, MARKET_PATH};
 use helpers::{NFT, NFT_PATH};
 use lemotests::prelude::*;
+use lemotests::serde_json::json;
 use lemotests::Nearable;
 use lemotests_macro::add_helpers;
 use near_sdk::json_types::U128;
+use token_metadata_ext::TokenExt;
 
 add_helpers!("./nft_schema.json", "./market_schema.json",);
 
@@ -170,9 +172,89 @@ async fn try_mint() -> anyhow::Result<()> {
     bchain
         .alice()?
         .call(bchain.worker(), nft.id(), "nft_mint")
-        .args_json(lemotests::serde_json::json!({ "receiver_id": alice }))?
+        .args_json(json!({ "receiver_id": alice }))?
         .max_gas()
         .deposit(Near(1).parse())
+        .transact()
+        .await?;
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn try_sale() -> anyhow::Result<()> {
+    let bchain = StateBuilder::testnet()
+        .with_alice(Near(10))?
+        .with_bob(Near(10))?
+        .build()
+        .await?;
+
+    let alice = bchain.alice_id()?;
+    let bob = bchain.bob_id()?;
+
+    let nft = lemotests::workspaces::Account::from_file("../testnet_creds/nft_contract.json")?;
+    let market =
+        lemotests::workspaces::Account::from_file("../testnet_creds/market_contract.json")?;
+
+    bchain
+        .alice()?
+        .call(bchain.worker(), nft.id(), "nft_mint")
+        .args_json(json!({ "receiver_id": alice }))?
+        .max_gas()
+        .deposit(Near(1).parse())
+        .transact()
+        .await?;
+
+    let tokens: Vec<TokenExt> = bchain
+        .alice()?
+        .call(bchain.worker(), nft.id(), "nft_tokens_for_owner")
+        .args_json(json!({ "account_id": alice }))?
+        .view()
+        .await?
+        .json()?;
+
+    bchain
+        .alice()?
+        .call(bchain.worker(), market.id(), "storage_deposit")
+        .args_json(json!({}))?
+        .max_gas()
+        .deposit(Near(1).parse())
+        .transact()
+        .await?;
+
+    let token = tokens.last().unwrap();
+    let msg = format!("{{\"price\":\"{}\"}}", Near(5));
+    bchain
+        .alice()?
+        .call(bchain.worker(), nft.id(), "nft_approve")
+        .args_json(json!({
+            "token_id": token.token_id,
+            "account_id": market.id(),
+            "msg": msg
+        }))?
+        .max_gas()
+        .deposit(Near(4).parse())
+        .transact()
+        .await?;
+
+    bchain
+        .bob()?
+        .call(bchain.worker(), market.id(), "storage_deposit")
+        .args_json(json!({}))?
+        .max_gas()
+        .deposit(Near(1).parse())
+        .transact()
+        .await?;
+
+    bchain
+        .bob()?
+        .call(bchain.worker(), market.id(), "add_bid")
+        .args_json(json!({
+            "token_id": token.token_id,
+            "price": Near(7).parse().to_string(),
+        }))?
+        .max_gas()
+        .deposit(1)
         .transact()
         .await?;
 
