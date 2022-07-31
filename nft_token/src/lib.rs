@@ -11,7 +11,7 @@ use near_sdk::json_types::U128;
 use near_sdk::{near_bindgen, require, AccountId, PanicOnDefault, Promise};
 
 use crate::consts::{DATA_IMAGE_SVG_LEMON_LOGO, IPFS_GATEWAY_BASE_URL, NFT_BACK_IMAGE};
-use nft_models::{Lemon, ModelKind};
+use battlemon_models::nft::{Lemon, ModelKind};
 use token_metadata_ext::TokenExt;
 
 mod consts;

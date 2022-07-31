@@ -27,12 +27,40 @@ impl Contract {
         }
 
         self.clean_ask_and_bid(&bid);
-        let json = near_sdk::serde_json::json!({
-           "prev_owner": ask.account_id(),
-           "curr_owner": bid.account_id(),
-           "token_id": ask.token_id(),
-           "price": U128(trade_price),
-        });
+        let trade_for_log = battlemon_models::market::SaleForContract {
+            prev_owner: ask.account_id().to_string(),
+            curr_owner: bid.account_id().to_string(),
+            token_id: ask.token_id().to_string(),
+            price: U128(trade_price),
+        };
+
+        let json = near_sdk::serde_json::to_value(&trade_for_log).unwrap();
         env::log_str(&format!("{EVENT_PREFIX}:{json}"));
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn sale_for_contract_valid_logs() {
+        let expected_json = near_sdk::serde_json::json!({
+            "prev_owner": "alice.near",
+            "curr_owner": "bob.near",
+            "token_id": "1",
+            "price": U128(10000000000000000000000),
+        });
+
+        let sale_for_contract = battlemon_models::market::SaleForContract {
+            prev_owner: "alice.near".to_string(),
+            curr_owner: "bob.near".to_string(),
+            token_id: "1".to_string(),
+            price: U128(10000000000000000000000),
+        };
+
+        let actual_json = near_sdk::serde_json::to_value(&sale_for_contract).unwrap();
+
+        assert_eq!(actual_json, expected_json);
     }
 }

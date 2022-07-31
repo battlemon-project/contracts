@@ -6,7 +6,7 @@ use near_sdk::json_types::Base64VecU8;
 use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::AccountId;
 
-use nft_models::ModelKind;
+use battlemon_models::nft::ModelKind;
 
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(crate = "near_sdk::serde")]

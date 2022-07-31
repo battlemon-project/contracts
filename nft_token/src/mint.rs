@@ -1,9 +1,9 @@
 use crate::Contract;
+use battlemon_models::nft::ModelKind;
 use near_contract_standards::non_fungible_token::{
     core::StorageKey, events::NftMint, metadata::TokenMetadata, refund_deposit_to_account, TokenId,
 };
 use near_sdk::{collections::UnorderedSet, env, AccountId};
-use nft_models::ModelKind;
 use std::collections::HashMap;
 use token_metadata_ext::TokenExt;
 

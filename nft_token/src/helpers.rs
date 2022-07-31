@@ -5,7 +5,7 @@ use rand::prelude::StdRng;
 use rand::{Rng, SeedableRng};
 use std::fmt::Debug;
 
-use nft_models::ModelKind;
+use battlemon_models::nft::ModelKind;
 
 use crate::error::{BattlemonError as BtlError, Result};
 use crate::Contract;
