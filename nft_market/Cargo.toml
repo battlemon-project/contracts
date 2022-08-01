@@ -13,7 +13,7 @@ near-contract-standards = "4.0.0"
 token_metadata_ext = { path = "../token_metadata_ext" }
 thiserror = "1.0.31"
 near-units = "0.2.0"
-battlemon_models = { git = "https://github.com/battlemon-project/battlemon_models", features = ["market"] }
+battlemon_models = { git = "https://github.com/battlemon-project/battlemon_models", features = ["market-contract"] }
 
 [dev-dependencies]
 tokio = { version = "1.19.2", features = ["macros"] }

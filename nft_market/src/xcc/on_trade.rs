@@ -27,7 +27,7 @@ impl Contract {
         }
 
         self.clean_ask_and_bid(&bid);
-        let trade_for_log = battlemon_models::market::SaleForContract {
+        let trade_for_log = battlemon_models::market::sale_contract::SaleForContract {
             prev_owner: ask.account_id().to_string(),
             curr_owner: bid.account_id().to_string(),
             token_id: ask.token_id().to_string(),
@@ -52,7 +52,7 @@ mod tests {
             "price": U128(10000000000000000000000),
         });
 
-        let sale_for_contract = battlemon_models::market::SaleForContract {
+        let sale_for_contract = battlemon_models::market::sale_contract::SaleForContract {
             prev_owner: "alice.near".to_string(),
             curr_owner: "bob.near".to_string(),
             token_id: "1".to_string(),
