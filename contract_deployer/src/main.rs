@@ -1,7 +1,11 @@
-mod helpers;
+pub const NFT_PATH: &str = "./target/wasm32-unknown-unknown/release/nft_token.wasm";
+pub const MARKET_PATH: &str = "./target/wasm32-unknown-unknown/release/nft_market.wasm";
+pub const NFT: &str = "nft_contract";
+pub const MARKET: &str = "market_contract";
+pub const NFT_CREDS: &str = "./testnet_creds/nft_contract.json";
+pub const MARKET_CREDS: &str = "./testnet_creds/market_contract.json";
 
-use crate::helpers::{MARKET, MARKET_PATH};
-use helpers::{NFT, NFT_PATH};
+use anyhow::Context;
 use lemotests::prelude::*;
 use lemotests::serde_json::json;
 use lemotests::Nearable;
@@ -11,7 +15,6 @@ use token_metadata_ext::TokenExt;
 
 add_helpers!("./nft_schema.json", "./market_schema.json",);
 
-#[tokio::test]
 async fn nft_mint_testnet() -> anyhow::Result<()> {
     let bchain = StateBuilder::testnet()
         .with_contract(NFT, NFT_PATH, Near(10))?
@@ -34,7 +37,6 @@ async fn nft_mint_testnet() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[tokio::test]
 async fn market_sale_testnet() -> anyhow::Result<()> {
     let bchain = StateBuilder::testnet()
         .with_contract(NFT, NFT_PATH, Near(10))?
@@ -90,7 +92,6 @@ async fn market_sale_testnet() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[tokio::test]
 async fn deploy_and_save_creds() -> anyhow::Result<()> {
     let path = "../testnet_creds/";
 
@@ -158,7 +159,6 @@ async fn deploy_and_save_creds() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[tokio::test]
 async fn try_mint() -> anyhow::Result<()> {
     let bchain = StateBuilder::testnet()
         .with_alice(Near(10))?
@@ -181,7 +181,23 @@ async fn try_mint() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[tokio::test]
+async fn redeploy() -> anyhow::Result<()> {
+    let worker = lemotests::workspaces::testnet().await?;
+    let nft = lemotests::workspaces::Account::from_file(NFT_CREDS)
+        .context("Failed to load creds for nft")?;
+    let nft_wasm = tokio::fs::read(NFT_PATH)
+        .await
+        .context("Failed to read file for nft")?;
+    nft.deploy(&worker, &nft_wasm)
+        .await
+        .context("Failed to deploy nft")?;
+
+    let market = lemotests::workspaces::Account::from_file(MARKET_CREDS)?;
+    let market_wasm = tokio::fs::read(MARKET_PATH).await?;
+    market.deploy(&worker, &market_wasm).await?;
+    Ok(())
+}
+
 async fn try_sale() -> anyhow::Result<()> {
     for _ in 0..100 {
         let bchain = StateBuilder::testnet()
@@ -258,5 +274,12 @@ async fn try_sale() -> anyhow::Result<()> {
             .transact()
             .await?;
     }
+    Ok(())
+}
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    redeploy().await?;
+
     Ok(())
 }
