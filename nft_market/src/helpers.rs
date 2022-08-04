@@ -1,5 +1,6 @@
-use crate::{ContractError, STORAGE_PER_SALE};
+use crate::{helpers, ContractError, STORAGE_PER_SALE};
 use battlemon_models::market::bid_contract::Bid;
+use battlemon_models::market::events::MarketEventKind;
 use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::{env, AccountId};
 
@@ -24,15 +25,21 @@ impl crate::Contract {
 
     pub(crate) fn clean_ask_and_bid(&mut self, bid: &Bid) {
         let token_id = bid.token_id();
-        self.asks.remove(token_id);
-        // todo emit removing ask event
+        if let Some(ask) = self.asks.remove(token_id) {
+            emit_log_event(MarketEventKind::RemoveAsk(ask))
+        }
+
         if let Some(bids) = self.bids.get_mut(token_id) {
-            bids.iter()
-                .position(|b| b == bid)
-                .map(|i| bids.swap_remove(i));
-            // todo emit removing bid event
+            emit_log_and_and_remove_bid(&bid.id, bids);
             bids.is_empty().then(|| self.bids.remove(token_id));
         }
+    }
+}
+
+fn emit_log_and_and_remove_bid(id: &str, bids: &mut Vec<Bid>) {
+    if let Some(idx) = bids.iter().position(|b| b.id == id) {
+        let bid = bids.swap_remove(idx);
+        emit_log_event(MarketEventKind::RemoveBid(bid));
     }
 }
 
@@ -45,7 +52,7 @@ pub fn check_cross_contract_call(id: &AccountId) -> Result<(), ContractError> {
     Ok(())
 }
 
-pub fn log_event<'de>(model: impl Deserialize<'de> + Serialize) {
-    let value = near_sdk::serde_json::to_value(&model).unwrap();
+pub fn emit_log_event<'de>(model: impl Deserialize<'de> + Serialize) {
+    let value = near_sdk::serde_json::to_value(model).unwrap();
     env::log_str(&format!("{}:{value}", crate::EVENT_PREFIX));
 }
