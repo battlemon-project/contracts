@@ -1,4 +1,5 @@
 pub use ask::*;
+use battlemon_models::market::events::MarketEventKind;
 use battlemon_models::market::{ask_contract::Ask, bid_contract::Bid};
 pub use bid::*;
 use consts::*;
@@ -9,6 +10,7 @@ use near_sdk::json_types::U128;
 use near_sdk::store::{LookupMap, UnorderedMap};
 use near_sdk::{env, near_bindgen, AccountId, Balance, BorshStorageKey, PanicOnDefault, Promise};
 use std::ops::AddAssign;
+
 mod ask;
 mod bid;
 mod consts;
@@ -82,13 +84,14 @@ impl Contract {
         let bid = Bid::new(token_id, expire_at);
         match self.ask_less_than_bid(&bid) {
             None => {
+                helpers::emit_log_event(MarketEventKind::AddBid(bid.to_owned()));
+
                 self.bids
                     .entry(bid.token_id().to_owned())
                     .and_modify(|bids| {
                         bids.push(bid.clone());
                     })
                     .or_insert_with(|| vec![bid]);
-                // todo: emit add bid log
             }
             Some(ask) => self.trade(ask, bid, true),
         }
