@@ -1,11 +1,11 @@
-use battlemon_models::market::ask_contract::Ask;
-use battlemon_models::market::bid_contract::Bid;
+use battlemon_models::market::ask::AskForContract;
+use battlemon_models::market::bid::BidForContract;
 use near_sdk::borsh::{self, BorshSerialize};
 use near_sdk::AccountId;
 
 #[derive(thiserror::Error, near_sdk::FunctionError, BorshSerialize, Debug)]
 pub enum BidError {
-    #[error("Bid is not found")]
+    #[error("BidForContract is not found")]
     BidNotFound,
 }
 
@@ -16,7 +16,7 @@ impl crate::Contract {
     /// the bidder automatically gets the token.
     /// The market will return the difference between bidder and asker prices to the bidder.
 
-    pub(crate) fn highest_bid_than_ask(&self, ask: &Ask) -> Option<Bid> {
+    pub(crate) fn highest_bid_than_ask(&self, ask: &AskForContract) -> Option<BidForContract> {
         let mut bids = self.bids.get(ask.token_id()).cloned().unwrap_or_default();
         bids.sort_unstable_by_key(|bid| (bid.price(), -(bid.create_at() as i128)));
         bids.pop()

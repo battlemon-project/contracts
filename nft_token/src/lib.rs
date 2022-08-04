@@ -49,7 +49,7 @@ impl Contract {
 
     #[payable]
     pub fn nft_mint(&mut self, receiver_id: AccountId) -> TokenExt {
-        let random = helpers::get_random_arr_range(0, 100);
+        let random = battlemon_models::helpers_contract::get_random_arr_range(0, 100);
 
         let model = ModelKind::Lemon(Lemon::from_random(&random));
 

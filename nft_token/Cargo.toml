@@ -11,8 +11,7 @@ crate-type = ["cdylib", "rlib"]
 near-sdk = "4.0.0"
 near-contract-standards = "4.0.0"
 token_metadata_ext = { path = "../token_metadata_ext" }
-battlemon_models = { git = "https://github.com/battlemon-project/battlemon_models", features = ["market"] }
-rand = "0.7.3"
+battlemon_models = { git = "https://github.com/battlemon-project/battlemon_models", features = ["nft"] }
 
 [dev-dependencies]
 tokio = "1.19.0"

@@ -16,8 +16,8 @@ pub trait Nft {
 //
 // #[near_sdk::ext_contract]
 // trait ExtSelf {
-//     fn after_nft_transfer_for_ask(&mut self, sale: Ask, buyer_id: AccountId) -> Promise;
-//     fn after_nft_transfer_for_bid(&mut self, sale: Bid, owner_id: AccountId) -> PromiseOrValue<()>;
+//     fn after_nft_transfer_for_ask(&mut self, sale: AskForContract, buyer_id: AccountId) -> Promise;
+//     fn after_nft_transfer_for_bid(&mut self, sale: BidForContract, owner_id: AccountId) -> PromiseOrValue<()>;
 //
 //     fn after_nft_token(
 //         &mut self,

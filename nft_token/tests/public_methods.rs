@@ -16,7 +16,7 @@ async fn contract_is_initable() -> anyhow::Result<()> {
 
     bchain
         .call_nft_contract_init(ALICE)?
-        .with_gas(Tgas(10))
+        .with_gas(Tgas(200))
         .execute()
         .await?;
 

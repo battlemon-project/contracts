@@ -52,14 +52,14 @@ async fn market_sale_testnet() -> anyhow::Result<()> {
 
     let result = bchain
         .call_nft_contract_init(&nft)?
-        .with_gas(Tgas(10))
+        .with_gas(Tgas(200))
         .then()
         .call_market_contract_init(&nft)?
-        .with_gas(Tgas(10))
+        .with_gas(Tgas(200))
         .then()
         .alice_call_nft_contract_nft_mint(&alice)?
         .with_deposit(Near(1))
-        .with_gas(Tgas(10))
+        .with_gas(Tgas(200))
         .then()
         .view_market_contract_storage_minimum_balance()?
         .with_label("minimum_deposit")
@@ -72,15 +72,15 @@ async fn market_sale_testnet() -> anyhow::Result<()> {
     result
         .into_state()
         .alice_call_market_contract_storage_deposit(None)?
-        .with_gas(Tgas(10))
+        .with_gas(Tgas(200))
         .with_deposit(required_storage_deposit)
         .then()
         .alice_call_nft_contract_nft_approve("1", &market, Some(&msg))?
         .with_deposit(Near(1))
-        .with_gas(Tgas(10))
+        .with_gas(Tgas(200))
         .then()
         .bob_call_market_contract_storage_deposit(None)?
-        .with_gas(Tgas(10))
+        .with_gas(Tgas(200))
         .with_deposit(required_storage_deposit)
         .then()
         .bob_call_market_contract_add_bid("1", None)?
@@ -279,7 +279,9 @@ async fn try_sale() -> anyhow::Result<()> {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    redeploy().await?;
+    market_sale_testnet().await?;
+    // nft_mint_testnet().await?;
+    // redeploy().await?;
 
     Ok(())
 }

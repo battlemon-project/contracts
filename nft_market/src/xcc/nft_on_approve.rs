@@ -1,5 +1,5 @@
 use crate::{helpers, Contract, ContractError, ContractExt};
-use battlemon_models::market::ask_contract::Ask;
+use battlemon_models::market::ask::AskForContract;
 use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::json_types::U128;
 use near_sdk::serde::{Deserialize, Serialize};
@@ -50,7 +50,7 @@ impl NonFungibleTokenApprovalReceiver for Contract {
         self.check_storage_deposits(&owner_id)?;
 
         let message: Message = near_sdk::serde_json::from_str(&*msg)?;
-        self.add_ask(&Ask::new(owner_id, token_id, approval_id, message.price));
+        self.add_ask(&AskForContract::new(owner_id, token_id, approval_id, message.price));
 
         Ok(())
     }

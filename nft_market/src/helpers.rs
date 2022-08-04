@@ -1,5 +1,5 @@
 use crate::{helpers, ContractError, STORAGE_PER_SALE};
-use battlemon_models::market::bid_contract::Bid;
+use battlemon_models::market::bid::BidForContract;
 use battlemon_models::market::events::MarketEventKind;
 use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::{env, AccountId};
@@ -23,7 +23,7 @@ impl crate::Contract {
         Ok(())
     }
 
-    pub(crate) fn clean_ask_and_bid(&mut self, bid: &Bid) {
+    pub(crate) fn clean_ask_and_bid(&mut self, bid: &BidForContract) {
         let token_id = bid.token_id();
         if let Some(ask) = self.asks.remove(token_id) {
             emit_log_event(MarketEventKind::RemoveAsk(ask))
@@ -36,7 +36,7 @@ impl crate::Contract {
     }
 }
 
-fn emit_log_and_and_remove_bid(id: &str, bids: &mut Vec<Bid>) {
+fn emit_log_and_and_remove_bid(id: &str, bids: &mut Vec<BidForContract>) {
     if let Some(idx) = bids.iter().position(|b| b.id == id) {
         let bid = bids.swap_remove(idx);
         emit_log_event(MarketEventKind::RemoveBid(bid));

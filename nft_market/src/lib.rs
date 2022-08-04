@@ -1,6 +1,6 @@
 pub use ask::*;
 use battlemon_models::market::events::MarketEventKind;
-use battlemon_models::market::{ask_contract::Ask, bid_contract::Bid};
+use battlemon_models::market::{ask::AskForContract, bid::BidForContract};
 pub use bid::*;
 use consts::*;
 use error::*;
@@ -24,8 +24,8 @@ mod xcc;
 #[derive(BorshSerialize, BorshDeserialize, PanicOnDefault)]
 pub struct Contract {
     nft_id: AccountId,
-    asks: UnorderedMap<TokenId, Ask>,
-    bids: UnorderedMap<TokenId, Vec<Bid>>,
+    asks: UnorderedMap<TokenId, AskForContract>,
+    bids: UnorderedMap<TokenId, Vec<BidForContract>>,
     storage_deposits: LookupMap<AccountId, Balance>,
 }
 
@@ -81,7 +81,7 @@ impl Contract {
     ) -> Result<(), ContractError> {
         self.check_storage_deposits(&env::predecessor_account_id())?;
 
-        let bid = Bid::new(token_id, expire_at);
+        let bid = BidForContract::new(token_id, expire_at);
         match self.ask_less_than_bid(&bid) {
             None => {
                 helpers::emit_log_event(MarketEventKind::AddBid(bid.to_owned()));
@@ -99,11 +99,11 @@ impl Contract {
         Ok(())
     }
 
-    pub fn ask(&self, token_id: TokenId) -> Option<&Ask> {
+    pub fn ask(&self, token_id: TokenId) -> Option<&AskForContract> {
         self.asks.get(&token_id)
     }
 
-    pub fn bids(&self, token_id: TokenId) -> Option<&Vec<Bid>> {
+    pub fn bids(&self, token_id: TokenId) -> Option<&Vec<BidForContract>> {
         self.bids.get(&token_id)
     }
 
@@ -181,7 +181,7 @@ mod tests {
     use near_sdk::test_utils::{accounts, VMContextBuilder};
     use near_sdk::testing_env;
 
-    const DEPOSIT: Balance = 1720000000000000000000;
+    const DEPOSIT: Balance = 1960000000000000000000;
 
     fn get_context(predecessor_account_id: AccountId) -> VMContextBuilder {
         let mut builder = VMContextBuilder::new();
@@ -250,7 +250,7 @@ mod tests {
         );
     }
 }
-// pub fn list_asks(&self) -> Vec<Ask> {
+// pub fn list_asks(&self) -> Vec<AskForContract> {
 //     self.asks.iter().map(|(_, v)| v).collect()
 // }
 //
@@ -281,7 +281,7 @@ mod tests {
 //     ))
 // }
 //
-// pub fn list_bids(&self) -> Vec<(TokenId, Vec<Bid>)> {
+// pub fn list_bids(&self) -> Vec<(TokenId, Vec<BidForContract>)> {
 //     self.bids.to_vec()
 // }
 //
@@ -390,7 +390,7 @@ mod tests {
 //     .then(callback)
 // }
 //
-// fn get_ask(&self, token_id: &TokenId) -> Ask {
+// fn get_ask(&self, token_id: &TokenId) -> AskForContract {
 //     self.asks.get(token_id).unwrap_or_else(|| {
 //         panic_str(format!("token with id {} doesn't sell", token_id).as_str())
 //     })
@@ -398,7 +398,7 @@ mod tests {
 //
 // #[private]
 // #[payable]
-// pub fn after_nft_transfer_for_ask(&mut self, sale: Ask, buyer_id: AccountId) -> Promise {
+// pub fn after_nft_transfer_for_ask(&mut self, sale: AskForContract, buyer_id: AccountId) -> Promise {
 //     let deposit = env::attached_deposit();
 //     match env::promise_result(0) {
 //         PromiseResult::Successful(_) => {
@@ -435,7 +435,7 @@ mod tests {
 // #[payable]
 // pub fn after_nft_transfer_for_bid(
 //     &mut self,
-//     sale: Bid,
+//     sale: BidForContract,
 //     owner_id: AccountId,
 // ) -> PromiseOrValue<()> {
 //     match env::promise_result(0) {
@@ -482,7 +482,7 @@ mod tests {
 //             PromiseOrValue::Value(())
 //         }
 //         Ok(Some(_)) => {
-//             let new_offer_condition = Bid::new(token_id.clone(), bidder_id, bid_price);
+//             let new_offer_condition = BidForContract::new(token_id.clone(), bidder_id, bid_price);
 //
 //             match self.bids.get(&token_id).as_mut() {
 //                 Some(offer_conditions) => {
@@ -538,7 +538,7 @@ mod tests {
 //             }
 //             SaleType::Selling => {
 //                 let price = price.expect("The price didn't provided for selling").0;
-//                 let sale_conditions = Ask::new(owner_id, token_id.clone(), approval_id, price);
+//                 let sale_conditions = AskForContract::new(owner_id, token_id.clone(), approval_id, price);
 //                 self.asks.insert(&token_id, &sale_conditions);
 //                 let ret = json!({
 //                     "status": true,

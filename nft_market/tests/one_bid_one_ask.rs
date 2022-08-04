@@ -1,10 +1,10 @@
 mod helpers;
 
+use battlemon_models::market::{ask::AskForContract, bid::BidForContract};
 use helpers::{MARKET, MARKET_PATH, NFT, NFT_PATH};
 use lemotests::prelude::*;
 use lemotests_macro::add_helpers;
 use near_sdk::json_types::U128;
-use nft_market::{Ask, Bid};
 use token_metadata_ext::TokenExt;
 
 add_helpers!("./nft_schema.json", "./market_schema.json",);
@@ -22,7 +22,7 @@ async fn alice_bid_for_token_5_near_then_balance_is_changed_and_bid_in_bids() ->
 
     let result = bchain
         .call_market_contract_init(NFT)?
-        .with_gas(Tgas(10))
+        .with_gas(Tgas(100))
         .then()
         .view_market_contract_storage_minimum_balance()?
         .with_label("minimum_deposit")
@@ -49,7 +49,7 @@ async fn alice_bid_for_token_5_near_then_balance_is_changed_and_bid_in_bids() ->
         .execute()
         .await?;
 
-    let bids = result.tx("view_bids")?.json::<Vec<Bid>>()?;
+    let bids = result.tx("view_bids")?.json::<Vec<BidForContract>>()?;
     assert_eq!(bids.len(), 1);
     let bid = &bids[0];
     assert_eq!(bid.account_id().as_str(), &alice);
@@ -292,11 +292,11 @@ async fn bid_first_ask_second_then_trade_then_bid_is_removed_and_ask_does_not_cr
         .execute()
         .await?;
 
-    let bids_before: Option<Vec<Bid>> = result.tx("bids_before")?.json()?;
+    let bids_before: Option<Vec<BidForContract>> = result.tx("bids_before")?.json()?;
     assert_eq!(bids_before.unwrap().len(), 1);
-    let bids_after: Option<Vec<Bid>> = result.tx("bids_after")?.json()?;
+    let bids_after: Option<Vec<BidForContract>> = result.tx("bids_after")?.json()?;
     assert_eq!(bids_after, None);
-    let ask: Option<Ask> = result.tx("ask")?.json()?;
+    let ask: Option<AskForContract> = result.tx("ask")?.json()?;
     assert_eq!(ask, None);
 
     Ok(())
@@ -363,11 +363,11 @@ async fn ask_first_bid_second_then_trade_then_ask_is_removed_and_bid_does_not_cr
         .execute()
         .await?;
 
-    let ask_before: Option<Ask> = result.tx("ask_before")?.json()?;
+    let ask_before: Option<AskForContract> = result.tx("ask_before")?.json()?;
     assert!(ask_before.is_some());
-    let ask_after: Option<Ask> = result.tx("ask_after")?.json()?;
+    let ask_after: Option<AskForContract> = result.tx("ask_after")?.json()?;
     assert!(ask_after.is_none());
-    let bids: Option<Vec<Bid>> = result.tx("bids")?.json()?;
+    let bids: Option<Vec<BidForContract>> = result.tx("bids")?.json()?;
     assert!(bids.is_none());
 
     Ok(())

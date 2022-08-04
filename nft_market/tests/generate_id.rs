@@ -1,12 +1,12 @@
 mod helpers;
 
+use battlemon_models::market::bid::BidForContract;
 use helpers::{MARKET, MARKET_PATH, NFT};
 use lemotests::workspaces::operations::Function;
 use lemotests::{Gasable, Near, StateBuilder, Tgas};
 use lemotests_macro::add_helpers;
 use near_sdk::json_types::U128;
 use near_sdk::serde_json::json;
-use nft_market::Bid;
 
 add_helpers!("./nft_schema.json", "./market_schema.json",);
 
@@ -69,7 +69,7 @@ async fn create_ten_bids_all_unique_ids() -> anyhow::Result<()> {
         .execute()
         .await?;
 
-    let bids = result.tx("view_bids")?.json::<Vec<Bid>>()?;
+    let bids = result.tx("view_bids")?.json::<Vec<BidForContract>>()?;
     dbg!(bids);
     Ok(())
 }

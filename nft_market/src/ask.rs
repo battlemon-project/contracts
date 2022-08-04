@@ -1,6 +1,6 @@
 use crate::helpers;
-use battlemon_models::market::ask_contract::Ask;
-use battlemon_models::market::bid_contract::Bid;
+use battlemon_models::market::ask::AskForContract;
+use battlemon_models::market::bid::BidForContract;
 use battlemon_models::market::events::MarketEventKind;
 use near_sdk::AccountId;
 
@@ -11,7 +11,7 @@ impl crate::Contract {
     /// if the asker provides a price less than the highest bid.
     /// First, the bidder receives the asker's token.
     /// Then, the asker gets the bidder's Nears held by the market.
-    pub(crate) fn add_ask(&mut self, ask: &Ask) {
+    pub(crate) fn add_ask(&mut self, ask: &AskForContract) {
         match self.highest_bid_than_ask(ask) {
             None => {
                 self.asks.insert(ask.token_id().to_owned(), ask.to_owned());
@@ -21,7 +21,7 @@ impl crate::Contract {
         }
     }
 
-    pub(crate) fn ask_less_than_bid(&self, bid: &Bid) -> Option<Ask> {
+    pub(crate) fn ask_less_than_bid(&self, bid: &BidForContract) -> Option<AskForContract> {
         self.asks
             .get(bid.token_id())
             .filter(|ask| ask.price() <= bid.price())

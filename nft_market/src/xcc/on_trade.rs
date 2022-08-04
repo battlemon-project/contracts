@@ -1,6 +1,6 @@
 use crate::{helpers, Contract, ContractExt};
 use battlemon_models::market::events::MarketEventKind;
-use battlemon_models::market::{ask_contract::Ask, bid_contract::Bid};
+use battlemon_models::market::{ask::AskForContract, bid::BidForContract};
 use near_sdk::json_types::U128;
 use near_sdk::{near_bindgen, Promise, PromiseError};
 
@@ -9,8 +9,8 @@ impl Contract {
     #[private]
     pub fn on_trade(
         &mut self,
-        ask: Ask,
-        bid: Bid,
+        ask: AskForContract,
+        bid: BidForContract,
         change: bool,
         #[callback_result] trade: Result<(), PromiseError>,
     ) {
@@ -29,7 +29,7 @@ impl Contract {
 
         self.clean_ask_and_bid(&bid);
 
-        let trade_for_log = battlemon_models::market::sale_contract::SaleForContract {
+        let trade_for_log = battlemon_models::market::sale::SaleForContract {
             prev_owner: ask.account_id().to_string(),
             curr_owner: bid.account_id().to_string(),
             token_id: ask.token_id().to_string(),
@@ -56,7 +56,7 @@ mod tests {
             }
         });
 
-        let sale_for_contract = battlemon_models::market::sale_contract::SaleForContract {
+        let sale_for_contract = battlemon_models::market::sale::SaleForContract {
             prev_owner: "alice.near".to_string(),
             curr_owner: "bob.near".to_string(),
             token_id: "1".to_string(),
