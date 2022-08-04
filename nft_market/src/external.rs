@@ -1,6 +1,5 @@
-use crate::{Ask, Bid};
 use near_contract_standards::non_fungible_token::TokenId;
-use near_sdk::{AccountId, Promise, PromiseError, PromiseOrValue};
+use near_sdk::{AccountId, Promise};
 
 #[near_sdk::ext_contract(nft)]
 pub trait Nft {

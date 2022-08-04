@@ -1,4 +1,5 @@
-use crate::{helpers, Ask, Contract, ContractError, ContractExt};
+use crate::{helpers, Contract, ContractError, ContractExt};
+use battlemon_models::market::ask_contract::Ask;
 use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::json_types::U128;
 use near_sdk::serde::{Deserialize, Serialize};

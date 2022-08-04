@@ -1,4 +1,5 @@
-use crate::{Ask, Bid};
+use battlemon_models::market::ask_contract::Ask;
+use battlemon_models::market::bid_contract::Bid;
 use near_sdk::env::STORAGE_PRICE_PER_BYTE;
 use near_sdk::{Balance, Gas};
 

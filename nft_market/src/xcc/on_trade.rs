@@ -1,7 +1,7 @@
-use crate::{consts, Ask, Bid, Contract, ContractExt};
-use consts::EVENT_PREFIX;
+use crate::{helpers, Contract, ContractExt};
+use battlemon_models::market::{ask_contract::Ask, bid_contract::Bid};
 use near_sdk::json_types::U128;
-use near_sdk::{env, near_bindgen, Promise, PromiseError};
+use near_sdk::{near_bindgen, Promise, PromiseError};
 
 #[near_bindgen]
 impl Contract {
@@ -34,8 +34,7 @@ impl Contract {
             price: U128(trade_price),
         };
 
-        let json = near_sdk::serde_json::to_value(&trade_for_log).unwrap();
-        env::log_str(&format!("{EVENT_PREFIX}:{json}"));
+        helpers::log_event(trade_for_log);
     }
 }
 

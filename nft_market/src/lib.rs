@@ -1,4 +1,5 @@
 pub use ask::*;
+use battlemon_models::market::{ask_contract::Ask, bid_contract::Bid};
 pub use bid::*;
 use consts::*;
 use error::*;
@@ -87,6 +88,7 @@ impl Contract {
                         bids.push(bid.clone());
                     })
                     .or_insert_with(|| vec![bid]);
+                // todo: emit add bid log
             }
             Some(ask) => self.trade(ask, bid, true),
         }

@@ -1,5 +1,6 @@
 use crate::external::*;
-use crate::{Ask, Bid};
+use battlemon_models::market::ask_contract::Ask;
+use battlemon_models::market::bid_contract::Bid;
 use near_sdk::env;
 
 impl crate::Contract {

@@ -1,45 +1,6 @@
-use crate::Bid;
-use near_contract_standards::non_fungible_token::TokenId;
-use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::json_types::U128;
-use near_sdk::serde::{Deserialize, Serialize};
+use battlemon_models::market::ask_contract::Ask;
+use battlemon_models::market::bid_contract::Bid;
 use near_sdk::AccountId;
-
-#[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-#[serde(crate = "near_sdk::serde")]
-pub struct Ask {
-    pub account_id: AccountId,
-    pub token_id: TokenId,
-    pub approval_id: u64,
-    pub price: U128,
-}
-
-impl Ask {
-    pub fn new(owner_id: AccountId, token_id: TokenId, approval_id: u64, price: U128) -> Self {
-        Self {
-            account_id: owner_id,
-            token_id,
-            approval_id,
-            price,
-        }
-    }
-
-    pub(crate) fn account_id(&self) -> &AccountId {
-        &self.account_id
-    }
-
-    pub(crate) fn approval_id(&self) -> Option<u64> {
-        Some(self.approval_id)
-    }
-
-    pub fn token_id(&self) -> &TokenId {
-        &self.token_id
-    }
-
-    pub(crate) fn price(&self) -> u128 {
-        self.price.0
-    }
-}
 
 impl crate::Contract {
     /// Add ask for a concrete token.
@@ -52,6 +13,7 @@ impl crate::Contract {
         match self.highest_bid_than_ask(ask) {
             None => {
                 self.asks.insert(ask.token_id().to_owned(), ask.to_owned());
+                // todo: emit ask log here
             }
             Some(bid) => self.trade(ask.to_owned(), bid, false),
         }
