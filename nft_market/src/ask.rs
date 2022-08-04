@@ -1,5 +1,7 @@
+use crate::helpers;
 use battlemon_models::market::ask_contract::Ask;
 use battlemon_models::market::bid_contract::Bid;
+use battlemon_models::market::events::MarketEventKind;
 use near_sdk::AccountId;
 
 impl crate::Contract {
@@ -13,7 +15,7 @@ impl crate::Contract {
         match self.highest_bid_than_ask(ask) {
             None => {
                 self.asks.insert(ask.token_id().to_owned(), ask.to_owned());
-                // todo: emit ask log here
+                helpers::emit_log_event(MarketEventKind::AddAsk(ask.to_owned()));
             }
             Some(bid) => self.trade(ask.to_owned(), bid, false),
         }
