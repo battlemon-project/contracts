@@ -93,7 +93,7 @@ async fn market_sale_testnet() -> anyhow::Result<()> {
 }
 
 async fn deploy_and_save_creds() -> anyhow::Result<()> {
-    let path = "../testnet_creds/";
+    let path = "./testnet_creds/";
 
     let bchain = StateBuilder::testnet()
         .with_contract(NFT, NFT_PATH, Near(10))?
@@ -104,7 +104,7 @@ async fn deploy_and_save_creds() -> anyhow::Result<()> {
         .await?;
 
     let [nft, market, alice, _bob] = bchain.string_ids()?;
-
+    println!("nft: {nft}, market: {market}");
     bchain
         .contract(NFT)?
         .as_account()
@@ -167,7 +167,7 @@ async fn try_mint() -> anyhow::Result<()> {
 
     let alice = bchain.alice_id()?;
 
-    let nft = lemotests::workspaces::Account::from_file("../testnet_creds/nft_contract.json")?;
+    let nft = lemotests::workspaces::Account::from_file("./testnet_creds/nft_contract.json")?;
 
     bchain
         .alice()?
@@ -199,7 +199,7 @@ async fn redeploy() -> anyhow::Result<()> {
 }
 
 async fn try_sale() -> anyhow::Result<()> {
-    for _ in 0..100 {
+    for _ in 0..10 {
         let bchain = StateBuilder::testnet()
             .with_alice(Near(10))?
             .with_bob(Near(10))?
@@ -209,9 +209,9 @@ async fn try_sale() -> anyhow::Result<()> {
         let alice = bchain.alice_id()?;
         let bob = bchain.bob_id()?;
 
-        let nft = lemotests::workspaces::Account::from_file("../testnet_creds/nft_contract.json")?;
+        let nft = lemotests::workspaces::Account::from_file("./testnet_creds/nft_contract.json")?;
         let market =
-            lemotests::workspaces::Account::from_file("../testnet_creds/market_contract.json")?;
+            lemotests::workspaces::Account::from_file("./testnet_creds/market_contract.json")?;
 
         bchain
             .alice()?
@@ -277,11 +277,92 @@ async fn try_sale() -> anyhow::Result<()> {
     Ok(())
 }
 
+async fn add_ten_bids_ten_asks() -> anyhow::Result<()> {
+    for _ in 0..10 {
+        let bchain = StateBuilder::testnet()
+            .with_alice(Near(10))?
+            .with_bob(Near(10))?
+            .build()
+            .await?;
+
+        let alice = bchain.alice_id()?;
+        let bob = bchain.bob_id()?;
+
+        let nft = lemotests::workspaces::Account::from_file("./testnet_creds/nft_contract.json")?;
+        let market =
+            lemotests::workspaces::Account::from_file("./testnet_creds/market_contract.json")?;
+
+        bchain
+            .alice()?
+            .call(bchain.worker(), nft.id(), "nft_mint")
+            .args_json(json!({ "receiver_id": alice }))?
+            .max_gas()
+            .deposit(Near(1).parse())
+            .transact()
+            .await?;
+
+        let tokens: Vec<TokenExt> = bchain
+            .alice()?
+            .call(bchain.worker(), nft.id(), "nft_tokens_for_owner")
+            .args_json(json!({ "account_id": alice }))?
+            .view()
+            .await?
+            .json()?;
+
+        bchain
+            .alice()?
+            .call(bchain.worker(), market.id(), "storage_deposit")
+            .args_json(json!({}))?
+            .max_gas()
+            .deposit(Near(1).parse())
+            .transact()
+            .await?;
+
+        let token = tokens.last().unwrap();
+        let msg = format!("{{\"price\":\"{}\"}}", Near(5));
+        bchain
+            .alice()?
+            .call(bchain.worker(), nft.id(), "nft_approve")
+            .args_json(json!({
+                "token_id": token.token_id,
+                "account_id": market.id(),
+                "msg": msg
+            }))?
+            .max_gas()
+            .deposit(Near(4).parse())
+            .transact()
+            .await?;
+
+        bchain
+            .bob()?
+            .call(bchain.worker(), market.id(), "storage_deposit")
+            .args_json(json!({}))?
+            .max_gas()
+            .deposit(Near(1).parse())
+            .transact()
+            .await?;
+
+        bchain
+            .bob()?
+            .call(bchain.worker(), market.id(), "add_bid")
+            .args_json(json!({
+                "token_id": token.token_id,
+            }))?
+            .max_gas()
+            .deposit(Near(3).parse())
+            .transact()
+            .await?;
+    }
+    Ok(())
+}
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    market_sale_testnet().await?;
+    // deploy_and_save_creds().await?;
     // nft_mint_testnet().await?;
+    // market_sale_testnet().await?;
     // redeploy().await?;
-
+    // try_sale().await?;
+    add_ten_bids_ten_asks().await?;
     Ok(())
 }
