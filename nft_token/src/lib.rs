@@ -8,10 +8,14 @@ use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{LazyOption, LookupMap};
 use near_sdk::env::{self, panic_str};
 use near_sdk::json_types::U128;
+use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::{near_bindgen, require, AccountId, PanicOnDefault, Promise};
 
 use crate::consts::{DATA_IMAGE_SVG_LEMON_LOGO, IPFS_GATEWAY_BASE_URL, NFT_BACK_IMAGE};
-use battlemon_models::nft::{Lemon, ModelKind};
+use battlemon_models::helpers_contract::weights;
+use battlemon_models::nft::{
+    Back, Cap, Cloth, ColdArm, FireArm, FromTraitWeights, Lemon, ModelKind,
+};
 use token_metadata_ext::TokenExt;
 
 mod consts;
@@ -19,6 +23,7 @@ mod error;
 mod helpers;
 mod internal;
 mod mint;
+mod xcc_handlers;
 
 #[near_bindgen]
 #[derive(BorshSerialize, BorshDeserialize, PanicOnDefault)]
@@ -27,6 +32,19 @@ pub struct Contract {
     metadata: LazyOption<NFTContractMetadata>,
     model_by_id: LookupMap<TokenId, ModelKind>,
     last_token_id: u128,
+}
+
+#[derive(
+    Serialize, Deserialize, Clone, Copy, BorshSerialize, BorshDeserialize, Debug, PartialEq,
+)]
+#[serde(crate = "near_sdk::serde", rename_all = "snake_case", untagged)]
+pub enum NftKind {
+    Lemon,
+    Firearm,
+    Coldarm,
+    Cloth,
+    Back,
+    Cap,
 }
 
 #[near_bindgen]
@@ -48,10 +66,15 @@ impl Contract {
     }
 
     #[payable]
-    pub fn nft_mint(&mut self, receiver_id: AccountId) -> TokenExt {
-        let random = battlemon_models::helpers_contract::get_random_arr_range(0, 100);
-
-        let model = ModelKind::Lemon(Lemon::from_random(&random));
+    pub fn nft_mint(&mut self, receiver_id: AccountId, kind: NftKind) -> TokenExt {
+        let model = match kind {
+            NftKind::Lemon => ModelKind::Lemon(Lemon::from_trait_weights(&weights())),
+            NftKind::Firearm => ModelKind::FireArm(FireArm::from_trait_weights(&weights())),
+            NftKind::Coldarm => ModelKind::ColdArm(ColdArm::from_trait_weights(&weights())),
+            NftKind::Cloth => ModelKind::Cloth(Cloth::from_trait_weights(&weights())),
+            NftKind::Back => ModelKind::Back(Back::from_trait_weights(&weights())),
+            NftKind::Cap => ModelKind::Cap(Cap::from_trait_weights(&weights())),
+        };
 
         let token_metadata = TokenMetadata {
             title: None,
