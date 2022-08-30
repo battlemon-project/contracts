@@ -1,0 +1,92 @@
+{
+  "name": "juice_contract",
+  "functions": [
+    {
+      "name": "init",
+      "initable": true,
+      "kind": "call",
+      "arguments": [
+        {
+          "name": "owner_id",
+          "type": "String"
+        },
+        {
+          "name": "total_supply",
+          "type": "near_sdk::json_types::U128"
+        }
+      ]
+    },
+    {
+      "name": "ft_transfer",
+      "initable": false,
+      "kind": "call",
+      "arguments": [
+        {
+          "name": "receiver_id",
+          "type": "String"
+        },
+        {
+          "name": "amount",
+          "type": "near_sdk::json_types::U128"
+        },
+        {
+          "name": "memo",
+          "type": "Option<String>"
+        }
+      ]
+    },
+    {
+      "name": "ft_transfer_call",
+      "initable": false,
+      "kind": "call",
+      "arguments": [
+        {
+          "name": "receiver_id",
+          "type": "String"
+        },
+        {
+          "name": "amount",
+          "type": "near_sdk::json_types::U128"
+        },
+        {
+          "name": "msg",
+          "type": "String"
+        }
+      ]
+    },
+    {
+      "name": "storage_deposit",
+      "initable": false,
+      "kind": "call",
+      "arguments": [
+        {
+          "name": "account_id",
+          "type": "Option<String>"
+        }
+      ]
+    },
+    {
+      "name": "storage_withdraw",
+      "initable": false,
+      "kind": "call",
+      "arguments": []
+    },
+    {
+      "name": "storage_minimum_balance",
+      "initable": false,
+      "kind": "view",
+      "arguments": []
+    },
+    {
+      "name": "storage_balance_of",
+      "initable": false,
+      "kind": "view",
+      "arguments": [
+        {
+          "name": "account_id",
+          "type": "Option<String>"
+        }
+      ]
+    }
+  ]
+}
