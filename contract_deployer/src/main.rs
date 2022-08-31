@@ -1,17 +1,18 @@
-pub const NFT_PATH: &str = "./target/wasm32-unknown-unknown/release/nft_token.wasm";
-pub const MARKET_PATH: &str = "./target/wasm32-unknown-unknown/release/nft_market.wasm";
-pub const NFT: &str = "nft_contract";
-pub const MARKET: &str = "market_contract";
-pub const NFT_CREDS: &str = "./testnet_creds/nft_contract.json";
-pub const MARKET_CREDS: &str = "./testnet_creds/market_contract.json";
-
 use anyhow::Context;
+use battlemon_models::nft::NftKind;
 use lemotests::prelude::*;
 use lemotests::serde_json::json;
 use lemotests::Nearable;
 use lemotests_macro::add_helpers;
 use near_sdk::json_types::U128;
 use token_metadata_ext::TokenExt;
+
+pub const NFT_PATH: &str = "./target/wasm32-unknown-unknown/release/nft_token.wasm";
+pub const MARKET_PATH: &str = "./target/wasm32-unknown-unknown/release/nft_market.wasm";
+pub const NFT: &str = "nft_contract";
+pub const MARKET: &str = "market_contract";
+pub const NFT_CREDS: &str = "./testnet_creds/nft_contract.json";
+pub const MARKET_CREDS: &str = "./testnet_creds/market_contract.json";
 
 add_helpers!("./nft_schema.json", "./market_schema.json",);
 
@@ -28,7 +29,7 @@ async fn nft_mint_testnet() -> anyhow::Result<()> {
         .call_nft_contract_init(&nft)?
         .with_gas(Tgas(10))
         .then()
-        .alice_call_nft_contract_nft_mint(&alice)?
+        .alice_call_nft_contract_nft_mint(&alice, NftKind::Lemon)?
         .with_deposit(Near(1))
         .with_gas(Tgas(10))
         .execute()
@@ -57,7 +58,7 @@ async fn market_sale_testnet() -> anyhow::Result<()> {
         .call_market_contract_init(&nft)?
         .with_gas(Tgas(200))
         .then()
-        .alice_call_nft_contract_nft_mint(&alice)?
+        .alice_call_nft_contract_nft_mint(&alice, NftKind::Lemon)?
         .with_deposit(Near(1))
         .with_gas(Tgas(200))
         .then()
@@ -124,7 +125,7 @@ async fn deploy_and_save_creds() -> anyhow::Result<()> {
         .call_market_contract_init(&nft)?
         .with_gas(Tgas(10))
         .then()
-        .alice_call_nft_contract_nft_mint(&alice)?
+        .alice_call_nft_contract_nft_mint(&alice, NftKind::Lemon)?
         .with_deposit(Near(1))
         .with_gas(Tgas(10))
         .then()
@@ -172,7 +173,7 @@ async fn try_mint() -> anyhow::Result<()> {
     bchain
         .alice()?
         .call(bchain.worker(), nft.id(), "nft_mint")
-        .args_json(json!({ "receiver_id": alice }))?
+        .args_json(json!({ "receiver_id": alice, "kind": "lemon" }))?
         .max_gas()
         .deposit(Near(1).parse())
         .transact()
@@ -216,7 +217,7 @@ async fn try_sale() -> anyhow::Result<()> {
         bchain
             .alice()?
             .call(bchain.worker(), nft.id(), "nft_mint")
-            .args_json(json!({ "receiver_id": alice }))?
+            .args_json(json!({ "receiver_id": alice, "kind": "lemon" }))?
             .max_gas()
             .deposit(Near(1).parse())
             .transact()
@@ -295,7 +296,7 @@ async fn add_ten_bids_ten_asks() -> anyhow::Result<()> {
         bchain
             .alice()?
             .call(bchain.worker(), nft.id(), "nft_mint")
-            .args_json(json!({ "receiver_id": alice }))?
+            .args_json(json!({ "receiver_id": alice, "kind": "lemon" }))?
             .max_gas()
             .deposit(Near(1).parse())
             .transact()
@@ -362,7 +363,7 @@ async fn main() -> anyhow::Result<()> {
     // nft_mint_testnet().await?;
     // market_sale_testnet().await?;
     // redeploy().await?;
-    // try_sale().await?;
-    add_ten_bids_ten_asks().await?;
+    try_sale().await?;
+    // add_ten_bids_ten_asks().await?;
     Ok(())
 }
