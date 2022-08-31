@@ -49,8 +49,13 @@ impl NonFungibleTokenApprovalReceiver for Contract {
         helpers::check_cross_contract_call(&self.nft_id)?;
         self.check_storage_deposits(&owner_id)?;
 
-        let message: Message = near_sdk::serde_json::from_str(&*msg)?;
-        self.add_ask(&AskForContract::new(owner_id, token_id, approval_id, message.price));
+        let message: Message = near_sdk::serde_json::from_str(&msg)?;
+        self.add_ask(&AskForContract::new(
+            owner_id,
+            token_id,
+            approval_id,
+            message.price,
+        ));
 
         Ok(())
     }

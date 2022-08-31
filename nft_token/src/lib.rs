@@ -14,7 +14,7 @@ use near_sdk::{near_bindgen, require, AccountId, PanicOnDefault, Promise};
 use crate::consts::{DATA_IMAGE_SVG_LEMON_LOGO, IPFS_GATEWAY_BASE_URL, NFT_BACK_IMAGE};
 use battlemon_models::helpers_contract::weights;
 use battlemon_models::nft::{
-    Back, Cap, Cloth, ColdArm, FireArm, FromTraitWeights, Lemon, ModelKind,
+    Back, Cap, Cloth, ColdArm, FireArm, FromTraitWeights, Lemon, ModelKind, NftKind,
 };
 use token_metadata_ext::TokenExt;
 
@@ -32,19 +32,6 @@ pub struct Contract {
     metadata: LazyOption<NFTContractMetadata>,
     model_by_id: LookupMap<TokenId, ModelKind>,
     last_token_id: u128,
-}
-
-#[derive(
-    Serialize, Deserialize, Clone, Copy, BorshSerialize, BorshDeserialize, Debug, PartialEq,
-)]
-#[serde(crate = "near_sdk::serde", rename_all = "snake_case", untagged)]
-pub enum NftKind {
-    Lemon,
-    Firearm,
-    Coldarm,
-    Cloth,
-    Back,
-    Cap,
 }
 
 #[near_bindgen]

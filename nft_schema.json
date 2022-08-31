@@ -20,6 +20,10 @@
         {
           "name": "receiver_id",
           "type": "String"
+        },
+        {
+          "name": "kind",
+          "type": "NftKind"
         }
       ]
     },

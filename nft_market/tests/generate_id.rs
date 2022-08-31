@@ -12,7 +12,7 @@ add_helpers!("./nft_schema.json", "./market_schema.json",);
 
 #[tokio::test]
 async fn create_ten_bids_all_unique_ids() -> anyhow::Result<()> {
-    let bchain = StateBuilder::sandbox()
+    let bchain = StateBuilder::testnet()
         .with_contract(MARKET, MARKET_PATH, Near(10))?
         .with_alice(Near(10))?
         .build()
