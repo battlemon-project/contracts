@@ -3,7 +3,7 @@ use near_contract_standards::non_fungible_token::TokenId;
 #[derive(Debug, thiserror::Error, near_sdk::FunctionError)]
 pub enum ContractError {
     #[error("Failed to authorize contract call: {0}")]
-    NotAuthorized(&'static str),
+    NotAuthorized(String),
     #[error("Failed to find model for token with id: {0}")]
     ModelNotFound(TokenId),
     #[error("Failed to find owner for token with id: {0}")]
