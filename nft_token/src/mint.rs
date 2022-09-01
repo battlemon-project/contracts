@@ -20,11 +20,13 @@ impl Contract {
     /// Returns the newly minted token and emits the mint event
     pub(crate) fn internal_mint(
         &mut self,
+        token_id: TokenId,
         token_owner_id: AccountId,
         token_metadata: TokenMetadata,
         model: ModelKind,
     ) -> TokenExt {
         let token = self.internal_mint_with_refund(
+            token_id,
             token_owner_id,
             token_metadata,
             env::predecessor_account_id(),
@@ -50,12 +52,12 @@ impl Contract {
     /// Returns the newly minted token and does not emit the mint event. This allows minting multiple before emitting.
     pub(crate) fn internal_mint_with_refund(
         &mut self,
+        token_id: TokenId,
         token_owner_id: AccountId,
         token_metadata: TokenMetadata,
         refund_id: AccountId,
         model: ModelKind,
     ) -> TokenExt {
-        let token_id = self.new_token_id();
         let initial_storage_usage = env::storage_usage();
 
         self.model_by_id.insert(&token_id, &model);

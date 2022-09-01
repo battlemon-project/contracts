@@ -66,8 +66,8 @@ impl FungibleTokenReceiver for Contract {
         }
 
         let random = battlemon_models::helpers_contract::get_random_arr_range(0, 100);
-
-        let model = ModelKind::Lemon(Lemon::from_trait_weights(&random));
+        let token_id = self.new_token_id();
+        let model = ModelKind::Lemon(Lemon::from_trait_weights(&token_id, &random));
 
         let token_metadata = near_contract_standards::non_fungible_token::metadata::TokenMetadata {
             title: Some("CraftedNft".to_string()),
@@ -84,7 +84,7 @@ impl FungibleTokenReceiver for Contract {
             reference_hash: None,
         };
 
-        self.internal_mint(sender_id, token_metadata, model);
+        self.internal_mint(token_id, sender_id, token_metadata, model);
 
         for id in message.tokens_ids.iter() {
             self.burn_token(id);
