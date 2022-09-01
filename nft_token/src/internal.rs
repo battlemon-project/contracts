@@ -7,7 +7,7 @@ use near_sdk::{AccountId, BorshStorageKey};
 
 use token_metadata_ext::TokenExt;
 
-use crate::error::{ContractError, Result};
+use crate::error::Result;
 use crate::Contract;
 
 #[derive(BorshSerialize, BorshStorageKey)]
