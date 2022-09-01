@@ -60,7 +60,7 @@ impl FungibleTokenReceiver for Contract {
 
             if owner_id != sender_id {
                 return Err(ContractError::NotAuthorized(
-                    "`sender_id` doesn't equal to token's owner.",
+                    "`sender_id` doesn't equal to token's owner.".to_string(),
                 ));
             }
         }
