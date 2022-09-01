@@ -34,6 +34,24 @@ impl Contract {
             .ok_or_else(|| ContractError::ModelNotFound(id.to_owned()))
     }
 
+    pub(crate) fn check_instructions(&self, instructions: &[TokenId]) -> Result<()> {
+        if instructions.len() < 2 {
+            return Err(ContractError::InstructionError(
+                "Not enough ids in instructions".to_string(),
+            ));
+        }
+
+        let lemon_model = self.model(&instructions[0])?;
+        if !matches!(lemon_model, ModelKind::Lemon(_)) {
+            return Err(ContractError::InstructionError(
+                "First id in instructions is not a lemon".to_string(),
+            ));
+        }
+        self.are_ids_belong_to_predecessor(instructions)?;
+
+        Ok(())
+    }
+
     pub(crate) fn are_ids_belong_to_predecessor(&self, ids: &[TokenId]) -> Result<()> {
         for id in ids {
             let owner_of_id = self.owner(id)?;
