@@ -1,3 +1,4 @@
+use battlemon_models::nft::NftKind;
 use lemotests::prelude::*;
 use lemotests_macro::add_helpers;
 use token_metadata_ext::TokenExt;
@@ -79,7 +80,7 @@ async fn mint_works() -> anyhow::Result<()> {
         .call_nft_contract_init(&nft)?
         .with_gas(Tgas(10))
         .then()
-        .alice_call_nft_contract_nft_mint(&alice)?
+        .alice_call_nft_contract_nft_mint(&alice, NftKind::Lemon)?
         .with_gas(Tgas(10))
         .with_deposit(Near(1))
         .then()
@@ -104,7 +105,7 @@ async fn minted_token_belongs_to_receiver_id() -> anyhow::Result<()> {
         .call_nft_contract_init(&nft)?
         .with_gas(Tgas(10))
         .then()
-        .alice_call_nft_contract_nft_mint(&alice)?
+        .alice_call_nft_contract_nft_mint(&alice, NftKind::Lemon)?
         .with_gas(Tgas(10))
         .with_deposit(Near(1))
         .then()
@@ -134,7 +135,7 @@ async fn nft_transfer_works() -> anyhow::Result<()> {
         .call_nft_contract_init(&nft)?
         .with_gas(Tgas(10))
         .then()
-        .alice_call_nft_contract_nft_mint(&alice)?
+        .alice_call_nft_contract_nft_mint(&alice, NftKind::Lemon)?
         .with_gas(Tgas(10))
         .with_deposit(Near(1))
         .then()
@@ -167,7 +168,7 @@ async fn nft_transfer_is_prohibited_for_not_owner() -> anyhow::Result<()> {
         .call_nft_contract_init(&nft)?
         .with_gas(Tgas(10))
         .then()
-        .alice_call_nft_contract_nft_mint(&alice)?
+        .alice_call_nft_contract_nft_mint(&alice, NftKind::Lemon)?
         .with_gas(Tgas(10))
         .with_deposit(Near(1))
         .then()
@@ -197,7 +198,7 @@ async fn transferred_token_not_allowed_for_prev_owner() -> anyhow::Result<()> {
         .call_nft_contract_init(&nft)?
         .with_gas(Tgas(10))
         .then()
-        .alice_call_nft_contract_nft_mint(&alice)?
+        .alice_call_nft_contract_nft_mint(&alice, NftKind::Lemon)?
         .with_gas(Tgas(10))
         .with_deposit(Near(1))
         .then()
@@ -231,7 +232,7 @@ async fn update_token_media_works() -> anyhow::Result<()> {
         .call_nft_contract_init(&nft)?
         .with_gas(Tgas(10))
         .then()
-        .alice_call_nft_contract_nft_mint(&alice)?
+        .alice_call_nft_contract_nft_mint(&alice, NftKind::Lemon)?
         .with_gas(Tgas(10))
         .with_deposit(Near(1))
         .then()
@@ -265,7 +266,7 @@ async fn update_token_media_can_be_called_only_by_contract_account() -> anyhow::
         .call_nft_contract_init(&nft)?
         .with_gas(Tgas(10))
         .then()
-        .alice_call_nft_contract_nft_mint(&alice)?
+        .alice_call_nft_contract_nft_mint(&alice, NftKind::Lemon)?
         .with_gas(Tgas(10))
         .with_deposit(Near(1))
         .then()
@@ -295,7 +296,7 @@ async fn nft_approve_method_works() -> anyhow::Result<()> {
         .call_nft_contract_init(&nft)?
         .with_gas(Tgas(10))
         .then()
-        .alice_call_nft_contract_nft_mint(&alice)?
+        .alice_call_nft_contract_nft_mint(&alice, NftKind::Lemon)?
         .with_gas(Tgas(10))
         .with_deposit(Near(1))
         .then()
@@ -322,7 +323,7 @@ async fn after_mint_exceeded_attached_deposit_is_refunded() -> anyhow::Result<()
         .call_nft_contract_init(&nft)?
         .with_gas(Tgas(10))
         .then()
-        .alice_call_nft_contract_nft_mint(&alice)?
+        .alice_call_nft_contract_nft_mint(&alice, NftKind::Lemon)?
         .with_gas(Tgas(10))
         .with_deposit(Near(9))
         .then()
