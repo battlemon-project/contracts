@@ -9,7 +9,7 @@ use near_sdk::collections::{LazyOption, LookupMap};
 use near_sdk::env::{self, panic_str};
 use near_sdk::json_types::U128;
 use near_sdk::serde::{Deserialize, Serialize};
-use near_sdk::{near_bindgen, require, AccountId, PanicOnDefault, Promise};
+use near_sdk::{assert_one_yocto, near_bindgen, require, AccountId, PanicOnDefault, Promise};
 
 use crate::consts::{DATA_IMAGE_SVG_LEMON_LOGO, IPFS_GATEWAY_BASE_URL, NFT_BACK_IMAGE};
 use battlemon_models::helpers_contract::weights;
@@ -176,25 +176,29 @@ impl Contract {
         })
     }
 
-    // #[payable]
-    // pub fn assemble_compound_nft(&mut self, instructions: Vec<TokenId>) {
-    //     assert_one_yocto();
-    //     self.check_instructions(&instructions)
-    //         .expect("Provided instructions contain errors");
-    //
-    //     for chunks in instructions.as_slice().chunks(2) {
-    //         self.put_slot(&chunks[0], &chunks[1])
-    //             .expect("Couldn't assemble compound nft");
-    //     }
-    // }
+    #[payable]
+    pub fn assemble_compound_nft(&mut self, instructions: Vec<TokenId>) {
+        assert_one_yocto();
+        self.check_instructions(&instructions)
+            .expect("Provided instructions contain errors");
 
-    // pub fn compound_nft_token(&self, token_id: TokenId) -> Vec<(TokenId, ModelKind)> {
-    //     //todo: add tests
-    //     let mut buf = Vec::new();
-    //     self.nested_tokens_id(token_id, &mut buf)
-    //         .expect("Couldn't get nested tokens");
-    //     buf
-    // }
+        let (lemon_id, other_ids) = instructions.split_first().unwrap();
+        for id in other_ids {
+            self.merge_ids(lemon_id, id);
+        }
+    }
+
+    #[payable]
+    pub fn disassemble_compound_nft(&mut self, instructions: Vec<TokenId>) {
+        assert_one_yocto();
+        self.check_instructions(&instructions)
+            .expect("Provided instructions contain errors");
+
+        let (lemon_id, other_ids) = instructions.split_first().unwrap();
+        for id in other_ids {
+            self.unmerge_ids(lemon_id, id);
+        }
+    }
 }
 
 #[near_bindgen]
