@@ -1,7 +1,7 @@
+use battlemon_models::nft::NftKind;
 use lemotests::{Near, StateBuilder, Tgas};
 use lemotests_macro::add_helpers;
 use near_sdk::json_types::U128;
-use token_metadata_ext::TokenExt;
 
 const NFT_PATH: &str = "../target/wasm32-unknown-unknown/release/nft_token.wasm";
 const NFT: &str = "nft_contract";
@@ -22,14 +22,14 @@ async fn mint_works() -> anyhow::Result<()> {
     let msg = serde_json::json!({
        "tokens_ids": ["1"],
     });
-    let result = bchain
+    bchain
         .call_nft_contract_init(&nft)?
         .with_gas(Tgas(10))
         .then()
         .call_juice_contract_init(&juice, U128(100000))?
         .with_gas(Tgas(10))
         .then()
-        .alice_call_nft_contract_nft_mint(&alice)?
+        .alice_call_nft_contract_nft_mint(&alice, NftKind::Lemon)?
         .with_gas(Tgas(10))
         .with_deposit(Near(1))
         .then()
@@ -53,9 +53,6 @@ async fn mint_works() -> anyhow::Result<()> {
         .with_label("view_nft_token")
         .execute()
         .await?;
-
-    // let nft_token = result.tx("view_nft_token")?.json::<TokenExt>()?;
-    dbg!(juice);
 
     Ok(())
 }
