@@ -56,9 +56,9 @@ impl Contract {
         for id in ids {
             let owner_of_id = self.owner(id)?;
             if !is_predecessor(&owner_of_id) {
-                return Err(ContractError::NotAuthorized(
-                    "Contract caller isn't the owner of the token id",
-                ));
+                return Err(ContractError::NotAuthorized(format!(
+                    "Contract caller isn't the owner of the token id: {id}"
+                )));
             }
         }
 
@@ -70,8 +70,8 @@ impl Contract {
         let outfit_model = self.model(outfit_id).unwrap();
         if let ModelKind::Lemon(mut lemon) = lemon_model {
             let lemon_model = match outfit_model {
-                ModelKind::FireArm(firearm) => replace_outfit!(lemon.firearm, firearm),
-                ModelKind::ColdArm(coldarm) => replace_outfit!(lemon.coldarm, coldarm),
+                ModelKind::FireArm(firearm) => replace_outfit!(lemon.fire_arm, firearm),
+                ModelKind::ColdArm(coldarm) => replace_outfit!(lemon.cold_arm, coldarm),
                 ModelKind::Cloth(cloth) => replace_outfit!(lemon.cloth, cloth),
                 ModelKind::Cap(cap) => replace_outfit!(lemon.cap, cap),
                 ModelKind::Back(back) => replace_outfit!(lemon.back, back),
@@ -87,8 +87,8 @@ impl Contract {
         let outfit_model = self.model(outfit_id).unwrap();
         if let ModelKind::Lemon(mut lemon) = lemon_model {
             let lemon_model = match outfit_model {
-                ModelKind::FireArm(_) => remove_outfit!(lemon.firearm),
-                ModelKind::ColdArm(_) => remove_outfit!(lemon.coldarm),
+                ModelKind::FireArm(_) => remove_outfit!(lemon.fire_arm),
+                ModelKind::ColdArm(_) => remove_outfit!(lemon.cold_arm),
                 ModelKind::Cloth(_) => remove_outfit!(lemon.cloth),
                 ModelKind::Cap(_) => remove_outfit!(lemon.cap),
                 ModelKind::Back(_) => remove_outfit!(lemon.back),
@@ -137,5 +137,5 @@ impl Contract {
 }
 
 pub(crate) fn is_predecessor(id: &AccountId) -> bool {
-    *id != env::predecessor_account_id()
+    *id == env::predecessor_account_id()
 }
