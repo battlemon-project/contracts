@@ -1,10 +1,24 @@
 use near_contract_standards::non_fungible_token::TokenId;
-use near_sdk::AccountId;
+use near_sdk::{env, AccountId};
 
 use battlemon_models::nft::ModelKind;
 
 use crate::error::{ContractError, Result};
 use crate::Contract;
+
+macro_rules! replace_outfit {
+    ($lemon: ident . $field: ident, $outfit: expr) => {{
+        $lemon.$field = Some($outfit);
+        ModelKind::Lemon($lemon)
+    }};
+}
+
+macro_rules! remove_outfit {
+    ($lemon: ident . $field: ident) => {{
+        $lemon.$field = None;
+        ModelKind::Lemon($lemon)
+    }};
+}
 
 impl Contract {
     pub(crate) fn owner(&self, id: &TokenId) -> Result<AccountId> {
@@ -18,6 +32,53 @@ impl Contract {
         self.model_by_id
             .get(id)
             .ok_or_else(|| ContractError::ModelNotFound(id.to_owned()))
+    }
+
+    pub(crate) fn are_ids_belong_to_predecessor(&self, ids: &[TokenId]) -> Result<()> {
+        for id in ids {
+            let owner_of_id = self.owner(id)?;
+            if !is_predecessor(&owner_of_id) {
+                return Err(ContractError::NotAuthorized(
+                    "Contract caller isn't the owner of the token id",
+                ));
+            }
+        }
+
+        Ok(())
+    }
+
+    pub(crate) fn merge_ids(&mut self, lemon_id: &TokenId, outfit_id: &TokenId) {
+        let lemon_model = self.model(lemon_id).unwrap();
+        let outfit_model = self.model(outfit_id).unwrap();
+        if let ModelKind::Lemon(mut lemon) = lemon_model {
+            let lemon_model = match outfit_model {
+                ModelKind::FireArm(firearm) => replace_outfit!(lemon.firearm, firearm),
+                ModelKind::ColdArm(coldarm) => replace_outfit!(lemon.coldarm, coldarm),
+                ModelKind::Cloth(cloth) => replace_outfit!(lemon.cloth, cloth),
+                ModelKind::Cap(cap) => replace_outfit!(lemon.cap, cap),
+                ModelKind::Back(back) => replace_outfit!(lemon.back, back),
+                _ => unreachable!(),
+            };
+
+            self.model_by_id.insert(lemon_id, &lemon_model);
+        }
+    }
+
+    pub(crate) fn unmerge_ids(&mut self, lemon_id: &TokenId, outfit_id: &TokenId) {
+        let lemon_model = self.model(lemon_id).unwrap();
+        let outfit_model = self.model(outfit_id).unwrap();
+        if let ModelKind::Lemon(mut lemon) = lemon_model {
+            let lemon_model = match outfit_model {
+                ModelKind::FireArm(_) => remove_outfit!(lemon.firearm),
+                ModelKind::ColdArm(_) => remove_outfit!(lemon.coldarm),
+                ModelKind::Cloth(_) => remove_outfit!(lemon.cloth),
+                ModelKind::Cap(_) => remove_outfit!(lemon.cap),
+                ModelKind::Back(_) => remove_outfit!(lemon.back),
+                _ => unreachable!(),
+            };
+
+            self.model_by_id.insert(lemon_id, &lemon_model);
+        }
     }
 
     pub(crate) fn burn_token(&mut self, token_id: &TokenId) {
@@ -55,4 +116,8 @@ impl Contract {
         }
         .emit();
     }
+}
+
+pub(crate) fn is_predecessor(id: &AccountId) -> bool {
+    *id != env::predecessor_account_id()
 }
