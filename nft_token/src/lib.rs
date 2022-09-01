@@ -54,13 +54,19 @@ impl Contract {
 
     #[payable]
     pub fn nft_mint(&mut self, receiver_id: AccountId, kind: NftKind) -> TokenExt {
+        let token_id = self.new_token_id();
+
         let model = match kind {
-            NftKind::Lemon => ModelKind::Lemon(Lemon::from_trait_weights(&weights())),
-            NftKind::Firearm => ModelKind::FireArm(FireArm::from_trait_weights(&weights())),
-            NftKind::Coldarm => ModelKind::ColdArm(ColdArm::from_trait_weights(&weights())),
-            NftKind::Cloth => ModelKind::Cloth(Cloth::from_trait_weights(&weights())),
-            NftKind::Back => ModelKind::Back(Back::from_trait_weights(&weights())),
-            NftKind::Cap => ModelKind::Cap(Cap::from_trait_weights(&weights())),
+            NftKind::Lemon => ModelKind::Lemon(Lemon::from_trait_weights(&token_id, &weights())),
+            NftKind::FireArm => {
+                ModelKind::FireArm(FireArm::from_trait_weights(&token_id, &weights()))
+            }
+            NftKind::ColdArm => {
+                ModelKind::ColdArm(ColdArm::from_trait_weights(&token_id, &weights()))
+            }
+            NftKind::Cloth => ModelKind::Cloth(Cloth::from_trait_weights(&token_id, &weights())),
+            NftKind::Back => ModelKind::Back(Back::from_trait_weights(&token_id, &weights())),
+            NftKind::Cap => ModelKind::Cap(Cap::from_trait_weights(&token_id, &weights())),
         };
 
         let token_metadata = TokenMetadata {
@@ -78,7 +84,7 @@ impl Contract {
             reference_hash: None,
         };
 
-        self.internal_mint(receiver_id, token_metadata, model)
+        self.internal_mint(token_id, receiver_id, token_metadata, model)
     }
 
     pub fn get_owner_by_token_id(&self, token_id: TokenId) -> Option<AccountId> {
