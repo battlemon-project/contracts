@@ -1,4 +1,4 @@
-use crate::{helpers, ContractError, STORAGE_PER_SALE};
+use crate::{ContractError, STORAGE_PER_SALE};
 use battlemon_models::market::bid::BidForContract;
 use battlemon_models::market::events::MarketEventKind;
 use near_sdk::serde::{Deserialize, Serialize};

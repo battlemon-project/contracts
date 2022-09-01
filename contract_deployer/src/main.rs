@@ -6,6 +6,7 @@ use lemotests::Nearable;
 use lemotests_macro::add_helpers;
 use near_sdk::json_types::U128;
 use token_metadata_ext::TokenExt;
+use near_contract_standards::non_fungible_token::TokenId;
 
 pub const NFT_PATH: &str = "./target/wasm32-unknown-unknown/release/nft_token.wasm";
 pub const MARKET_PATH: &str = "./target/wasm32-unknown-unknown/release/nft_market.wasm";
@@ -126,6 +127,26 @@ async fn deploy_and_save_creds() -> anyhow::Result<()> {
         .with_gas(Tgas(10))
         .then()
         .alice_call_nft_contract_nft_mint(&alice, NftKind::Lemon)?
+        .with_deposit(Near(1))
+        .with_gas(Tgas(10))
+        .then()
+        .alice_call_nft_contract_nft_mint(&alice, NftKind::Back)?
+        .with_deposit(Near(1))
+        .with_gas(Tgas(10))
+        .then()
+        .alice_call_nft_contract_nft_mint(&alice, NftKind::Cap)?
+        .with_deposit(Near(1))
+        .with_gas(Tgas(10))
+        .then()
+        .alice_call_nft_contract_nft_mint(&alice, NftKind::FireArm)?
+        .with_deposit(Near(1))
+        .with_gas(Tgas(10))
+        .then()
+        .alice_call_nft_contract_nft_mint(&alice, NftKind::Cloth)?
+        .with_deposit(Near(1))
+        .with_gas(Tgas(10))
+        .then()
+        .alice_call_nft_contract_nft_mint(&alice, NftKind::ColdArm)?
         .with_deposit(Near(1))
         .with_gas(Tgas(10))
         .then()
@@ -359,11 +380,11 @@ async fn add_ten_bids_ten_asks() -> anyhow::Result<()> {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    // deploy_and_save_creds().await?;
+    deploy_and_save_creds().await?;
     // nft_mint_testnet().await?;
     // market_sale_testnet().await?;
     // redeploy().await?;
-    try_sale().await?;
+    // try_sale().await?;
     // add_ten_bids_ten_asks().await?;
     Ok(())
 }

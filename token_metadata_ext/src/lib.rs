@@ -71,14 +71,11 @@ impl TokenExt {
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {
-    use std::collections::HashSet;
-
-    use nft_models::lemon::*;
-
     use super::*;
+    use battlemon_models::nft::{FromTraitWeights, Lemon};
 
     fn get_lemon_model() -> Lemon {
-        Lemon::from_random(&[10, 12, 13, 14])
+        Lemon::from_trait_weights(&[10, 12, 13, 14])
     }
 
     #[test]
@@ -98,12 +95,12 @@ mod tests {
             extra: None,
             reference: None,
             reference_hash: None,
-            model: expected_model.clone().into(),
+            model: ModelKind::Lemon(expected_model.clone()),
         };
 
         let (actual_metadata, actual_model) = token_metadata_ext.clone().split();
 
-        assert_eq!(actual_model, expected_model.into());
+        assert_eq!(actual_model, ModelKind::Lemon(expected_model.clone()));
         assert_eq!(token_metadata_ext.title, actual_metadata.title);
         assert_eq!(token_metadata_ext.description, actual_metadata.description);
         assert_eq!(token_metadata_ext.media, actual_metadata.media);
@@ -130,12 +127,13 @@ mod tests {
 
         let expected_model = get_lemon_model();
 
-        let token_ext = TokenExt::from_parts(token.clone(), expected_model.clone().into());
+        let token_ext =
+            TokenExt::from_parts(token.clone(), ModelKind::Lemon(expected_model.clone()));
         assert_eq!(token.token_id, token_ext.token_id);
         assert_eq!(token.metadata, token_ext.metadata);
         assert_eq!(token.owner_id, token_ext.owner_id);
         assert_eq!(token.approved_account_ids, token_ext.approved_account_ids);
-        let expected: ModelKind = expected_model.into();
+        let expected = ModelKind::Lemon(expected_model.clone());
         assert_eq!(expected, token_ext.model)
     }
 }

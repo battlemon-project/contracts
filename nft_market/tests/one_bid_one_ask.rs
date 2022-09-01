@@ -1,9 +1,11 @@
 mod helpers;
 
 use battlemon_models::market::{ask::AskForContract, bid::BidForContract};
+use battlemon_models::nft::NftKind;
 use helpers::{MARKET, MARKET_PATH, NFT, NFT_PATH};
 use lemotests::prelude::*;
 use lemotests_macro::add_helpers;
+use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::json_types::U128;
 use token_metadata_ext::TokenExt;
 
@@ -81,7 +83,7 @@ async fn alice_ask_for_nft_token_five_bob_bid_six_alice_receive_five_bob_receive
         .call_market_contract_init(&nft)?
         .with_gas(Tgas(10))
         .then()
-        .alice_call_nft_contract_nft_mint(&alice)?
+        .alice_call_nft_contract_nft_mint(&alice, NftKind::Lemon)?
         .with_deposit(Near(1))
         .with_gas(Tgas(10))
         .then()
@@ -166,7 +168,7 @@ async fn bob_bid_six_alice_ask_for_nft_token_five_alice_receive_six_bob_receive_
         .call_market_contract_init(&nft)?
         .with_gas(Tgas(10))
         .then()
-        .alice_call_nft_contract_nft_mint(&alice)?
+        .alice_call_nft_contract_nft_mint(&alice, NftKind::Lemon)?
         .with_deposit(Near(1))
         .with_gas(Tgas(10))
         .then()
@@ -251,7 +253,7 @@ async fn bid_first_ask_second_then_trade_then_bid_is_removed_and_ask_does_not_cr
         .call_market_contract_init(&nft)?
         .with_gas(Tgas(10))
         .then()
-        .alice_call_nft_contract_nft_mint(&alice)?
+        .alice_call_nft_contract_nft_mint(&alice, NftKind::Lemon)?
         .with_deposit(Near(1))
         .with_gas(Tgas(10))
         .then()
@@ -322,7 +324,7 @@ async fn ask_first_bid_second_then_trade_then_ask_is_removed_and_bid_does_not_cr
         .call_market_contract_init(&nft)?
         .with_gas(Tgas(10))
         .then()
-        .alice_call_nft_contract_nft_mint(&alice)?
+        .alice_call_nft_contract_nft_mint(&alice, NftKind::Lemon)?
         .with_deposit(Near(1))
         .with_gas(Tgas(10))
         .then()
