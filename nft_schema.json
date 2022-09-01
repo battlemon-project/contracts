@@ -39,6 +39,17 @@
       ]
     },
     {
+      "name": "nft_tokens_for_owner",
+      "initable": false,
+      "kind": "view",
+      "arguments": [
+        {
+          "name": "account_id",
+          "type": "String"
+        }
+      ]
+    },
+    {
       "name": "nft_transfer",
       "initable": false,
       "kind": "call",
@@ -92,6 +103,28 @@
         {
           "name": "msg",
           "type": "Option<String>"
+        }
+      ]
+    },
+    {
+      "name": "assemble_compound_nft",
+      "initable": false,
+      "kind": "call",
+      "arguments": [
+        {
+          "name": "instructions",
+          "type": "Vec<TokenId>"
+        }
+      ]
+    },
+    {
+      "name": "disassemble_compound_nft",
+      "initable": false,
+      "kind": "call",
+      "arguments": [
+        {
+          "name": "instructions",
+          "type": "Vec<TokenId>"
         }
       ]
     }
