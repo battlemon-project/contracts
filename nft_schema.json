@@ -28,6 +28,17 @@
       ]
     },
     {
+      "name": "nft_mint_full",
+      "initable": false,
+      "kind": "call",
+      "arguments": [
+        {
+          "name": "receiver_id",
+          "type": "String"
+        }
+      ]
+    },
+    {
       "name": "nft_token",
       "initable": false,
       "kind": "view",
