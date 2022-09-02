@@ -89,8 +89,11 @@ impl Contract {
     #[payable]
     pub fn nft_mint_full(&mut self, receiver_id: AccountId) -> TokenExt {
         require!(
-            env::prepaid_gas() < near_sdk::Gas(40_000_000_000_000),
-            "Not enough gas"
+            env::prepaid_gas() >= near_sdk::Gas(40_000_000_000_000),
+            format!(
+                "Not enough gas for full mint, attached gas is {:?}",
+                env::prepaid_gas()
+            )
         );
         let fire_arm_token_id = self.new_token_id();
         let fire_arm_model =
