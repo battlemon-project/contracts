@@ -86,6 +86,66 @@ impl Contract {
         self.internal_mint(token_id, receiver_id, token_metadata, model)
     }
 
+    #[payable]
+    pub fn nft_mint_full(&mut self, receiver_id: AccountId) -> TokenExt {
+        let lemon_token_id = self.new_token_id();
+        let lemon_model = ModelKind::Lemon(Lemon::from_trait_weights(&lemon_token_id, &weights()));
+
+        let fire_arm_token_id = self.new_token_id();
+        let fire_arm_model =
+            ModelKind::FireArm(FireArm::from_trait_weights(&fire_arm_token_id, &weights()));
+
+        let cold_arm_token_id = self.new_token_id();
+        let cold_arm_model =
+            ModelKind::ColdArm(ColdArm::from_trait_weights(&cold_arm_token_id, &weights()));
+
+        let cloth_token_id = self.new_token_id();
+        let cloth_model = ModelKind::Cloth(Cloth::from_trait_weights(&cloth_token_id, &weights()));
+
+        let back_token_id = self.new_token_id();
+        let back_model = ModelKind::Back(Back::from_trait_weights(&back_token_id, &weights()));
+
+        let cap_token_id = self.new_token_id();
+        let cap_model = ModelKind::Cap(Cap::from_trait_weights(&cap_token_id, &weights()));
+
+        let token_metadata = TokenMetadata {
+            title: None,
+            description: None,
+            media: Some(NFT_BACK_IMAGE.to_string()),
+            media_hash: None,
+            copies: None,
+            issued_at: None,
+            expires_at: None,
+            starts_at: None,
+            updated_at: None,
+            extra: None,
+            reference: None,
+            reference_hash: None,
+        };
+
+        let parts = vec![
+            (lemon_token_id, lemon_model),
+            (fire_arm_token_id, fire_arm_model),
+            (cold_arm_token_id, cold_arm_model),
+            (cloth_token_id, cloth_model),
+            (back_token_id, back_model),
+            (cap_token_id, cap_model),
+        ];
+
+        for (token_id, model) in parts.iter() {
+            self.internal_mint(
+                token_id.clone(),
+                receiver_id.clone(),
+                token_metadata.clone(),
+                model.clone(),
+            );
+        }
+
+        let tokens_ids: Vec<_> = parts.iter().map(|(id, _)| id.clone()).collect();
+        self.assemble_compound_nft(tokens_ids.clone());
+        self.nft_token(tokens_ids[0].clone()).unwrap()
+    }
+
     pub fn get_owner_by_token_id(&self, token_id: TokenId) -> Option<AccountId> {
         self.tokens.owner_by_id.get(&token_id)
     }
