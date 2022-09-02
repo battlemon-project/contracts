@@ -3,7 +3,9 @@ use near_contract_standards::non_fungible_token::enumeration::NonFungibleTokenEn
 use near_contract_standards::non_fungible_token::metadata::{
     NFTContractMetadata, NonFungibleTokenMetadataProvider, TokenMetadata, NFT_METADATA_SPEC,
 };
-use near_contract_standards::non_fungible_token::{NonFungibleToken, TokenId};
+use near_contract_standards::non_fungible_token::{
+    refund_deposit_to_account, NonFungibleToken, TokenId,
+};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{LazyOption, LookupMap};
 use near_sdk::env::{self, panic_str};
@@ -139,8 +141,10 @@ impl Contract {
             (lemon_token_id, lemon_model),
         ];
 
+        let initial_storage_usage = env::storage_usage();
+
         for (token_id, model) in parts.iter() {
-            self.internal_mint(
+            self.internal_mint_full(
                 token_id.clone(),
                 receiver_id.clone(),
                 token_metadata.clone(),
@@ -153,6 +157,11 @@ impl Contract {
         for id in other_ids {
             self.merge_ids(lemon_id, id);
         }
+
+        refund_deposit_to_account(
+            env::storage_usage() - initial_storage_usage,
+            env::predecessor_account_id(),
+        );
         self.nft_token(lemon_id.clone()).unwrap()
     }
 
