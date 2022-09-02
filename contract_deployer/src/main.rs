@@ -4,9 +4,9 @@ use lemotests::prelude::*;
 use lemotests::serde_json::json;
 use lemotests::Nearable;
 use lemotests_macro::add_helpers;
+use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::json_types::U128;
 use token_metadata_ext::TokenExt;
-use near_contract_standards::non_fungible_token::TokenId;
 
 pub const NFT_PATH: &str = "./target/wasm32-unknown-unknown/release/nft_token.wasm";
 pub const MARKET_PATH: &str = "./target/wasm32-unknown-unknown/release/nft_market.wasm";
@@ -203,6 +203,28 @@ async fn try_mint() -> anyhow::Result<()> {
     Ok(())
 }
 
+async fn try_mint_full() -> anyhow::Result<()> {
+    let bchain = StateBuilder::testnet()
+        .with_alice(Near(10))?
+        .build()
+        .await?;
+
+    let alice = bchain.alice_id()?;
+
+    let nft = lemotests::workspaces::Account::from_file("./testnet_creds/nft_contract.json")?;
+
+    bchain
+        .alice()?
+        .call(bchain.worker(), nft.id(), "nft_mint_full")
+        .args_json(json!({ "receiver_id": alice }))?
+        .max_gas()
+        .deposit(Near(1).parse())
+        .transact()
+        .await?;
+
+    Ok(())
+}
+
 async fn redeploy() -> anyhow::Result<()> {
     let worker = lemotests::workspaces::testnet().await?;
     let nft = lemotests::workspaces::Account::from_file(NFT_CREDS)
@@ -380,11 +402,13 @@ async fn add_ten_bids_ten_asks() -> anyhow::Result<()> {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    deploy_and_save_creds().await?;
+    // deploy_and_save_creds().await?;
     // nft_mint_testnet().await?;
     // market_sale_testnet().await?;
     // redeploy().await?;
     // try_sale().await?;
     // add_ten_bids_ten_asks().await?;
+    try_mint_full().await?;
+
     Ok(())
 }
