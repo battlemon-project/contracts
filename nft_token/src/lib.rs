@@ -88,9 +88,10 @@ impl Contract {
 
     #[payable]
     pub fn nft_mint_full(&mut self, receiver_id: AccountId) -> TokenExt {
-        let lemon_token_id = self.new_token_id();
-        let lemon_model = ModelKind::Lemon(Lemon::from_trait_weights(&lemon_token_id, &weights()));
-
+        require!(
+            env::prepaid_gas() < near_sdk::Gas(40_000_000_000_000),
+            "Not enough gas"
+        );
         let fire_arm_token_id = self.new_token_id();
         let fire_arm_model =
             ModelKind::FireArm(FireArm::from_trait_weights(&fire_arm_token_id, &weights()));
@@ -108,6 +109,9 @@ impl Contract {
         let cap_token_id = self.new_token_id();
         let cap_model = ModelKind::Cap(Cap::from_trait_weights(&cap_token_id, &weights()));
 
+        let lemon_token_id = self.new_token_id();
+        let lemon_model = ModelKind::Lemon(Lemon::from_trait_weights(&lemon_token_id, &weights()));
+
         let token_metadata = TokenMetadata {
             title: None,
             description: None,
@@ -124,12 +128,12 @@ impl Contract {
         };
 
         let parts = vec![
-            (lemon_token_id, lemon_model),
             (fire_arm_token_id, fire_arm_model),
             (cold_arm_token_id, cold_arm_model),
             (cloth_token_id, cloth_model),
             (back_token_id, back_model),
             (cap_token_id, cap_model),
+            (lemon_token_id, lemon_model),
         ];
 
         for (token_id, model) in parts.iter() {
@@ -142,8 +146,11 @@ impl Contract {
         }
 
         let tokens_ids: Vec<_> = parts.iter().map(|(id, _)| id.clone()).collect();
-        self.assemble_compound_nft(tokens_ids.clone());
-        self.nft_token(tokens_ids[0].clone()).unwrap()
+        let (lemon_id, other_ids) = tokens_ids.split_last().unwrap();
+        for id in other_ids {
+            self.merge_ids(lemon_id, id);
+        }
+        self.nft_token(lemon_id.clone()).unwrap()
     }
 
     pub fn get_owner_by_token_id(&self, token_id: TokenId) -> Option<AccountId> {
