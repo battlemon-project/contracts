@@ -1,8 +1,10 @@
 mod helpers;
 
+use battlemon_models::nft::NftKind;
 use helpers::{MARKET, MARKET_PATH, NFT, NFT_PATH};
 use lemotests::prelude::*;
 use lemotests_macro::add_helpers;
+use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::json_types::U128;
 
 add_helpers!("./nft_schema.json", "./market_schema.json",);
@@ -105,7 +107,7 @@ async fn ask_rejected_without_storage_deposit() -> anyhow::Result<()> {
         .call_market_contract_init(&nft)?
         .with_gas(Tgas(10))
         .then()
-        .alice_call_nft_contract_nft_mint(&alice)?
+        .alice_call_nft_contract_nft_mint(&alice, NftKind::Lemon)?
         .with_deposit(Near(1))
         .with_gas(Tgas(10))
         .then()
