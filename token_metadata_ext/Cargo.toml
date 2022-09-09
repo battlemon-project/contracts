@@ -1,9 +1,0 @@
-[package]
-name = "token_metadata_ext"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-near-sdk = "4.0.0"
-near-contract-standards = "4.0.0"
-battlemon_models = { git = "https://github.com/battlemon-project/battlemon_models", features = ["nft"] }

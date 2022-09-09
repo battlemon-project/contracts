@@ -218,7 +218,7 @@ async fn try_mint_full() -> anyhow::Result<()> {
         .call(bchain.worker(), nft.id(), "nft_mint_full")
         .args_json(json!({ "receiver_id": alice }))?
         .max_gas()
-        .deposit(Near(1).parse())
+        .deposit(Near(2).parse())
         .transact()
         .await?;
 
@@ -405,10 +405,10 @@ async fn main() -> anyhow::Result<()> {
     // deploy_and_save_creds().await?;
     // nft_mint_testnet().await?;
     // market_sale_testnet().await?;
-    // redeploy().await?;
+    redeploy().await?;
     // try_sale().await?;
     // add_ten_bids_ten_asks().await?;
-    try_mint_full().await?;
+    // try_mint_full().await?;
 
     Ok(())
 }

@@ -1,11 +1,10 @@
 use crate::Contract;
-use battlemon_models::nft::ModelKind;
+use battlemon_models::nft::{ModelKind, TokenExt};
 use near_contract_standards::non_fungible_token::{
     core::StorageKey, events::NftMint, metadata::TokenMetadata, refund_deposit_to_account, TokenId,
 };
 use near_sdk::{collections::UnorderedSet, env, AccountId};
 use std::collections::HashMap;
-use token_metadata_ext::TokenExt;
 
 impl Contract {
     pub(crate) fn new_token_id(&mut self) -> TokenId {
@@ -55,12 +54,8 @@ impl Contract {
         token_metadata: TokenMetadata,
         model: ModelKind,
     ) -> TokenExt {
-        let token = self.internal_mint_without_refund(
-            token_id,
-            token_owner_id,
-            token_metadata,
-            model,
-        );
+        let token =
+            self.internal_mint_without_refund(token_id, token_owner_id, token_metadata, model);
 
         NftMint {
             owner_id: &token.owner_id,

@@ -1,13 +1,11 @@
+use crate::error::Result;
+use crate::Contract;
+use battlemon_models::nft::TokenExt;
 use near_contract_standards::non_fungible_token::metadata::NFTContractMetadata;
 use near_contract_standards::non_fungible_token::{NonFungibleToken, Token};
 use near_sdk::borsh::{self, BorshSerialize};
 use near_sdk::collections::{LazyOption, LookupMap};
 use near_sdk::{AccountId, BorshStorageKey};
-
-use token_metadata_ext::TokenExt;
-
-use crate::error::Result;
-use crate::Contract;
 
 #[derive(BorshSerialize, BorshStorageKey)]
 enum StorageKey {

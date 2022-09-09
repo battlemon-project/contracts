@@ -15,9 +15,8 @@ use near_sdk::{assert_one_yocto, near_bindgen, require, AccountId, PanicOnDefaul
 use crate::consts::{DATA_IMAGE_SVG_LEMON_LOGO, IPFS_GATEWAY_BASE_URL, NFT_BACK_IMAGE};
 use battlemon_models::helpers_contract::weights;
 use battlemon_models::nft::{
-    Back, Cap, Cloth, ColdArm, FireArm, FromTraitWeights, Lemon, ModelKind, NftKind,
+    Back, Cap, Cloth, ColdArm, FireArm, FromTraitWeights, Lemon, ModelKind, NftKind, TokenExt,
 };
-use token_metadata_ext::TokenExt;
 
 mod consts;
 mod error;

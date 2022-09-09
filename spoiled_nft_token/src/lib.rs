@@ -1,7 +1,7 @@
+use battlemon_models::nft::TokenExt;
 use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::{env, near_bindgen};
-use token_metadata_ext::TokenExt;
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, Default)]
