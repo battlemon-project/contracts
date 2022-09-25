@@ -11,7 +11,7 @@ crate-type = ["cdylib", "rlib"]
 near-sdk = "4.0.0"
 thiserror = "1.0.32"
 near-contract-standards = "4.0.0"
-battlemon_models = { git = "https://github.com/battlemon-project/battlemon_models", features = ["nft-contract"] }
+battlemon_models = { git = "https://github.com/battlemon-project/battlemon_models", features = ["nft-contract", "nft-events"] }
 
 [dev-dependencies]
 tokio = "1.19.0"
