@@ -1,7 +1,7 @@
+use battlemon_models::helpers_contract::emit_log_event;
 use crate::{ContractError, STORAGE_PER_SALE};
 use battlemon_models::market::bid::BidForContract;
 use battlemon_models::market::events::MarketEventKind;
-use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::{env, AccountId};
 
 impl crate::Contract {
@@ -52,7 +52,3 @@ pub fn check_cross_contract_call(id: &AccountId) -> Result<(), ContractError> {
     Ok(())
 }
 
-pub fn emit_log_event<'de>(model: impl Deserialize<'de> + Serialize) {
-    let value = near_sdk::serde_json::to_value(model).unwrap();
-    env::log_str(&format!("{}:{value}", crate::EVENT_PREFIX));
-}
