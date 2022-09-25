@@ -1,4 +1,5 @@
 pub use ask::*;
+use battlemon_models::helpers_contract::emit_log_event;
 use battlemon_models::market::events::MarketEventKind;
 use battlemon_models::market::{ask::AskForContract, bid::BidForContract};
 pub use bid::*;
@@ -84,7 +85,7 @@ impl Contract {
         let bid = BidForContract::new(token_id, expire_at);
         match self.ask_less_than_bid(&bid) {
             None => {
-                helpers::emit_log_event(MarketEventKind::AddBid(bid.to_owned()));
+                emit_log_event(MarketEventKind::AddBid(bid.to_owned()));
 
                 self.bids
                     .entry(bid.token_id().to_owned())
