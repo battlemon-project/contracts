@@ -4,7 +4,7 @@ use near_sdk::env::STORAGE_PRICE_PER_BYTE;
 use near_sdk::{Balance, Gas};
 
 pub const STORAGE_PER_SALE: u128 = minimum_deposit();
-pub const EVENT_PREFIX: &str = "EVENT_JSON";
+
 
 pub const NO_DEPOSIT: Balance = 0;
 pub const ONE_YOCTO: Balance = 1;
