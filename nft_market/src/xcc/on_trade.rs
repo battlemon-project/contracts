@@ -1,4 +1,5 @@
-use crate::{helpers, Contract, ContractExt};
+use crate::{Contract, ContractExt};
+use battlemon_models::helpers_contract::emit_log_event;
 use battlemon_models::market::events::MarketEventKind;
 use battlemon_models::market::{ask::AskForContract, bid::BidForContract};
 use near_sdk::json_types::U128;
@@ -36,7 +37,7 @@ impl Contract {
             price: U128(trade_price),
         };
 
-        helpers::emit_log_event(MarketEventKind::Sale(trade_for_log));
+        emit_log_event(MarketEventKind::Sale(trade_for_log));
     }
 }
 
