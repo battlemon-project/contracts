@@ -13,9 +13,10 @@ use near_sdk::json_types::U128;
 use near_sdk::{assert_one_yocto, near_bindgen, require, AccountId, PanicOnDefault, Promise};
 
 use crate::consts::{DATA_IMAGE_SVG_LEMON_LOGO, IPFS_GATEWAY_BASE_URL, NFT_BACK_IMAGE};
-use battlemon_models::helpers_contract::weights;
+use battlemon_models::helpers_contract::{emit_log_event, weights};
 use battlemon_models::nft::{
-    Back, Cap, Cloth, ColdArm, FireArm, FromTraitWeights, Lemon, ModelKind, NftKind, TokenExt,
+    Back, Cap, Cloth, ColdArm, FireArm, FromTraitWeights, Lemon, ModelKind, NftEvent, NftEventKind,
+    NftKind, StandardKind, TokenExt, VersionKind,
 };
 
 mod consts;
@@ -260,7 +261,7 @@ impl Contract {
     }
 
     #[payable]
-    pub fn assemble_compound_nft(&mut self, instructions: Vec<TokenId>) {
+    pub fn assemble_compound_nft(&mut self, instructions: Vec<TokenId>) -> TokenExt {
         assert_one_yocto();
         self.check_instructions(&instructions)
             .expect("Provided instructions contain errors");
@@ -269,10 +270,20 @@ impl Contract {
         for id in other_ids {
             self.merge_ids(lemon_id, id);
         }
+
+        let event = NftEvent {
+            standard: StandardKind::Nep171,
+            version: VersionKind::V1_0_0,
+            event: NftEventKind::AssembleNft,
+            data: None,
+        };
+
+        emit_log_event(event);
+        self.nft_token(lemon_id.clone()).unwrap()
     }
 
     #[payable]
-    pub fn disassemble_compound_nft(&mut self, instructions: Vec<TokenId>) {
+    pub fn disassemble_compound_nft(&mut self, instructions: Vec<TokenId>) -> TokenExt {
         assert_one_yocto();
         self.check_instructions(&instructions)
             .expect("Provided instructions contain errors");
@@ -281,6 +292,16 @@ impl Contract {
         for id in other_ids {
             self.unmerge_ids(lemon_id, id);
         }
+
+        let event = NftEvent {
+            standard: StandardKind::Nep171,
+            version: VersionKind::V1_0_0,
+            event: NftEventKind::DisassembleNft,
+            data: None,
+        };
+
+        emit_log_event(event);
+        self.nft_token(lemon_id.clone()).unwrap()
     }
 }
 

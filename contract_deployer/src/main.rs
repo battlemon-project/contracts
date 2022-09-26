@@ -1,12 +1,11 @@
 use anyhow::Context;
-use battlemon_models::nft::NftKind;
+use battlemon_models::nft::{ModelKind, NftKind, TokenExt};
 use lemotests::prelude::*;
 use lemotests::serde_json::json;
 use lemotests::Nearable;
 use lemotests_macro::add_helpers;
 use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::json_types::U128;
-use token_metadata_ext::TokenExt;
 
 pub const NFT_PATH: &str = "./target/wasm32-unknown-unknown/release/nft_token.wasm";
 pub const MARKET_PATH: &str = "./target/wasm32-unknown-unknown/release/nft_market.wasm";
@@ -19,21 +18,57 @@ add_helpers!("./nft_schema.json", "./market_schema.json",);
 
 async fn nft_mint_testnet() -> anyhow::Result<()> {
     let bchain = StateBuilder::testnet()
-        .with_contract(NFT, NFT_PATH, Near(10))?
         .with_alice(Near(10))?
         .build()
         .await?;
 
-    let [nft, alice] = bchain.string_ids()?;
-    println!("{}", nft);
+    let alice = bchain.alice_id()?;
+
+    let nft = lemotests::workspaces::Account::from_file("./testnet_creds/nft_contract.json")?;
+
     bchain
-        .call_nft_contract_init(&nft)?
-        .with_gas(Tgas(10))
-        .then()
-        .alice_call_nft_contract_nft_mint(&alice, NftKind::Lemon)?
-        .with_deposit(Near(1))
-        .with_gas(Tgas(10))
-        .execute()
+        .alice()?
+        .call(bchain.worker(), nft.id(), "nft_mint")
+        .args_json(json!({ "receiver_id": alice, "kind": "lemon" }))?
+        .max_gas()
+        .deposit(Near(1).parse())
+        .transact()
+        .await?;
+
+    bchain
+        .alice()?
+        .call(bchain.worker(), nft.id(), "nft_mint")
+        .args_json(json!({ "receiver_id": alice, "kind": "fire_arm" }))?
+        .max_gas()
+        .deposit(Near(1).parse())
+        .transact()
+        .await?;
+
+    let tokens: Vec<TokenExt> = bchain
+        .alice()?
+        .call(bchain.worker(), nft.id(), "nft_tokens_for_owner")
+        .args_json(json!({ "account_id": alice }))?
+        .view()
+        .await?
+        .json()?;
+
+    let lemon = tokens
+        .iter()
+        .find(|t| matches!(t.model, ModelKind::Lemon(..)))
+        .unwrap();
+    let fire_arm = tokens
+        .iter()
+        .find(|t| matches!(t.model, ModelKind::FireArm(..)))
+        .unwrap();
+
+    let instructions = vec![&lemon.token_id, &fire_arm.token_id];
+    bchain
+        .alice()?
+        .call(bchain.worker(), nft.id(), "assemble_compound_nft")
+        .args_json(json!({ "instructions": instructions }))?
+        .max_gas()
+        .deposit(1)
+        .transact()
         .await?;
 
     Ok(())
@@ -402,10 +437,10 @@ async fn add_ten_bids_ten_asks() -> anyhow::Result<()> {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    // deploy_and_save_creds().await?;
+    deploy_and_save_creds().await?;
     // nft_mint_testnet().await?;
     // market_sale_testnet().await?;
-    redeploy().await?;
+    // redeploy().await?;
     // try_sale().await?;
     // add_ten_bids_ten_asks().await?;
     // try_mint_full().await?;
