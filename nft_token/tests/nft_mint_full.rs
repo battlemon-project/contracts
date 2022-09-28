@@ -25,13 +25,12 @@ async fn full_mint_works() -> anyhow::Result<()> {
         .alice_call_nft_contract_nft_mint_full(&alice)?
         .with_gas(Tgas(100))
         .with_deposit(Near(1))
-        .then()
-        .view_nft_contract_nft_token("1")?
-        .with_label("token")
+        .with_label("lemon")
         .execute()
         .await?;
 
-    let token: TokenExt = result.tx("token")?.json()?;
+    let token: TokenExt = result.tx("lemon")?.json()?;
+
     assert!(matches!(
         token.model,
         ModelKind::Lemon(Lemon {
