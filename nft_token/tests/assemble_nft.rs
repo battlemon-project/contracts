@@ -1,10 +1,7 @@
-#![feature(let_else)]
-
-use battlemon_models::nft::{Lemon, ModelKind, NftKind};
+use battlemon_models::nft::{Lemon, ModelKind, NftKind, TokenExt};
 use lemotests::prelude::*;
 use lemotests_macro::add_helpers;
 use near_contract_standards::non_fungible_token::TokenId;
-use token_metadata_ext::TokenExt;
 
 const NFT_PATH: &str = "../target/wasm32-unknown-unknown/release/nft_token.wasm";
 const NFT: &str = "nft_contract";

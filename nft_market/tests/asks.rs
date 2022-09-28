@@ -12,7 +12,7 @@ add_helpers!("./nft_schema.json", "./market_schema.json",);
 
 #[tokio::test]
 async fn ask_works_for_storage_deposit_made_by_alice_for_bob() -> anyhow::Result<()> {
-    let bchain = StateBuilder::testnet()
+    let bchain = StateBuilder::sandbox()
         .with_contract(NFT, NFT_PATH, Near(10))?
         .with_contract(MARKET, MARKET_PATH, Near(10))?
         .with_alice(Near(10))?

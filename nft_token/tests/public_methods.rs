@@ -1,4 +1,4 @@
-use battlemon_models::nft::NftKind;
+use battlemon_models::nft::{NftKind, TokenExt};
 use lemotests::prelude::*;
 use lemotests_macro::add_helpers;
 use near_contract_standards::non_fungible_token::TokenId;
@@ -333,5 +333,10 @@ async fn after_mint_exceeded_attached_deposit_is_refunded() -> anyhow::Result<()
     let alice_balance = result[2].balance();
 
     assert!(alice_balance > Near(9));
+    Ok(())
+}
+
+#[tokio::test]
+async fn nft_is_dissambled_after_transfer() -> anyhow::Result<()> {
     Ok(())
 }

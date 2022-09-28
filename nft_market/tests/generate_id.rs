@@ -1,10 +1,11 @@
 mod helpers;
-
 use battlemon_models::market::bid::BidForContract;
+use battlemon_models::nft::NftKind;
 use helpers::{MARKET, MARKET_PATH, NFT};
 use lemotests::workspaces::operations::Function;
 use lemotests::{Gasable, Near, StateBuilder, Tgas};
 use lemotests_macro::add_helpers;
+use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::json_types::U128;
 use near_sdk::serde_json::json;
 
@@ -12,7 +13,7 @@ add_helpers!("./nft_schema.json", "./market_schema.json",);
 
 #[tokio::test]
 async fn create_ten_bids_all_unique_ids() -> anyhow::Result<()> {
-    let bchain = StateBuilder::testnet()
+    let bchain = StateBuilder::sandbox()
         .with_contract(MARKET, MARKET_PATH, Near(10))?
         .with_alice(Near(10))?
         .build()

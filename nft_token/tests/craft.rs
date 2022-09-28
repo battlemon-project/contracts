@@ -1,6 +1,7 @@
 use battlemon_models::nft::NftKind;
 use lemotests::{Near, StateBuilder, Tgas};
 use lemotests_macro::add_helpers;
+use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::json_types::U128;
 
 const NFT_PATH: &str = "../target/wasm32-unknown-unknown/release/nft_token.wasm";
@@ -11,7 +12,7 @@ add_helpers!("./nft_schema.json", "./juice_schema.json");
 
 #[tokio::test]
 async fn mint_works() -> anyhow::Result<()> {
-    let bchain = StateBuilder::testnet()
+    let bchain = StateBuilder::sandbox()
         .with_contract(NFT, NFT_PATH, Near(10))?
         .with_contract(JUICE, JUICE_PATH, Near(10))?
         .with_alice(Near(10))?

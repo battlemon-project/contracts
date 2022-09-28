@@ -1,13 +1,12 @@
 mod helpers;
 
 use battlemon_models::market::{ask::AskForContract, bid::BidForContract};
-use battlemon_models::nft::NftKind;
+use battlemon_models::nft::{NftKind, TokenExt};
 use helpers::{MARKET, MARKET_PATH, NFT, NFT_PATH};
 use lemotests::prelude::*;
 use lemotests_macro::add_helpers;
 use near_contract_standards::non_fungible_token::TokenId;
 use near_sdk::json_types::U128;
-use token_metadata_ext::TokenExt;
 
 add_helpers!("./nft_schema.json", "./market_schema.json",);
 
