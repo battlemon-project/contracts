@@ -1,4 +1,4 @@
-use battlemon_models::nft::{NftKind, TokenExt};
+use battlemon_models::nft::{Lemon, ModelKind, NftKind, TokenExt};
 use lemotests::prelude::*;
 use lemotests_macro::add_helpers;
 use near_contract_standards::non_fungible_token::TokenId;
@@ -337,6 +337,57 @@ async fn after_mint_exceeded_attached_deposit_is_refunded() -> anyhow::Result<()
 }
 
 #[tokio::test]
-async fn nft_is_dissambled_after_transfer() -> anyhow::Result<()> {
+async fn nft_is_disassembled_after_transfer() -> anyhow::Result<()> {
+    let bchain = StateBuilder::sandbox()
+        .with_contract(NFT, NFT_PATH, Near(10))?
+        .with_alice(Near(10))?
+        .build()
+        .await?;
+
+    let [nft, alice] = bchain.string_ids()?;
+
+    let result = bchain
+        .call_nft_contract_init(&nft)?
+        .with_gas(Tgas(10))
+        .then()
+        .alice_call_nft_contract_nft_mint_full(&alice)?
+        .with_gas(Tgas(100))
+        .with_deposit(Near(1))
+        .with_label("lemon")
+        .execute()
+        .await?;
+
+    let token: TokenExt = result.tx("lemon")?.json()?;
+    let token_id = token.token_id.as_str();
+
+    let result = result
+        .into_state()
+        .alice_call_nft_contract_nft_transfer(&nft, token_id, None, None)?
+        .with_gas(Tgas(10))
+        .with_deposit(1)
+        .then()
+        .view_nft_contract_nft_token(token_id)?
+        .with_label("lemon")
+        .execute()
+        .await?;
+
+    let token: TokenExt = result.tx("lemon")?.json()?;
+
+    let ModelKind::Lemon(
+        Lemon {
+            fire_arm: None,
+            cold_arm: None,
+            cloth: None,
+            cap: None,
+            back: None,
+            sets,
+            ..
+        }
+    ) = token.model else {
+       panic!("Token model must be Lemon");
+    };
+
+    assert!(sets.is_empty());
+
     Ok(())
 }
