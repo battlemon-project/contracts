@@ -99,6 +99,20 @@ impl Contract {
         }
     }
 
+    pub(crate) fn disassemble_all(&mut self, token_id: &TokenId) {
+        let model = self.model(token_id).unwrap();
+        if let ModelKind::Lemon(mut lemon) = model {
+            lemon.fire_arm = None;
+            lemon.cold_arm = None;
+            lemon.cloth = None;
+            lemon.cap = None;
+            lemon.back = None;
+            lemon.sets.clear();
+
+            self.model_by_id.insert(token_id, &ModelKind::Lemon(lemon));
+        }
+    }
+
     pub(crate) fn burn_token(&mut self, token_id: &TokenId) {
         self.model_by_id.remove(token_id);
         let tokens = &mut self.tokens;
