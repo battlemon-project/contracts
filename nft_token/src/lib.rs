@@ -16,7 +16,7 @@ use crate::consts::{DATA_IMAGE_SVG_LEMON_LOGO, IPFS_GATEWAY_BASE_URL, NFT_BACK_I
 use battlemon_models::helpers_contract::{emit_log_event, weights};
 use battlemon_models::nft::{
     Back, Cap, Cloth, ColdArm, FireArm, FromTraitWeights, Lemon, ModelKind, NftEvent, NftEventKind,
-    NftKind, StandardKind, TokenExt, VersionKind,
+    NftKind, Set, StandardKind, TokenExt, VersionKind,
 };
 
 mod consts;
@@ -68,6 +68,7 @@ impl Contract {
             NftKind::Cloth => ModelKind::Cloth(Cloth::from_trait_weights(&token_id, &weights())),
             NftKind::Back => ModelKind::Back(Back::from_trait_weights(&token_id, &weights())),
             NftKind::Cap => ModelKind::Cap(Cap::from_trait_weights(&token_id, &weights())),
+            NftKind::Set => ModelKind::Set(Set::from_trait_weights(&token_id, &weights())),
         };
 
         let token_metadata = TokenMetadata {
@@ -207,12 +208,8 @@ impl Contract {
         memo: Option<String>,
     ) {
         self.tokens
-            .nft_transfer(receiver_id, token_id, approval_id, memo);
-
-        // After transfer NFT, we must disassemble compound NFT.
-        // Put off token with `token_id` from tokens that contain it.
-        // self.disassemble_token(&token_id)
-        //     .expect("Couldn't disassemble token");
+            .nft_transfer(receiver_id, token_id.clone(), approval_id, memo);
+        self.disassemble_all(&token_id);
     }
 
     // todo: add security checking
