@@ -128,7 +128,7 @@ impl Contract {
 
         near_contract_standards::non_fungible_token::events::NftBurn {
             owner_id: &owner_id,
-            token_ids: &[token_id],
+            token_ids: &[token_id.as_str()],
             authorized_id: None,
             memo: None,
         }
