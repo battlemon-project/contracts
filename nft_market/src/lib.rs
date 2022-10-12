@@ -104,6 +104,20 @@ impl Contract {
         self.asks.get(&token_id)
     }
 
+    pub fn cancel_ask(&mut self, token_id: TokenId) -> Result<(), ContractError> {
+        let ask = self.asks.get(&token_id).ok_or(ContractError::AskNotFound)?;
+
+        if ask.owner_id() != &env::predecessor_account_id() {
+            return Err(ContractError::NotAuthorized(
+                "Ask's owner is not the same as the caller",
+            ));
+        }
+
+        emit_log_event(MarketEventKind::RemoveAsk(ask));
+
+        Ok(())
+    }
+
     pub fn bids(&self, token_id: TokenId) -> Option<&Vec<BidForContract>> {
         self.bids.get(&token_id)
     }
