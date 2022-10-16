@@ -19,3 +19,4 @@ once_cell = "1.8.0"
 anyhow = "1.0.57"
 lemotests = { git = "https://github.com/battlemon-project/lemotests" }
 lemotests-macro = { git = "https://github.com/battlemon-project/lemotests" }
+battlemon_models = { git = "https://github.com/battlemon-project/battlemon_models", features = ["nft-contract"] }
