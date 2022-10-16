@@ -15,8 +15,8 @@ pub enum ContractError {
     OneYoctoDeposit,
     #[error("The storage error occurred: {0}")]
     StorageError(&'static str),
-    #[error("The ask does not exist")]
-    AskNotFound,
+    #[error("The item does not exist")]
+    NotFound(&'static str),
 }
 
 impl Debug for ContractError {
