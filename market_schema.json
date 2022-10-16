@@ -82,6 +82,17 @@
           "type": "Option<String>"
         }
       ]
+    },
+    {
+      "name": "cancel_ask",
+      "initable": false,
+      "kind": "call",
+      "arguments": [
+        {
+          "name": "token_id",
+          "type": "&TokenId"
+        }
+      ]
     }
   ]
 }
