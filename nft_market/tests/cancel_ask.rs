@@ -1,6 +1,6 @@
 mod helpers;
 
-use battlemon_models::market::{ask::AskForContract, bid::BidForContract};
+use battlemon_models::market::ask::AskForContract;
 use battlemon_models::nft::{NftKind, TokenExt};
 use helpers::{MARKET, MARKET_PATH, NFT, NFT_PATH};
 use lemotests::prelude::*;
