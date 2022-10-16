@@ -1,5 +1,5 @@
-use battlemon_models::helpers_contract::emit_log_event;
 use crate::{ContractError, STORAGE_PER_SALE};
+use battlemon_models::helpers_contract::emit_log_event;
 use battlemon_models::market::bid::BidForContract;
 use battlemon_models::market::events::MarketEventKind;
 use near_sdk::{env, AccountId};
@@ -30,13 +30,13 @@ impl crate::Contract {
         }
 
         if let Some(bids) = self.bids.get_mut(token_id) {
-            emit_log_and_and_remove_bid(&bid.id, bids);
+            emit_log_and_remove_bid(&bid.id, bids);
             bids.is_empty().then(|| self.bids.remove(token_id));
         }
     }
 }
 
-fn emit_log_and_and_remove_bid(id: &str, bids: &mut Vec<BidForContract>) {
+pub(crate) fn emit_log_and_remove_bid(id: &str, bids: &mut Vec<BidForContract>) {
     if let Some(idx) = bids.iter().position(|b| b.id == id) {
         let bid = bids.swap_remove(idx);
         emit_log_event(MarketEventKind::RemoveBid(bid));
@@ -51,4 +51,3 @@ pub fn check_cross_contract_call(id: &AccountId) -> Result<(), ContractError> {
     }
     Ok(())
 }
-
