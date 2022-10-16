@@ -1,13 +1,6 @@
 use battlemon_models::market::ask::AskForContract;
 use battlemon_models::market::bid::BidForContract;
-use near_sdk::borsh::{self, BorshSerialize};
 use near_sdk::AccountId;
-
-#[derive(thiserror::Error, near_sdk::FunctionError, BorshSerialize, Debug)]
-pub enum BidError {
-    #[error("BidForContract is not found")]
-    BidNotFound,
-}
 
 impl crate::Contract {
     /// Add a bid to the auction to concrete the token.
