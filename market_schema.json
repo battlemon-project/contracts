@@ -93,6 +93,21 @@
           "type": "&TokenId"
         }
       ]
+    },
+    {
+      "name": "cancel_bid",
+      "initable": false,
+      "kind": "call",
+      "arguments": [
+        {
+          "name": "token_id",
+          "type": "&TokenId"
+        },
+        {
+          "name": "bid_id",
+          "type": "String"
+        }
+      ]
     }
   ]
 }
