@@ -30,30 +30,6 @@ pub struct Contract {
     storage_deposits: LookupMap<AccountId, Balance>,
 }
 
-// enum OrderType {
-//     AcceptAsk,
-//     AskLessBid(AccountId),
-//     AcceptBid {
-//         owner_id: AccountId,
-//         approval_id: u64,
-//     },
-// }
-//
-// #[derive(Deserialize)]
-// #[serde(crate = "near_sdk::serde")]
-// #[serde(rename_all = "snake_case")]
-// pub enum SaleType {
-//     AcceptBid,
-//     Selling,
-// }
-//
-// #[derive(Deserialize)]
-// #[serde(crate = "near_sdk::serde")]
-// pub struct SaleArgs {
-//     sale_type: SaleType,
-//     price: Option<U128>,
-// }
-
 #[derive(BorshSerialize, BorshStorageKey)]
 enum StorageKey {
     Asks,
@@ -104,15 +80,21 @@ impl Contract {
         self.asks.get(&token_id)
     }
 
+    #[handle_result]
     pub fn cancel_ask(&mut self, token_id: TokenId) -> Result<(), ContractError> {
-        let ask = self.asks.get(&token_id).ok_or(ContractError::AskNotFound)?;
+        let ask = self
+            .asks
+            .get(&token_id)
+            .ok_or(ContractError::NotFound("Ask doesn't exist"))?
+            .to_owned();
 
-        if ask.owner_id() != &env::predecessor_account_id() {
+        if ask.account_id() != &env::predecessor_account_id() {
             return Err(ContractError::NotAuthorized(
                 "Ask's owner is not the same as the caller",
             ));
         }
 
+        self.asks.remove(&token_id);
         emit_log_event(MarketEventKind::RemoveAsk(ask));
 
         Ok(())
@@ -120,6 +102,33 @@ impl Contract {
 
     pub fn bids(&self, token_id: TokenId) -> Option<&Vec<BidForContract>> {
         self.bids.get(&token_id)
+    }
+
+    #[handle_result]
+    pub fn cancel_bid(&mut self, token_id: TokenId, bid_id: String) -> Result<(), ContractError> {
+        let bids = self.bids.get_mut(&token_id).ok_or(ContractError::NotFound(
+            "Bids for provided token id don't exist",
+        ))?;
+
+        let idx = bids
+            .iter()
+            .position(|b| b.id == bid_id)
+            .ok_or(ContractError::NotFound(
+                "Bid with provided id doesn't exist",
+            ))?;
+        let bid = bids.get(idx).unwrap();
+        if bid.account_id() != &env::predecessor_account_id() {
+            return Err(ContractError::NotAuthorized(
+                "Ask's owner is not the same as the caller",
+            ));
+        }
+
+        let bid = bids.swap_remove(idx);
+        emit_log_event(MarketEventKind::RemoveBid(bid));
+
+        bids.is_empty().then(|| self.bids.remove(&token_id));
+
+        Ok(())
     }
 
     #[payable]
