@@ -70,7 +70,5 @@ async fn create_ten_bids_all_unique_ids() -> anyhow::Result<()> {
         .execute()
         .await?;
 
-    let bids = result.tx("view_bids")?.json::<Vec<BidForContract>>()?;
-    dbg!(bids);
     Ok(())
 }
