@@ -19,7 +19,7 @@ async fn ask_works_for_storage_deposit_made_by_alice_for_bob() -> anyhow::Result
         .with_bob(Near(10))?
         .build()
         .await?;
-    let [nft, market, alice, bob] = bchain.string_ids()?;
+    let [nft, market, _alice, bob] = bchain.string_ids()?;
 
     let result = bchain
         .call_nft_contract_init(&nft)?
