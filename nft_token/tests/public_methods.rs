@@ -357,8 +357,9 @@ async fn nft_is_disassembled_after_transfer() -> anyhow::Result<()> {
         .execute()
         .await?;
 
-    let token: TokenExt = result.tx("lemon")?.json()?;
-    let token_id = token.token_id.as_str();
+    let tokens: Vec<TokenExt> = result.tx("lemon")?.json()?;
+    let lemon_token = tokens.last().expect("Failed to get nft token");
+    let token_id = lemon_token.token_id.as_str();
 
     let result = result
         .into_state()

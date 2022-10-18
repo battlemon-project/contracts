@@ -29,7 +29,8 @@ async fn full_mint_works() -> anyhow::Result<()> {
         .execute()
         .await?;
 
-    let token: TokenExt = result.tx("lemon")?.json()?;
+    let tokens: Vec<TokenExt> = result.tx("lemon")?.json()?;
+    let token = tokens.last().expect("Failed to get nft token");
 
     assert!(matches!(
         token.model,
