@@ -1,5 +1,6 @@
 use near_contract_standards::non_fungible_token::core::NonFungibleTokenCore;
 use near_contract_standards::non_fungible_token::enumeration::NonFungibleTokenEnumeration;
+use near_contract_standards::non_fungible_token::events::NftMint;
 use near_contract_standards::non_fungible_token::metadata::{
     NFTContractMetadata, NonFungibleTokenMetadataProvider, TokenMetadata, NFT_METADATA_SPEC,
 };
@@ -90,7 +91,7 @@ impl Contract {
     }
 
     #[payable]
-    pub fn nft_mint_full(&mut self, receiver_id: AccountId) -> TokenExt {
+    pub fn nft_mint_full(&mut self, receiver_id: AccountId) -> Vec<TokenExt> {
         require!(
             env::prepaid_gas() >= near_sdk::Gas(40_000_000_000_000),
             format!(
@@ -152,8 +153,16 @@ impl Contract {
                 model.clone(),
             );
         }
-
         let tokens_ids: Vec<_> = parts.iter().map(|(id, _)| id.clone()).collect();
+        let tokens_ids_str: Vec<_> = tokens_ids.iter().map(String::as_str).collect();
+
+        NftMint {
+            owner_id: &receiver_id,
+            token_ids: &tokens_ids_str,
+            memo: None,
+        }
+        .emit();
+
         let (lemon_id, other_ids) = tokens_ids.split_last().unwrap();
         for id in other_ids {
             self.merge_ids(lemon_id, id);
@@ -163,7 +172,11 @@ impl Contract {
             env::storage_usage() - initial_storage_usage,
             env::predecessor_account_id(),
         );
-        self.nft_token(lemon_id.clone()).unwrap()
+
+        tokens_ids
+            .into_iter()
+            .flat_map(|id| self.nft_token(id))
+            .collect()
     }
 
     pub fn get_owner_by_token_id(&self, token_id: TokenId) -> Option<AccountId> {
