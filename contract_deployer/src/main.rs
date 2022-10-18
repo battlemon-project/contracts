@@ -129,8 +129,16 @@ async fn market_sale_testnet() -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn deploy_and_save_creds() -> anyhow::Result<()> {
-    let path = "./testnet_creds/";
+enum Environment {
+    TestNet,
+    LocalDevelopment,
+}
+
+async fn deploy_and_save_creds(env: Environment) -> anyhow::Result<()> {
+    let path = match env {
+        Environment::TestNet => "./testnet_creds/",
+        Environment::LocalDevelopment => "./local_dev_creds/",
+    };
 
     let bchain = StateBuilder::testnet()
         .with_contract(NFT, NFT_PATH, Near(10))?
@@ -260,9 +268,14 @@ async fn try_mint_full() -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn redeploy() -> anyhow::Result<()> {
+async fn redeploy(env: Environment) -> anyhow::Result<()> {
+    let path_prefix = match env {
+        Environment::TestNet => "./testnet_creds/",
+        Environment::LocalDevelopment => "./local_dev_creds/",
+    };
+    let nft_creds = format!("{path_prefix}{NFT}.json");
     let worker = lemotests::workspaces::testnet().await?;
-    let nft = lemotests::workspaces::Account::from_file(NFT_CREDS)
+    let nft = lemotests::workspaces::Account::from_file(nft_creds)
         .context("Failed to load creds for nft")?;
     let nft_wasm = tokio::fs::read(NFT_PATH)
         .await
@@ -270,8 +283,8 @@ async fn redeploy() -> anyhow::Result<()> {
     nft.deploy(&worker, &nft_wasm)
         .await
         .context("Failed to deploy nft")?;
-
-    let market = lemotests::workspaces::Account::from_file(MARKET_CREDS)?;
+    let market_creds = format!("{path_prefix}{MARKET}.json");
+    let market = lemotests::workspaces::Account::from_file(market_creds)?;
     let market_wasm = tokio::fs::read(MARKET_PATH).await?;
     market.deploy(&worker, &market_wasm).await?;
     Ok(())
@@ -437,10 +450,10 @@ async fn add_ten_bids_ten_asks() -> anyhow::Result<()> {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    deploy_and_save_creds().await?;
+    // deploy_and_save_creds(Environment::LocalDevelopment).await?;
     // nft_mint_testnet().await?;
     // market_sale_testnet().await?;
-    // redeploy().await?;
+    redeploy(Environment::LocalDevelopment).await?;
     // try_sale().await?;
     // add_ten_bids_ten_asks().await?;
     // try_mint_full().await?;

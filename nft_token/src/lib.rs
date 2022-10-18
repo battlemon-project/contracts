@@ -146,7 +146,7 @@ impl Contract {
         let initial_storage_usage = env::storage_usage();
 
         for (token_id, model) in parts.iter() {
-            self.internal_mint_full(
+            self.internal_mint_without_refund(
                 token_id.clone(),
                 receiver_id.clone(),
                 token_metadata.clone(),

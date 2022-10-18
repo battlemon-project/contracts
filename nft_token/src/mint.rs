@@ -44,30 +44,6 @@ impl Contract {
 
     /// Mint a new token without checking:
     /// * Whether the caller id is equal to the `owner_id`
-    /// * Assumes there will be a refund to the predecessor after covering the storage costs
-    ///
-    /// Returns the newly minted token and emits the mint event
-    pub(crate) fn internal_mint_full(
-        &mut self,
-        token_id: TokenId,
-        token_owner_id: AccountId,
-        token_metadata: TokenMetadata,
-        model: ModelKind,
-    ) -> TokenExt {
-        let token =
-            self.internal_mint_without_refund(token_id, token_owner_id, token_metadata, model);
-
-        NftMint {
-            owner_id: &token.owner_id,
-            token_ids: &[&token.token_id],
-            memo: None,
-        }
-        .emit();
-
-        token
-    }
-    /// Mint a new token without checking:
-    /// * Whether the caller id is equal to the `owner_id`
     /// * `refund_id` will transfer the left over balance after storage costs are calculated to the provided account.
     ///   Typically the account will be the owner. If `None`, will not refund. This is useful for delaying refunding
     ///   until multiple tokens have been minted.
